@@ -12,6 +12,11 @@ const getUserById = async (id) => {
   return user;
 };
 
+const getAllUsers = async () => {
+  return await usersRepository.findAllUsers();
+};
+
 module.exports = {
   getUserById,
+  getAllUsers,
 };

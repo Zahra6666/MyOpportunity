@@ -16,6 +16,23 @@ const getMe = async (req, res) => {
   }
 };
 
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await usersService.getAllUsers();
+
+    res.json({
+      success: true,
+      users,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Server error",
+    });
+  }
+};
+
 module.exports = {
   getMe,
+  getAllUsers,
 };

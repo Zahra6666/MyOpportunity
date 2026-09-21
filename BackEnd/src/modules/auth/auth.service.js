@@ -3,7 +3,7 @@ const jwt = require("jsonwebtoken");
 
 const authRepository = require("./auth.repository");
 
-const register = async (name, email, password) => {
+const register = async (fullName, email, password, phone) => {
   const existingUser = await authRepository.findUserByEmail(email);
 
   if (existingUser) {
@@ -12,11 +12,23 @@ const register = async (name, email, password) => {
     throw error;
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password, 10);
 
-  const user = await authRepository.createUser(name, email, hashedPassword);
+  const user = await authRepository.createUser(
+    fullName,
+    email,
+    passwordHash,
+    1,
+    phone,
+  );
 
-  return user;
+  return {
+    id: user.id,
+    fullName: user.full_name,
+    email: user.email,
+    phone: user.phone,
+    role: "user",
+  };
 };
 
 const login = async (email, password) => {
@@ -28,7 +40,7 @@ const login = async (email, password) => {
     throw error;
   }
 
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  const isPasswordCorrect = await bcrypt.compare(password, user.password_hash);
 
   if (!isPasswordCorrect) {
     const error = new Error("Invalid email or password");
@@ -52,8 +64,9 @@ const login = async (email, password) => {
     token,
     user: {
       id: user.id,
-      name: user.name,
+      fullName: user.full_name,
       email: user.email,
+      phone: user.phone,
       role: user.role,
     },
   };
