@@ -10,22 +10,7 @@ router.get("/:id", companiesController.getCompanyById);
 
 router.post("/", authMiddleware, companiesController.createCompany);
 
-router.put("/:id", companiesController.updateCompany);
+router.put("/:id", authMiddleware, companiesController.updateCompany);
 
-router.delete("/:id", companiesController.deleteCompany);
-
-router.put(
-  "/admin/:id/approve",
-  authMiddleware,
-  allowRoles("admin"),
-  companiesController.approveCompany
-);
-
-router.put(
-  "/admin/:id/reject",
-  authMiddleware,
-  allowRoles("admin"),
-  companiesController.rejectCompany
-);
-
+router.delete("/:id", authMiddleware, companiesController.deleteCompany);
 module.exports = router;

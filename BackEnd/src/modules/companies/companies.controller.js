@@ -1,13 +1,13 @@
 const pool = require("../../config/db");
 
-// GET /api/companies 
+// GET /api/companies
 
 const getCompanies = async (req, res) => {
   try {
     const result = await pool.query(
       `SELECT id, user_id, company_name, logo_url, location, description, status, created_at
        FROM companies
-       ORDER BY id ASC`
+       ORDER BY id ASC`,
     );
 
     return res.status(200).json({
@@ -23,7 +23,7 @@ const getCompanies = async (req, res) => {
     });
   }
 };
-// GET /api/companies/:id 
+// GET /api/companies/:id
 const getCompanyById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -32,7 +32,7 @@ const getCompanyById = async (req, res) => {
       `SELECT id, user_id, company_name, logo_url, location, description, status, created_at
        FROM companies
        WHERE id = $1`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {
@@ -55,12 +55,13 @@ const getCompanyById = async (req, res) => {
     });
   }
 };
-// POST /api/companies 
+// POST /api/companies
 const createCompany = async (req, res) => {
   try {
     const { company_name, logo_url, location, description } = req.body;
 
     const user_id = req.user.id;
+    const user_role = req.user.role;
 
     if (!company_name || company_name.trim() === "") {
       return res.status(400).json({
@@ -76,8 +77,25 @@ const createCompany = async (req, res) => {
       });
     }
 
+    // Only non-admin users are limited to one company
+    if (user_role !== "admin") {
+      const existingCompany = await pool.query(
+        `SELECT id
+         FROM companies
+         WHERE user_id = $1`,
+        [user_id],
+      );
+
+      if (existingCompany.rows.length > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "You already have a company.",
+        });
+      }
+    }
+
     const result = await pool.query(
-      `INSERT INTO companies 
+      `INSERT INTO companies
        (user_id, company_name, logo_url, location, description)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
@@ -87,7 +105,7 @@ const createCompany = async (req, res) => {
         logo_url || null,
         location.trim(),
         description || null,
-      ]
+      ],
     );
 
     return res.status(201).json({
@@ -97,13 +115,6 @@ const createCompany = async (req, res) => {
     });
   } catch (error) {
     console.error("Error creating company:", error);
-
-    if (error.code === "23505") {
-      return res.status(400).json({
-        success: false,
-        message: "This user already has a company.",
-      });
-    }
 
     return res.status(500).json({
       success: false,
@@ -117,36 +128,57 @@ const updateCompany = async (req, res) => {
     const { id } = req.params;
     const { company_name, logo_url, location, description } = req.body;
 
-    if (!company_name || company_name.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Company name is required.",
-      });
-    }
-
-    const result = await pool.query(
-      `UPDATE companies
-       SET company_name = $1,
-           logo_url = $2,
-           location = $3,
-           description = $4
-       WHERE id = $5
-       RETURNING *`,
-      [
-        company_name.trim(),
-        logo_url || null,
-        location || null,
-        description || null,
-        id,
-      ]
+    const companyResult = await pool.query(
+      `SELECT user_id
+       FROM companies
+       WHERE id = $1`,
+      [id],
     );
 
-    if (result.rows.length === 0) {
+    if (companyResult.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Company not found.",
       });
     }
+
+    const company = companyResult.rows[0];
+
+    if (req.user.role !== "admin" && company.user_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to update this company.",
+      });
+    }
+
+    if (
+      company_name === undefined &&
+      logo_url === undefined &&
+      location === undefined &&
+      description === undefined
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one field is required to update.",
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE companies
+       SET company_name = COALESCE($1, company_name),
+           logo_url = COALESCE($2, logo_url),
+           location = COALESCE($3, location),
+           description = COALESCE($4, description)
+       WHERE id = $5
+       RETURNING *`,
+      [
+        company_name ?? null,
+        logo_url ?? null,
+        location ?? null,
+        description ?? null,
+        id,
+      ],
+    );
 
     return res.status(200).json({
       success: true,
@@ -162,23 +194,35 @@ const updateCompany = async (req, res) => {
     });
   }
 };
-
-// DELETE /api/companies/:id 
-const deleteCompany = async (req, res) => { // أو deleteCompany
+// DELETE /api/companies/:id
+const deleteCompany = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(
-      "DELETE FROM companies WHERE id = $1 RETURNING id",
-      [id]
+    const companyResult = await pool.query(
+      `SELECT user_id
+       FROM companies
+       WHERE id = $1`,
+      [id],
     );
 
-    if (result.rows.length === 0) {
+    if (companyResult.rows.length === 0) {
       return res.status(404).json({
         success: false,
         message: "Company not found.",
       });
     }
+
+    const company = companyResult.rows[0];
+
+    if (req.user.role !== "admin" && company.user_id !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not allowed to delete this company.",
+      });
+    }
+
+    await pool.query("DELETE FROM companies WHERE id = $1", [id]);
 
     return res.status(200).json({
       success: true,
@@ -186,6 +230,7 @@ const deleteCompany = async (req, res) => { // أو deleteCompany
     });
   } catch (error) {
     console.error("Error deleting company:", error);
+
     return res.status(500).json({
       success: false,
       message: "A server error occurred while deleting the company.",
@@ -193,7 +238,7 @@ const deleteCompany = async (req, res) => { // أو deleteCompany
   }
 };
 
-// PUT /api/admin/companies/:id/approve
+// PUT /api/companies/:id/approve
 const approveCompany = async (req, res) => {
   try {
     const { id } = req.params;
@@ -203,7 +248,7 @@ const approveCompany = async (req, res) => {
        SET status = 'approved'
        WHERE id = $1
        RETURNING *`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {
@@ -228,7 +273,7 @@ const approveCompany = async (req, res) => {
   }
 };
 
-// PUT /api/admin/companies/:id/reject
+// PUT /api/companies/:id/reject
 const rejectCompany = async (req, res) => {
   try {
     const { id } = req.params;
@@ -238,7 +283,7 @@ const rejectCompany = async (req, res) => {
        SET status = 'rejected'
        WHERE id = $1
        RETURNING *`,
-      [id]
+      [id],
     );
 
     if (result.rows.length === 0) {

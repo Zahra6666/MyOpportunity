@@ -25,6 +25,6 @@ app.use("/api/users", usersRoutes);
 
 app.use("/api/categories", categoriesRouter);
 app.use("/api/companies", companiesRouter);
-app.use("/api/admin/companies", adminCompaniesRouter);
+app.use("/api/companies", adminCompaniesRouter);
 
 module.exports = app;
