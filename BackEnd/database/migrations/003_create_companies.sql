@@ -8,3 +8,8 @@ CREATE TABLE IF NOT EXISTS companies (
     status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+
+ALTER TABLE companies
+DROP CONSTRAINT companies_user_id_key;

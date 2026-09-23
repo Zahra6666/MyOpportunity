@@ -1,27 +1,31 @@
 const express = require("express");
 const router = express.Router();
-const categoriesController = require("./categories.controller");
+
+const typesController = require("./types.controller");
 const authMiddleware = require("../../middleware/auth.middleware");
 const allowRoles = require("../../middleware/role.middleware");
 
-router.get("/", categoriesController.getCategories);
+router.get("/", typesController.getTypes);
+
 router.post(
   "/",
   authMiddleware,
   allowRoles("admin"),
-  categoriesController.createCategory,
+  typesController.createType,
 );
+
 router.put(
   "/:id",
   authMiddleware,
   allowRoles("admin"),
-  categoriesController.updateCategory,
+  typesController.updateType,
 );
+
 router.delete(
   "/:id",
   authMiddleware,
   allowRoles("admin"),
-  categoriesController.deleteCategory,
+  typesController.deleteType,
 );
 
 module.exports = router;

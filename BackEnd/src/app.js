@@ -7,7 +7,7 @@ const usersRoutes = require("./modules/users/users.routes");
 const categoriesRouter = require("./modules/categories/categories.routes");
 const companiesRouter = require("./modules/companies/companies.routes");
 const adminCompaniesRouter = require("./modules/companies/companies.admin.routes");
-
+const typesRouter = require("./modules/types/types.routes");
 const app = express();
 
 app.use(cors());
@@ -24,6 +24,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", usersRoutes);
 
 app.use("/api/categories", categoriesRouter);
+app.use("/api/types", typesRouter);
 app.use("/api/companies", companiesRouter);
 app.use("/api/companies", adminCompaniesRouter);
 
