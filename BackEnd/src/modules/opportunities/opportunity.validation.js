@@ -1,6 +1,5 @@
-
 const validateOpportunityInput = (req, res, next) => {
-  const { title, description, opportunity_type, location, deadline } = req.body;
+  const { title, description, type_id, location, deadline } = req.body;
 
   const errors = [];
 
@@ -8,12 +7,16 @@ const validateOpportunityInput = (req, res, next) => {
     errors.push("Title is required and must be a non-empty string.");
   }
 
-  if (!description || typeof description !== "string" || description.trim() === "") {
+  if (
+    !description ||
+    typeof description !== "string" ||
+    description.trim() === ""
+  ) {
     errors.push("Description is required and must be a non-empty string.");
   }
 
-  if (!opportunity_type || typeof opportunity_type !== "string" || opportunity_type.trim() === "") {
-    errors.push("Opportunity type is required.");
+  if (!type_id || !Number.isInteger(Number(type_id)) || Number(type_id) <= 0) {
+    errors.push("Type ID is required and must be a valid positive integer.");
   }
 
   if (!location || typeof location !== "string" || location.trim() === "") {

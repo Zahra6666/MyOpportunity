@@ -11,3 +11,10 @@ CREATE TABLE IF NOT EXISTS opportunities (
     status VARCHAR(20) DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+
+ALTER TABLE opportunities
+DROP COLUMN opportunity_type;
+
+ALTER TABLE opportunities
+ADD COLUMN type_id INT REFERENCES types(id) ON DELETE SET NULL;

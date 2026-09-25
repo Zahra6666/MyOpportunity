@@ -6,9 +6,9 @@ class CvController {
     try {
       const userId = req.user.id;
       const filePath = req.file ? req.file.path : null;
+      const fileMimetype = req.file ? req.file.mimetype : null;
 
-      const result = await cvService.uploadCv(userId, filePath);
-
+      const result = await cvService.uploadCv(userId, filePath, fileMimetype);
       return res.status(201).json({
         success: true,
         message: "CV uploaded successfully",
@@ -69,6 +69,24 @@ class CvController {
       });
     } catch (error) {
       return res.status(400).json({
+        success: false,
+        message: error.message,
+      });
+    }
+  }
+
+  async deleteById(req, res) {
+    try {
+      const { id } = req.params;
+
+      const result = await cvService.deleteCvById(id);
+
+      return res.status(200).json({
+        success: true,
+        message: result.message,
+      });
+    } catch (error) {
+      return res.status(404).json({
         success: false,
         message: error.message,
       });

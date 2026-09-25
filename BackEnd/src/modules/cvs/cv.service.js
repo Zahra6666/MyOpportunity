@@ -1,11 +1,19 @@
 const cvRepository = require("./cv.repository");
+const { extractText } = require("./cv.parser");
 
 class CvService {
-  async uploadCv(userId, filePath) {
+  async uploadCv(userId, filePath, fileMimetype) {
     if (!filePath) {
       throw new Error("CV file is required");
     }
-    return await cvRepository.saveOrUpdateCv(userId, filePath);
+
+    const parsedText = await extractText(filePath, fileMimetype);
+    const cv = await cvRepository.saveOrUpdateCv(userId, filePath, parsedText);
+
+    return {
+      ...cv,
+      parsed_text: parsedText,
+    };
   }
 
   async getMyCv(userId) {
@@ -29,6 +37,16 @@ class CvService {
     if (!deleted) {
       throw new Error("No CV found to delete");
     }
+    return { message: "CV deleted successfully" };
+  }
+
+  async deleteCvById(id) {
+    const deleted = await cvRepository.deleteCvById(id);
+
+    if (!deleted) {
+      throw new Error("CV not found");
+    }
+
     return { message: "CV deleted successfully" };
   }
 }

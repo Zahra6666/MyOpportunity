@@ -4,16 +4,19 @@ class OpportunityRepository {
   // 1. Get all opportunities with search and filter options
   async findAll(filters = {}) {
     let query = `
-      SELECT 
+      SELECT
         o.*,
         c.company_name,
         c.logo_url AS company_logo,
-        cat.name AS category_name
+        cat.name AS category_name,
+        t.name AS type_name
       FROM opportunities o
       LEFT JOIN companies c ON o.company_id = c.id
       LEFT JOIN categories cat ON o.category_id = cat.id
+      LEFT JOIN types t ON o.type_id = t.id
       WHERE 1=1
     `;
+
     const values = [];
     let paramIndex = 1;
 
@@ -27,9 +30,9 @@ class OpportunityRepository {
       values.push(`%${filters.location}%`);
     }
 
-    if (filters.opportunity_type) {
-      query += ` AND o.opportunity_type ILIKE $${paramIndex++}`;
-      values.push(`%${filters.opportunity_type}%`);
+    if (filters.type_id) {
+      query += ` AND o.type_id = $${paramIndex++}`;
+      values.push(filters.type_id);
     }
 
     if (filters.search) {
@@ -47,16 +50,19 @@ class OpportunityRepository {
   // 2. Get single opportunity by ID
   async findById(id) {
     const query = `
-      SELECT 
+      SELECT
         o.*,
         c.company_name,
         c.logo_url AS company_logo,
-        cat.name AS category_name
+        cat.name AS category_name,
+        t.name AS type_name
       FROM opportunities o
       LEFT JOIN companies c ON o.company_id = c.id
       LEFT JOIN categories cat ON o.category_id = cat.id
+      LEFT JOIN types t ON o.type_id = t.id
       WHERE o.id = $1
     `;
+
     const result = await db.query(query, [id]);
     return result.rows[0];
   }
@@ -69,15 +75,15 @@ class OpportunityRepository {
       title,
       description,
       requirements,
-      opportunity_type,
+      type_id,
       location,
       deadline,
     } = data;
 
     const query = `
-      INSERT INTO opportunities 
-        (company_id, category_id, title, description, requirements, opportunity_type, location, deadline)
-      VALUES 
+      INSERT INTO opportunities
+        (company_id, category_id, title, description, requirements, type_id, location, deadline)
+      VALUES
         ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING *
     `;
@@ -88,7 +94,7 @@ class OpportunityRepository {
       title,
       description,
       requirements || null,
-      opportunity_type,
+      type_id || null,
       location,
       deadline,
     ];
@@ -104,7 +110,7 @@ class OpportunityRepository {
       title,
       description,
       requirements,
-      opportunity_type,
+      type_id,
       location,
       deadline,
       status,
@@ -112,12 +118,12 @@ class OpportunityRepository {
 
     const query = `
       UPDATE opportunities
-      SET 
+      SET
         category_id = COALESCE($1, category_id),
         title = COALESCE($2, title),
         description = COALESCE($3, description),
         requirements = COALESCE($4, requirements),
-        opportunity_type = COALESCE($5, opportunity_type),
+        type_id = COALESCE($5, type_id),
         location = COALESCE($6, location),
         deadline = COALESCE($7, deadline),
         status = COALESCE($8, status)
@@ -130,7 +136,7 @@ class OpportunityRepository {
       title,
       description,
       requirements,
-      opportunity_type,
+      type_id,
       location,
       deadline,
       status,
