@@ -1,0 +1,774 @@
+.opportunity-details-page {
+  min-height: 100vh;
+  background: #f7f8fc;
+}
+
+.details-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 21px 0 14px;
+
+  color: #98a2b3;
+  font-size: 9px;
+}
+
+.details-breadcrumb a {
+  color: #667085;
+}
+
+.details-breadcrumb a:hover {
+  color: #155eef;
+}
+
+
+/* ========================================
+   LAYOUT
+======================================== */
+
+.opportunity-details-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  gap: 15px;
+
+  padding-bottom: 70px;
+}
+
+.opportunity-details-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.opportunity-details-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+.details-header-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 17px;
+
+  padding: 21px;
+
+  background: #ffffff;
+
+  border: 1px solid #e1e5ec;
+  border-radius: 11px;
+}
+
+.details-company-logo {
+  width: 68px;
+  height: 68px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #eef4ff;
+  color: #155eef;
+}
+
+.details-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.details-type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-bottom: 6px;
+}
+
+.details-type-badge {
+  padding: 4px 7px;
+
+  border-radius: 4px;
+
+  background: #eef4ff;
+  color: #155eef;
+
+  font-size: 8px;
+  font-weight: 700;
+}
+
+.details-posted {
+  color: #98a2b3;
+  font-size: 8px;
+}
+
+.details-header-content h1 {
+  color: #101828;
+
+  font-size: 21px;
+  line-height: 1.5;
+
+  margin-bottom: 1px;
+}
+
+.details-title-en {
+  color: #98a2b3;
+  font-size: 8px;
+
+  direction: ltr;
+  text-align: right;
+
+  margin-bottom: 8px;
+}
+
+.details-company-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #475467;
+
+  font-size: 9px;
+  font-weight: 700;
+
+  margin-bottom: 12px;
+}
+
+.details-company-link:hover {
+  color: #155eef;
+}
+
+.details-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 13px;
+
+  color: #667085;
+  font-size: 8px;
+}
+
+.details-meta span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+
+/* ========================================
+   GENERAL CARD
+======================================== */
+
+.details-card {
+  padding: 18px;
+
+  background: #ffffff;
+
+  border: 1px solid #e1e5ec;
+  border-radius: 10px;
+}
+
+.details-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-bottom: 14px;
+}
+
+.details-section-icon {
+  width: 32px;
+  height: 32px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: #eef4ff;
+  color: #155eef;
+}
+
+.details-section-heading h2 {
+  color: #344054;
+
+  font-size: 12px;
+
+  margin-bottom: 2px;
+}
+
+.details-section-heading p {
+  color: #98a2b3;
+
+  font-size: 8px;
+}
+
+.details-description {
+  color: #667085;
+
+  font-size: 10px;
+  line-height: 2;
+
+  margin: 0;
+}
+
+
+/* ========================================
+   LIST
+======================================== */
+
+.details-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  padding: 0;
+  margin: 0;
+
+  list-style: none;
+}
+
+.details-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+
+  color: #667085;
+
+  font-size: 9px;
+  line-height: 1.8;
+}
+
+.details-list li svg {
+  flex-shrink: 0;
+
+  color: #12a76c;
+
+  margin-top: 3px;
+}
+
+
+/* ========================================
+   BENEFITS
+======================================== */
+
+.benefits-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+
+  gap: 8px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 10px;
+
+  background: #fafbfc;
+
+  border: 1px solid #edf0f4;
+  border-radius: 7px;
+
+  color: #667085;
+
+  font-size: 8px;
+}
+
+.benefit-item svg {
+  flex-shrink: 0;
+  color: #12a76c;
+}
+
+
+/* ========================================
+   COMPANY LINK
+======================================== */
+
+.view-company-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  margin-top: 13px;
+
+  color: #155eef;
+
+  font-size: 9px;
+  font-weight: 700;
+}
+
+
+/* ========================================
+   MATCH CARD
+======================================== */
+
+.match-card {
+  padding: 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #dce4ef;
+  border-radius: 10px;
+}
+
+.match-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 12px;
+}
+
+.match-card-header h2 {
+  color: #344054;
+
+  font-size: 12px;
+
+  margin-bottom: 4px;
+}
+
+.match-card-header p {
+  color: #98a2b3;
+
+  font-size: 7px;
+
+  line-height: 1.7;
+}
+
+
+/* Match circle */
+
+.match-circle {
+  width: 67px;
+  height: 67px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  border: 5px solid #d1fae5;
+  border-radius: 50%;
+
+  background: #f0fdf4;
+}
+
+.match-circle strong {
+  color: #079669;
+
+  font-size: 16px;
+  line-height: 1;
+}
+
+.match-circle span {
+  color: #667085;
+
+  font-size: 6px;
+
+  margin-top: 4px;
+}
+
+
+/* Progress */
+
+.match-progress {
+  height: 6px;
+
+  overflow: hidden;
+
+  margin: 15px 0;
+
+  background: #edf0f4;
+
+  border-radius: 10px;
+}
+
+.match-progress span {
+  display: block;
+
+  height: 100%;
+
+  background: #12a76c;
+
+  border-radius: inherit;
+}
+
+
+/* Match groups */
+
+.match-group {
+  padding-top: 12px;
+  margin-top: 12px;
+
+  border-top: 1px solid #edf0f4;
+}
+
+.match-group-title {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #079669;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  margin-bottom: 8px;
+}
+
+.match-group-title.missing {
+  color: #b54708;
+}
+
+.match-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.match-tags span {
+  padding: 5px 7px;
+
+  border-radius: 4px;
+
+  background: #ecfdf3;
+  color: #087443;
+
+  font-size: 7px;
+}
+
+.match-tags.missing-tags span {
+  background: #fffaeb;
+  color: #b54708;
+}
+
+
+/* Learning time */
+
+.learning-time {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px;
+
+  margin-top: 12px;
+
+  background: #f8fafc;
+
+  border: 1px solid #edf0f4;
+  border-radius: 7px;
+
+  color: #667085;
+}
+
+.learning-time > svg {
+  color: #155eef;
+  flex-shrink: 0;
+}
+
+.learning-time span {
+  display: block;
+
+  color: #98a2b3;
+
+  font-size: 7px;
+
+  margin-bottom: 3px;
+}
+
+.learning-time strong {
+  color: #475467;
+
+  font-size: 8px;
+}
+
+
+/* ========================================
+   APPLY CARD
+======================================== */
+
+.apply-card {
+  padding: 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #e1e5ec;
+  border-radius: 10px;
+}
+
+.apply-card-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 12px;
+}
+
+.apply-card-info span {
+  color: #98a2b3;
+
+  font-size: 8px;
+}
+
+.apply-card-info strong {
+  color: #344054;
+
+  font-size: 9px;
+}
+
+.apply-button {
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  margin-bottom: 8px;
+}
+
+.save-details-button {
+  width: 100%;
+
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+
+  border: 1px solid #dfe4ec;
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  color: #475467;
+
+  font-family: inherit;
+  font-size: 9px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.save-details-button:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+
+/* ========================================
+   INFO CARD
+======================================== */
+
+.details-info-card {
+  padding: 17px;
+
+  background: #ffffff;
+
+  border: 1px solid #e1e5ec;
+  border-radius: 10px;
+}
+
+.details-info-card h3 {
+  color: #344054;
+
+  font-size: 11px;
+
+  margin-bottom: 9px;
+}
+
+.details-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 10px 0;
+
+  border-top: 1px solid #edf0f4;
+}
+
+.details-info-row span {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #98a2b3;
+
+  font-size: 8px;
+}
+
+.details-info-row strong {
+  color: #475467;
+
+  font-size: 8px;
+
+  text-align: left;
+}
+
+
+/* ========================================
+   CV REMINDER
+======================================== */
+
+.cv-reminder {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+
+  padding: 14px;
+
+  background: #f0f4ff;
+
+  border: 1px solid #dbe5ff;
+  border-radius: 10px;
+
+  color: #155eef;
+}
+
+.cv-reminder > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.cv-reminder strong {
+  display: block;
+
+  color: #344054;
+
+  font-size: 9px;
+
+  margin-bottom: 4px;
+}
+
+.cv-reminder p {
+  color: #667085;
+
+  font-size: 7px;
+  line-height: 1.8;
+
+  margin-bottom: 7px;
+}
+
+.cv-reminder a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  color: #155eef;
+
+  font-size: 8px;
+  font-weight: 700;
+}
+
+
+/* ========================================
+   BUTTON FALLBACK
+======================================== */
+
+.apply-button svg {
+  flex-shrink: 0;
+}
+
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 900px) {
+  .opportunity-details-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .opportunity-details-sidebar {
+    display: grid;
+
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+
+    align-items: start;
+  }
+
+  .match-card {
+    grid-column: 1 / -1;
+  }
+
+  .cv-reminder {
+    grid-column: 1 / -1;
+  }
+}
+
+
+@media (max-width: 650px) {
+  .details-header-card {
+    flex-direction: column;
+  }
+
+  .details-company-logo {
+    width: 55px;
+    height: 55px;
+  }
+
+  .details-header-content h1 {
+    font-size: 18px;
+  }
+
+  .details-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .opportunity-details-sidebar {
+    display: flex;
+  }
+}
+
+
+@media (max-width: 430px) {
+  .details-header-card,
+  .details-card,
+  .match-card,
+  .apply-card,
+  .details-info-card,
+  .cv-reminder {
+    padding: 14px;
+  }
+
+  .match-card-header {
+    align-items: flex-start;
+  }
+
+  .match-circle {
+    width: 60px;
+    height: 60px;
+  }
+}

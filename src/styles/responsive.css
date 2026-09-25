@@ -1,0 +1,440 @@
+
+@media (max-width: 1100px) {
+
+  .navbar-links {
+    gap: 15px;
+  }
+
+  .ai-navbar-button span {
+    display: none;
+  }
+
+  .hero-content {
+    gap: 35px;
+  }
+
+  .hero-copy h1 {
+    font-size: 47px;
+  }
+
+  .category-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashboard-stats,
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 900px) {
+
+  .navbar-links {
+    display: none;
+  }
+
+  .navbar-links-open {
+    position: absolute;
+
+    top: 78px;
+    right: 20px;
+    left: 20px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 0;
+
+    padding: 10px;
+
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    box-shadow: var(--shadow-lg);
+  }
+
+  .navbar-links-open a {
+    padding: 12px;
+  }
+
+  .navbar-links-open a.active::after {
+    display: none;
+  }
+
+  .mobile-menu-button {
+    display: grid;
+  }
+
+  .hero-content {
+    grid-template-columns: 1fr;
+
+    text-align: center;
+  }
+
+  .hero-copy {
+    margin-inline: auto;
+  }
+
+  .hero-eyebrow {
+    margin-inline: auto;
+  }
+
+  .hero-actions,
+  .hero-trust {
+    justify-content: center;
+  }
+
+  .hero-visual {
+    min-height: 400px;
+  }
+
+  .opportunity-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .details-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .details-sidebar {
+    order: -1;
+  }
+
+  .analysis-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-menu-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+/* =========================================
+   640px
+========================================= */
+
+@media (max-width: 640px) {
+
+  .container {
+    width: min(
+      calc(100% - 28px),
+      var(--container)
+    );
+  }
+
+  .navbar {
+    height: 70px;
+  }
+
+  .navbar-links-open {
+    top: 70px;
+    right: 14px;
+    left: 14px;
+  }
+
+  .notification-button,
+  .user-navbar span:not(.user-avatar),
+  .user-navbar svg {
+    display: none;
+  }
+
+  .login-link {
+    padding: 0;
+  }
+
+  .hero-section {
+    padding: 55px 0 50px;
+  }
+
+  .hero-copy h1 {
+    font-size: 36px;
+
+    letter-spacing: -1px;
+  }
+
+  .hero-copy > p {
+    font-size: 13px;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+  }
+
+  .hero-trust {
+    gap: 20px;
+  }
+
+  .hero-visual {
+    min-height: 350px;
+  }
+
+  .hero-card-main {
+    width: 320px;
+  }
+
+  .floating-card {
+    display: none;
+  }
+
+  .search-section {
+    margin-top: 0;
+
+    padding-top: 15px;
+  }
+
+  .search-box {
+    flex-direction: column;
+    align-items: stretch;
+
+    padding: 12px;
+  }
+
+  .search-input-wrapper {
+    min-height: 45px;
+  }
+
+  .search-filter {
+    width: 100%;
+  }
+
+  .search-button {
+    width: 100%;
+  }
+
+  .categories-section,
+  .featured-section,
+  .dashboard-section {
+    padding: 55px 0;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .section-heading-row {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .opportunity-card {
+    padding: 17px;
+  }
+
+  .opportunity-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .opportunity-actions {
+    width: 100%;
+  }
+
+  .opportunity-actions .btn {
+    flex: 1;
+  }
+
+  .ai-cta {
+    padding: 35px 25px;
+  }
+
+  .ai-cta h2 {
+    font-size: 27px;
+  }
+
+  .page-hero {
+    padding: 50px 0;
+  }
+
+  .page-hero h1 {
+    font-size: 32px;
+  }
+
+  .opportunities-toolbar {
+    flex-direction: column;
+  }
+
+  .opportunities-search {
+    width: 100%;
+  }
+
+  .filter-toggle {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    width: 100%;
+    height: 44px;
+
+    color: var(--text-soft);
+
+    background: white;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    font-size: 11px;
+  }
+
+  .filters-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-select {
+    width: 100%;
+  }
+
+  .details-header {
+    padding: 20px;
+
+    flex-direction: column;
+  }
+
+  .details-title-area h1 {
+    font-size: 24px;
+  }
+
+  .details-section {
+    padding: 20px;
+  }
+
+  .cv-heading h1 {
+    font-size: 29px;
+  }
+
+  .cv-upload-card {
+    padding: 13px;
+  }
+
+  .upload-dropzone {
+    min-height: 270px;
+
+    padding: 20px;
+  }
+
+  .cv-steps {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analysis-score {
+    width: 100%;
+  }
+
+  .analysis-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-success {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .analysis-success .btn {
+    width: 100%;
+  }
+
+  .dashboard-welcome,
+  .admin-header,
+  .admin-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-stats,
+  .admin-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dashboard-cv-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .dashboard-cv-card .btn {
+    width: 100%;
+  }
+
+  .application-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .application-info {
+    min-width: calc(100% - 60px);
+  }
+
+  .application-location {
+    margin-right: 55px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+
+    gap: 30px;
+  }
+
+}
+
+/* =========================================
+   380px
+========================================= */
+
+@media (max-width: 380px) {
+
+  .brand-name {
+    display: none;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-stats,
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-copy h1 {
+    font-size: 31px;
+  }
+
+  .hero-card-main {
+    width: 290px;
+  }
+
+  .footer-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+}

@@ -1,0 +1,986 @@
+/* =========================================
+   OPPORTUNITIES EXPLORER
+========================================= */
+
+.opportunities-page {
+  background: #f7f8fc;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.opportunities-header {
+  padding: 28px 0 32px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e6e9ef;
+}
+
+.opportunities-breadcrumb {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  margin-bottom: 27px;
+
+  color: #98a2b3;
+
+  font-size: 10px;
+}
+
+.opportunities-breadcrumb a {
+  color: #667085;
+}
+
+.opportunities-breadcrumb strong {
+  color: #344054;
+}
+
+.opportunities-heading {
+  display: flex;
+
+  align-items: flex-end;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 24px;
+}
+
+.opportunities-overline {
+  color: #155eef;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.opportunities-heading h1 {
+  color: #101828;
+
+  font-size: 31px;
+
+  line-height: 1.35;
+
+  margin: 6px 0;
+}
+
+.opportunities-heading p {
+  color: #667085;
+
+  font-size: 12px;
+}
+
+.results-count {
+  min-width: 115px;
+
+  padding: 12px 17px;
+
+  border: 1px solid #e1e5ec;
+
+  border-radius: 10px;
+
+  background: #f8fafc;
+
+  text-align: center;
+}
+
+.results-count strong {
+  display: block;
+
+  color: #155eef;
+
+  font-size: 20px;
+}
+
+.results-count span {
+  color: #667085;
+
+  font-size: 9px;
+}
+
+
+/* =========================================
+   SEARCH
+========================================= */
+
+.opportunities-search {
+  display: grid;
+
+  grid-template-columns: 1.5fr 0.65fr auto;
+
+  gap: 7px;
+
+  padding: 7px;
+
+  border: 1px solid #dfe4ec;
+
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 6px 18px rgba(15, 23, 42, 0.04);
+}
+
+.main-search,
+.search-location {
+  min-height: 43px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  padding-inline: 12px;
+
+  border-radius: 7px;
+
+  background: #f8fafc;
+
+  color: #98a2b3;
+}
+
+.main-search input,
+.search-location select {
+  width: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  font-family: inherit;
+
+  color: #344054;
+
+  font-size: 11px;
+}
+
+.main-search input::placeholder {
+  color: #98a2b3;
+}
+
+.search-location select {
+  cursor: pointer;
+}
+
+.opportunities-search-button {
+  min-width: 82px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #155eef;
+
+  color: #ffffff;
+
+  font-family: inherit;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  gap: 6px;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.opportunities-content {
+  padding: 30px 0 75px;
+}
+
+.opportunities-layout {
+  display: grid;
+
+  grid-template-columns: 250px minmax(0, 1fr);
+
+  gap: 22px;
+
+  align-items: start;
+}
+
+
+/* =========================================
+   FILTERS
+========================================= */
+
+.opportunities-filters {
+  padding: 17px;
+
+  border: 1px solid #e0e4eb;
+
+  border-radius: 11px;
+
+  background: #ffffff;
+}
+
+.filters-header {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #edf0f4;
+}
+
+.filters-header > div {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  color: #344054;
+}
+
+.filters-header h2 {
+  font-size: 12px;
+}
+
+.filters-header button {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #667085;
+
+  font-family: inherit;
+
+  font-size: 9px;
+
+  cursor: pointer;
+}
+
+.filter-section {
+  padding: 17px 0;
+}
+
+.filter-section > label {
+  display: block;
+
+  color: #344054;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  margin-bottom: 11px;
+}
+
+.filter-options {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+.filter-radio {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  color: #667085;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+.filter-radio input {
+  accent-color: #155eef;
+}
+
+.filter-divider {
+  height: 1px;
+
+  background: #edf0f4;
+}
+
+.filter-select {
+  height: 38px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding-inline: 9px;
+
+  border: 1px solid #e1e5ec;
+
+  border-radius: 7px;
+
+  color: #98a2b3;
+}
+
+.filter-select select {
+  flex: 1;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #475467;
+
+  font-family: inherit;
+
+  font-size: 10px;
+}
+
+.match-filter-value {
+  color: #155eef;
+
+  font-size: 17px;
+
+  font-weight: 800;
+
+  margin-bottom: 9px;
+}
+
+.match-range {
+  width: 100%;
+
+  accent-color: #155eef;
+
+  cursor: pointer;
+}
+
+.range-labels {
+  display: flex;
+
+  justify-content: space-between;
+
+  color: #98a2b3;
+
+  font-size: 8px;
+}
+
+.filter-profile-box {
+  display: flex;
+
+  gap: 9px;
+
+  padding: 12px;
+
+  border-radius: 9px;
+
+  background: #f0f7ff;
+
+  color: #155eef;
+}
+
+.filter-profile-box > div {
+  flex: 1;
+}
+
+.filter-profile-box strong {
+  display: block;
+
+  color: #1d2939;
+
+  font-size: 10px;
+
+  margin-bottom: 4px;
+}
+
+.filter-profile-box p {
+  color: #667085;
+
+  font-size: 8px;
+
+  line-height: 1.7;
+
+  margin-bottom: 7px;
+}
+
+.filter-profile-box a {
+  color: #155eef;
+
+  font-size: 9px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================
+   RESULTS
+========================================= */
+
+.opportunities-results {
+  min-width: 0;
+}
+
+.mobile-filter-row {
+  display: none;
+}
+
+.results-toolbar {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 14px;
+}
+
+.results-toolbar > div:first-child {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.results-toolbar strong {
+  color: #1d2939;
+
+  font-size: 13px;
+}
+
+.results-toolbar span {
+  color: #98a2b3;
+
+  font-size: 9px;
+}
+
+.sort-select {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  color: #98a2b3;
+}
+
+.sort-select select {
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #475467;
+
+  font-family: inherit;
+
+  font-size: 10px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================
+   GRID
+========================================= */
+
+.explorer-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+
+/* =========================================
+   CARD
+========================================= */
+
+.explorer-card {
+  padding: 16px;
+
+  border: 1px solid #e0e4eb;
+
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.explorer-card:hover {
+  transform: translateY(-2px);
+
+  border-color: #cbd8ed;
+
+  box-shadow:
+    0 10px 28px rgba(15, 23, 42, 0.07);
+}
+
+.explorer-card-top {
+  display: flex;
+
+  align-items: flex-start;
+
+  gap: 10px;
+
+  margin-bottom: 13px;
+}
+
+.explorer-company-logo {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 9px;
+
+  background: #edf3ff;
+
+  color: #155eef;
+}
+
+.explorer-card-title {
+  flex: 1;
+
+  min-width: 0;
+}
+
+.explorer-card-title .badge {
+  font-size: 8px;
+
+  margin-bottom: 5px;
+}
+
+.explorer-card-title h3 {
+  overflow: hidden;
+
+  color: #101828;
+
+  font-size: 13px;
+
+  line-height: 1.5;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.explorer-card-title > span {
+  display: block;
+
+  overflow: hidden;
+
+  color: #98a2b3;
+
+  font-size: 8px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.explorer-save {
+  width: 31px;
+  height: 31px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  flex-shrink: 0;
+
+  border: 1px solid #e4e7ec;
+
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #667085;
+
+  cursor: pointer;
+}
+
+.explorer-save:hover {
+  color: #155eef;
+
+  border-color: #b9c9e7;
+}
+
+
+/* company */
+
+.explorer-company,
+.explorer-details {
+  display: flex;
+
+  align-items: center;
+
+  flex-wrap: wrap;
+
+  gap: 10px;
+
+  color: #667085;
+
+  font-size: 9px;
+
+  margin-bottom: 9px;
+}
+
+.explorer-company span,
+.explorer-details span {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+}
+
+
+/* description */
+
+.explorer-description {
+  min-height: 42px;
+
+  color: #667085;
+
+  font-size: 9px;
+
+  line-height: 1.8;
+
+  margin-bottom: 10px;
+}
+
+
+/* skills */
+
+.explorer-skills {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  margin-bottom: 13px;
+}
+
+.explorer-skills span {
+  padding: 4px 7px;
+
+  border: 1px solid #e4e7ec;
+
+  border-radius: 5px;
+
+  color: #475467;
+
+  background: #f8fafc;
+
+  font-size: 8px;
+}
+
+
+/* match */
+
+.explorer-match {
+  padding: 10px;
+
+  border-radius: 8px;
+
+  background: #f0fdf8;
+
+  margin-bottom: 12px;
+}
+
+.explorer-match > div:first-child {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 6px;
+}
+
+.explorer-match strong {
+  color: #087443;
+
+  font-size: 13px;
+}
+
+.explorer-match span {
+  color: #667085;
+
+  font-size: 8px;
+}
+
+.explorer-match-bar {
+  height: 4px;
+
+  overflow: hidden;
+
+  border-radius: 20px;
+
+  background: #d8eee5;
+}
+
+.explorer-match-bar span {
+  display: block;
+
+  height: 100%;
+
+  border-radius: inherit;
+
+  background: #25c58a;
+}
+
+
+/* footer */
+
+.explorer-footer {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  padding-top: 11px;
+
+  border-top: 1px solid #edf0f4;
+}
+
+.explorer-footer strong {
+  color: #344054;
+
+  font-size: 9px;
+}
+
+.explorer-footer a {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  color: #155eef;
+
+  font-size: 9px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.opportunities-empty {
+  min-height: 350px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 30px;
+
+  border: 1px dashed #d0d5dd;
+
+  border-radius: 11px;
+
+  background: #ffffff;
+
+  text-align: center;
+}
+
+.empty-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 12px;
+
+  border-radius: 50%;
+
+  background: #f2f4f7;
+
+  color: #667085;
+}
+
+.opportunities-empty h3 {
+  color: #344054;
+
+  font-size: 14px;
+
+  margin-bottom: 5px;
+}
+
+.opportunities-empty p {
+  color: #98a2b3;
+
+  font-size: 10px;
+
+  margin-bottom: 14px;
+}
+
+.opportunities-empty button {
+  padding: 8px 13px;
+
+  border: 1px solid #d0d5dd;
+
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #475467;
+
+  font-family: inherit;
+
+  font-size: 9px;
+
+  cursor: pointer;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 950px) {
+
+  .opportunities-layout {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .explorer-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 760px) {
+
+  .opportunities-heading {
+    align-items: flex-start;
+  }
+
+  .results-count {
+    display: none;
+  }
+
+  .opportunities-search {
+    grid-template-columns: 1fr;
+  }
+
+  .opportunities-search-button {
+    min-height: 42px;
+  }
+
+  .opportunities-layout {
+    display: block;
+  }
+
+  .opportunities-filters {
+    display: none;
+
+    margin-bottom: 15px;
+  }
+
+  .opportunities-filters-open {
+    display: block;
+  }
+
+  .mobile-filter-row {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    margin-bottom: 13px;
+  }
+
+  .mobile-filter-row button {
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 8px 11px;
+
+    border: 1px solid #dfe3ea;
+
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    color: #344054;
+
+    font-family: inherit;
+
+    font-size: 9px;
+  }
+
+}
+
+
+@media (max-width: 500px) {
+
+  .opportunities-heading h1 {
+    font-size: 25px;
+  }
+
+  .opportunities-heading p {
+    font-size: 10px;
+  }
+
+  .results-toolbar {
+    align-items: flex-start;
+  }
+
+  .sort-select span {
+    display: none;
+  }
+
+}
