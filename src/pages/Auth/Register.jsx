@@ -62,7 +62,7 @@ function Register() {
 
           <div className="auth-heading">
             <h1>
-              أنشئي حسابچ 🚀
+              أنشئ حسابك
             </h1>
 
             <p>
