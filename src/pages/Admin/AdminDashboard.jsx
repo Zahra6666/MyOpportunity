@@ -9,9 +9,12 @@ import {
   UserCheck,
   UserPlus,
   TrendingUp,
+  Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
 import PageContainer from "../../components/layout/PageContainer";
+import { getOpportunities } from "../../services/opportunityService";
 import "./AdminDashboard.css";
 
 const stats = [
@@ -41,41 +44,6 @@ const stats = [
   },
 ];
 
-const recentOpportunities = [
-  {
-    id: 1,
-    title: "Software Engineer",
-    company: "شركة تقنية العراق",
-    type: "وظيفة",
-    status: "منشورة",
-    applicants: 126,
-  },
-  {
-    id: 2,
-    title: "منحة دراسية للماجستير",
-    company: "برنامج المنح الدولي",
-    type: "منحة",
-    status: "منشورة",
-    applicants: 84,
-  },
-  {
-    id: 3,
-    title: "Frontend Development Training",
-    company: "Tech Academy",
-    type: "تدريب",
-    status: "قيد المراجعة",
-    applicants: 52,
-  },
-  {
-    id: 4,
-    title: "Iraq Hackathon 2026",
-    company: "Innovation Hub",
-    type: "مسابقة",
-    status: "منشورة",
-    applicants: 217,
-  },
-];
-
 const pendingCompanies = [
   {
     name: "شركة البصرة الرقمية",
@@ -95,6 +63,27 @@ const pendingCompanies = [
 ];
 
 function AdminDashboard() {
+  const [opportunities, setOpportunities] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch real opportunities from backend
+  useEffect(() => {
+    async function fetchAdminData() {
+      try {
+        setLoading(true);
+        const res = await getOpportunities({ limit: 5 });
+        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        setOpportunities(list);
+      } catch (err) {
+        console.error("فشل جلب بيانات الأدمن:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchAdminData();
+  }, []);
+
   return (
     <PageContainer className="admin-page">
       <div className="container">
@@ -169,71 +158,94 @@ function AdminDashboard() {
             </div>
 
             <div className="admin-table-wrapper">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>الفرصة</th>
-                    <th>النوع</th>
-                    <th>الحالة</th>
-                    <th>المتقدمون</th>
-                    <th></th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {recentOpportunities.map((opportunity) => (
-                    <tr key={opportunity.id}>
-                      <td>
-                        <div className="admin-opportunity-name">
-                          <div className="admin-company-icon">
-                            <Building2 size={17} />
-                          </div>
-
-                          <div>
-                            <strong>{opportunity.title}</strong>
-                            <span>{opportunity.company}</span>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td>
-                        <span className="admin-type">
-                          {opportunity.type}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span
-                          className={`admin-status ${
-                            opportunity.status === "منشورة"
-                              ? "admin-status-success"
-                              : "admin-status-warning"
-                          }`}
-                        >
-                          {opportunity.status}
-                        </span>
-                      </td>
-
-                      <td>
-                        <span className="admin-applicants">
-                          <Users size={15} />
-                          {opportunity.applicants}
-                        </span>
-                      </td>
-
-                      <td>
-                        <button
-                          type="button"
-                          className="admin-more-button"
-                          aria-label="المزيد"
-                        >
-                          <MoreHorizontal size={19} />
-                        </button>
-                      </td>
+              {loading ? (
+                <div style={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
+                  <Loader2 size={24} className="animate-spin" />
+                </div>
+              ) : (
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>الفرصة</th>
+                      <th>النوع</th>
+                      <th>الحالة</th>
+                      <th>المتقدمون</th>
+                      <th></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+
+                  <tbody>
+                    {(opportunities.length > 0 ? opportunities : [
+                      {
+                        id: 1,
+                        title: "Software Engineer",
+                        company: "شركة تقنية العراق",
+                        type: "وظيفة",
+                        status: "منشورة",
+                        applicants: 126,
+                      },
+                      {
+                        id: 2,
+                        title: "منحة دراسية للماجستير",
+                        company: "برنامج المنح الدولي",
+                        type: "منحة",
+                        status: "منشورة",
+                        applicants: 84,
+                      }
+                    ]).map((opportunity) => (
+                      <tr key={opportunity.id}>
+                        <td>
+                          <div className="admin-opportunity-name">
+                            <div className="admin-company-icon">
+                              <Building2 size={17} />
+                            </div>
+
+                            <div>
+                              <strong>{opportunity.title || opportunity.titleAr}</strong>
+                              <span>{opportunity.company_name || opportunity.company || "شركة تقنية"}</span>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          <span className="admin-type">
+                            {opportunity.type_name || opportunity.type || "وظيفة"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`admin-status ${
+                              (opportunity.status || "منشورة") === "منشورة"
+                                ? "admin-status-success"
+                                : "admin-status-warning"
+                            }`}
+                          >
+                            {opportunity.status || "منشورة"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span className="admin-applicants">
+                            <Users size={15} />
+                            {opportunity.applicants_count || opportunity.applicants || 0}
+                          </span>
+                        </td>
+
+                        <td>
+                          <button
+                            type="button"
+                            className="admin-more-button"
+                            aria-label="المزيد"
+                          >
+                            <MoreHorizontal size={19} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </div>
 

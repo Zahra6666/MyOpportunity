@@ -14,16 +14,24 @@ import {
   Users,
   BriefcaseBusiness,
   CircleAlert,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Button from "../../components/common/Button";
+import { getOpportunityById, getOpportunityMatch } from "../../services/opportunityService";
 
 import "./OpportunityDetails.css";
 
 function OpportunityDetails() {
   const { id } = useParams();
+
+  const [matchData, setMatchData] = useState(null);
+  const [loadingMatch, setLoadingMatch] = useState(false);
+  const [matchError, setMatchError] = useState(null);
 
   // Temporary frontend data.
   // Later this will come from opportunityService / Backend API.
@@ -91,6 +99,32 @@ function OpportunityDetails() {
     companyDescription:
       "شركة تقنية عراقية تعمل في مجال الحلول الرقمية وتطوير المنتجات والخدمات التقنية، وتركز على دعم الكفاءات المحلية وبناء فرق تقنية متخصصة.",
   };
+
+  // Fetch AI Match data from Backend (GET /api/opportunities/:id/match)
+  useEffect(() => {
+    async function fetchMatch() {
+      if (!id) return;
+      try {
+        setLoadingMatch(true);
+        setMatchError(null);
+        const res = await getOpportunityMatch(id);
+        setMatchData(res?.data || res);
+      } catch (err) {
+        setMatchError(err.message || "عذراً، تعذر جلب بيانات المطابقة للذكاء الاصطناعي");
+      } finally {
+        setLoadingMatch(false);
+      }
+    }
+
+    fetchMatch();
+  }, [id]);
+
+  const matchPercentage = matchData?.match_percentage ?? opportunity.match;
+  const matchedSkills = matchData?.matched_skills || opportunity.matchingSkills;
+  const missingSkills = matchData?.missing_skills || opportunity.missingSkills;
+  const matchReason = matchData?.reason;
+  const experienceMatch = matchData?.experience_match;
+  const educationMatch = matchData?.education_match;
 
   return (
     <PageContainer className="opportunity-details-page">
@@ -388,7 +422,7 @@ function OpportunityDetails() {
 
                 <div>
                   <h2>
-                    مدى توافقك
+                    مدى توافقك (AI)
                   </h2>
 
                   <p>
@@ -397,13 +431,19 @@ function OpportunityDetails() {
                 </div>
 
                 <div className="match-circle">
-                  <strong>
-                    {opportunity.match}%
-                  </strong>
+                  {loadingMatch ? (
+                    <Loader2 size={20} className="animate-spin" />
+                  ) : (
+                    <>
+                      <strong>
+                        {matchPercentage}%
+                      </strong>
 
-                  <span>
-                    توافق
-                  </span>
+                      <span>
+                        توافق
+                      </span>
+                    </>
+                  )}
                 </div>
 
               </div>
@@ -413,11 +453,35 @@ function OpportunityDetails() {
 
                 <span
                   style={{
-                    width: `${opportunity.match}%`,
+                    width: `${matchPercentage}%`,
                   }}
                 />
 
               </div>
+
+              {/* Display AI Explanation / Reason if present */}
+              {matchReason && (
+                <div style={{ marginTop: "0.75rem", padding: "0.5rem 0.75rem", backgroundColor: "#f0fdf4", borderRight: "3px solid #22c55e", borderRadius: "4px", fontSize: "0.85rem", color: "#15803d" }}>
+                  <Sparkles size={14} style={{ display: "inline", marginLeft: "0.25rem" }} />
+                  {matchReason}
+                </div>
+              )}
+
+              {/* Experience / Education match indicators */}
+              {(experienceMatch !== undefined || educationMatch !== undefined) && (
+                <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.75rem", fontSize: "0.8rem" }}>
+                  {experienceMatch !== undefined && (
+                    <span style={{ padding: "0.25rem 0.5rem", borderRadius: "4px", backgroundColor: experienceMatch ? "#dcfce7" : "#fee2e2", color: experienceMatch ? "#166534" : "#991b1b" }}>
+                      الخبرة: {experienceMatch ? "متطابقة" : "غير متطابقة"}
+                    </span>
+                  )}
+                  {educationMatch !== undefined && (
+                    <span style={{ padding: "0.25rem 0.5rem", borderRadius: "4px", backgroundColor: educationMatch ? "#dcfce7" : "#fee2e2", color: educationMatch ? "#166534" : "#991b1b" }}>
+                      التعليم: {educationMatch ? "متطابق" : "غير متطابق"}
+                    </span>
+                  )}
+                </div>
+              )}
 
 
               {/* Matching */}
@@ -431,7 +495,7 @@ function OpportunityDetails() {
 
                 <div className="match-tags">
 
-                  {opportunity.matchingSkills.map(
+                  {matchedSkills.map(
                     (skill) => (
                       <span key={skill}>
                         {skill}
@@ -455,7 +519,7 @@ function OpportunityDetails() {
 
                 <div className="match-tags missing-tags">
 
-                  {opportunity.missingSkills.map(
+                  {missingSkills.map(
                     (skill) => (
                       <span key={skill}>
                         {skill}

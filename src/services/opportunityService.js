@@ -1,30 +1,27 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
 async function request(endpoint, options = {}) {
-  const response = await fetch(
-    `${API_BASE_URL}${endpoint}`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-      ...options,
-    }
-  );
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    headers: {
+      "Content-Type": "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers || {}),
+    },
+    ...options,
+  });
 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
     throw new Error(
-      data?.message ||
-        "حدث خطأ أثناء جلب بيانات الفرص"
+      data?.message || "حدث خطأ أثناء جلب بيانات الفرص"
     );
   }
 
   return data;
 }
-
 
 export async function getOpportunities(params = {}) {
   const query = new URLSearchParams();
@@ -56,11 +53,15 @@ export async function getOpportunityById(id) {
   return request(`/opportunities/${id}`);
 }
 
+export async function getOpportunityMatch(id) {
+  if (!id) {
+    throw new Error("معرّف الفرصة مطلوب لإجراء المطابقة");
+  }
 
-export async function searchOpportunities(
-  searchTerm,
-  filters = {}
-) {
+  return request(`/opportunities/${id}/match`);
+}
+
+export async function searchOpportunities(searchTerm, filters = {}) {
   return getOpportunities({
     search: searchTerm,
     ...filters,
@@ -91,11 +92,7 @@ export async function getSavedOpportunities() {
   return request("/opportunities/saved");
 }
 
-
-export async function applyToOpportunity(
-  id,
-  applicationData = {}
-) {
+export async function applyToOpportunity(id, applicationData = {}) {
   if (!id) {
     throw new Error("معرّف الفرصة مطلوب");
   }
@@ -106,13 +103,16 @@ export async function applyToOpportunity(
   });
 }
 
-
 export async function getMyApplications() {
   return request("/applications/me");
 }
 
-export async function getOpportunityCategories() {
-  return request("/opportunities/categories");
+export async function getCategories() {
+  return request("/categories");
+}
+
+export async function getTypes() {
+  return request("/types");
 }
 
 export async function getGovernorates() {
@@ -122,12 +122,14 @@ export async function getGovernorates() {
 export default {
   getOpportunities,
   getOpportunityById,
+  getOpportunityMatch,
   searchOpportunities,
   saveOpportunity,
   removeSavedOpportunity,
   getSavedOpportunities,
   applyToOpportunity,
   getMyApplications,
-  getOpportunityCategories,
+  getCategories,
+  getTypes,
   getGovernorates,
 };

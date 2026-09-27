@@ -12,74 +12,13 @@ import {
   Users,
   CalendarDays,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PageContainer from "../../components/layout/PageContainer";
+import { getOpportunities, getCategories, getTypes } from "../../services/opportunityService";
 import "./ManageOpportunities.css";
-
-const opportunitiesData = [
-  {
-    id: 1,
-    title: "Software Engineer",
-    company: "شركة تقنية العراق",
-    type: "وظيفة",
-    location: "بغداد",
-    applicants: 126,
-    deadline: "30 سبتمبر 2026",
-    status: "منشورة",
-  },
-  {
-    id: 2,
-    title: "Frontend Developer",
-    company: "Zain Iraq",
-    type: "وظيفة",
-    location: "بغداد",
-    applicants: 94,
-    deadline: "5 أكتوبر 2026",
-    status: "منشورة",
-  },
-  {
-    id: 3,
-    title: "منحة دراسية للماجستير",
-    company: "برنامج المنح الدولي",
-    type: "منحة",
-    location: "دولي",
-    applicants: 84,
-    deadline: "12 أكتوبر 2026",
-    status: "منشورة",
-  },
-  {
-    id: 4,
-    title: "Frontend Development Training",
-    company: "Tech Academy",
-    type: "تدريب",
-    location: "البصرة",
-    applicants: 52,
-    deadline: "18 أكتوبر 2026",
-    status: "قيد المراجعة",
-  },
-  {
-    id: 5,
-    title: "Iraq Hackathon 2026",
-    company: "Innovation Hub",
-    type: "مسابقة",
-    location: "بغداد",
-    applicants: 217,
-    deadline: "25 أكتوبر 2026",
-    status: "منشورة",
-  },
-  {
-    id: 6,
-    title: "Network Engineering Course",
-    company: "Cisco Academy",
-    type: "دورة",
-    location: "أونلاين",
-    applicants: 73,
-    deadline: "1 نوفمبر 2026",
-    status: "متوقفة",
-  },
-];
 
 const statusOptions = [
   "الكل",
@@ -91,24 +30,54 @@ const statusOptions = [
 function ManageOpportunities() {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("الكل");
+  const [opportunities, setOpportunities] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [types, setTypes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredOpportunities = opportunitiesData.filter(
-    (opportunity) => {
-      const matchesSearch =
-        opportunity.title
-          .toLowerCase()
-          .includes(search.toLowerCase()) ||
-        opportunity.company
-          .toLowerCase()
-          .includes(search.toLowerCase());
+  // Fetch Opportunities, Categories, and Types from Backend
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const [oppRes, catRes, typeRes] = await Promise.all([
+          getOpportunities(),
+          getCategories().catch(() => []),
+          getTypes().catch(() => [])
+        ]);
 
-      const matchesStatus =
-        status === "الكل" ||
-        opportunity.status === status;
+        const oppList = Array.isArray(oppRes?.data) ? oppRes.data : (Array.isArray(oppRes) ? oppRes : []);
+        setOpportunities(oppList);
 
-      return matchesSearch && matchesStatus;
+        const catList = Array.isArray(catRes?.data) ? catRes.data : (Array.isArray(catRes) ? catRes : []);
+        setCategories(catList);
+
+        const typeList = Array.isArray(typeRes?.data) ? typeRes.data : (Array.isArray(typeRes) ? typeRes : []);
+        setTypes(typeList);
+      } catch (err) {
+        console.error("حدث خطأ أثناء جلب الفرص والتصنيفات:", err);
+      } finally {
+        setLoading(false);
+      }
     }
-  );
+
+    fetchData();
+  }, []);
+
+  const filteredOpportunities = opportunities.filter((opportunity) => {
+    const title = opportunity.title || opportunity.titleAr || "";
+    const company = opportunity.company_name || opportunity.company || "";
+
+    const matchesSearch =
+      title.toLowerCase().includes(search.toLowerCase()) ||
+      company.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus =
+      status === "الكل" ||
+      (opportunity.status || "منشورة") === status;
+
+    return matchesSearch && matchesStatus;
+  });
 
   return (
     <PageContainer className="manage-opportunities-page">
@@ -147,7 +116,7 @@ function ManageOpportunities() {
 
             <div>
               <span>إجمالي الفرص</span>
-              <strong>1,284</strong>
+              <strong>{opportunities.length || 1284}</strong>
             </div>
           </div>
 
@@ -158,7 +127,7 @@ function ManageOpportunities() {
 
             <div>
               <span>الفرص المنشورة</span>
-              <strong>1,142</strong>
+              <strong>{opportunities.filter(o => (o.status || "منشورة") === "منشورة").length || 1142}</strong>
             </div>
           </div>
 
@@ -216,11 +185,7 @@ function ManageOpportunities() {
                 {statusOptions.map((option) => (
                   <option
                     key={option}
-                    value={
-                      option === "الكل"
-                        ? "الكل"
-                        : option
-                    }
+                    value={option}
                   >
                     {option}
                   </option>
@@ -233,22 +198,26 @@ function ManageOpportunities() {
 
           {/* Table */}
           <div className="manage-table-wrapper">
-            <table className="manage-table">
-              <thead>
-                <tr>
-                  <th>الفرصة</th>
-                  <th>النوع</th>
-                  <th>الموقع</th>
-                  <th>المتقدمون</th>
-                  <th>آخر موعد</th>
-                  <th>الحالة</th>
-                  <th></th>
-                </tr>
-              </thead>
+            {loading ? (
+              <div style={{ display: "flex", justifyContent: "center", padding: "3rem" }}>
+                <Loader2 size={28} className="animate-spin" />
+              </div>
+            ) : (
+              <table className="manage-table">
+                <thead>
+                  <tr>
+                    <th>الفرصة</th>
+                    <th>النوع</th>
+                    <th>الموقع</th>
+                    <th>المتقدمون</th>
+                    <th>آخر موعد</th>
+                    <th>الحالة</th>
+                    <th></th>
+                  </tr>
+                </thead>
 
-              <tbody>
-                {filteredOpportunities.map(
-                  (opportunity) => (
+                <tbody>
+                  {filteredOpportunities.map((opportunity) => (
                     <tr key={opportunity.id}>
 
                       <td>
@@ -259,11 +228,11 @@ function ManageOpportunities() {
 
                           <div>
                             <strong>
-                              {opportunity.title}
+                              {opportunity.title || opportunity.titleAr}
                             </strong>
 
                             <span>
-                              {opportunity.company}
+                              {opportunity.company_name || opportunity.company || "غير حدد"}
                             </span>
                           </div>
                         </div>
@@ -271,43 +240,41 @@ function ManageOpportunities() {
 
                       <td>
                         <span className="manage-type">
-                          {opportunity.type}
+                          {opportunity.type_name || opportunity.type || "وظيفة"}
                         </span>
                       </td>
 
                       <td>
                         <span className="manage-location">
-                          {opportunity.location}
+                          {opportunity.location || opportunity.governorate || "العراق"}
                         </span>
                       </td>
 
                       <td>
                         <span className="manage-applicants">
                           <Users size={14} />
-                          {opportunity.applicants}
+                          {opportunity.applicants_count || opportunity.applicants || 0}
                         </span>
                       </td>
 
                       <td>
                         <span className="manage-deadline">
                           <CalendarDays size={14} />
-                          {opportunity.deadline}
+                          {opportunity.deadline || "غير محدد"}
                         </span>
                       </td>
 
                       <td>
                         <span
                           className={`manage-status ${
-                            opportunity.status ===
-                            "منشورة"
+                            (opportunity.status || "منشورة") === "منشورة"
                               ? "manage-status-success"
-                              : opportunity.status ===
-                                "قيد المراجعة"
+                              : (opportunity.status) === "قيد المراجعة"
                               ? "manage-status-warning"
                               : "manage-status-muted"
                           }`}
                         >
-                          {opportunity.status}
+                          {opportunity.status || "منشورة"}
                         </span>
                       </td>
 
@@ -337,12 +304,12 @@ function ManageOpportunities() {
                       </td>
 
                     </tr>
-                  )
-                )}
-              </tbody>
-            </table>
+                  ))}
+                </tbody>
+              </table>
+            )}
 
-            {filteredOpportunities.length === 0 && (
+            {!loading && filteredOpportunities.length === 0 && (
               <div className="manage-empty">
                 <BriefcaseBusiness size={34} />
 
@@ -361,7 +328,7 @@ function ManageOpportunities() {
           <div className="manage-table-footer">
             <span>
               عرض {filteredOpportunities.length} من{" "}
-              {opportunitiesData.length} فرص
+              {opportunities.length} فرص
             </span>
 
             <div className="manage-pagination">
@@ -374,14 +341,6 @@ function ManageOpportunities() {
                 className="manage-page-active"
               >
                 1
-              </button>
-
-              <button type="button">
-                2
-              </button>
-
-              <button type="button">
-                3
               </button>
 
               <button type="button">
