@@ -9,6 +9,9 @@ class CvRepository {
     DO UPDATE SET
       raw_file_url = EXCLUDED.raw_file_url,
       parsed_text = EXCLUDED.parsed_text,
+      skills = NULL,
+      experience_years = 0,
+      education = NULL,
       created_at = CURRENT_TIMESTAMP
     RETURNING *;
   `;
@@ -44,6 +47,26 @@ class CvRepository {
   `;
 
     const result = await pool.query(query, [id]);
+    return result.rows[0];
+  }
+  async updateCvAiData(userId, skills, experienceYears, education) {
+    const query = `
+    UPDATE user_cvs
+    SET
+      skills = $2,
+      experience_years = $3,
+      education = $4
+    WHERE user_id = $1
+    RETURNING *;
+  `;
+
+    const result = await pool.query(query, [
+      userId,
+      JSON.stringify(skills),
+      experienceYears,
+      education,
+    ]);
+
     return result.rows[0];
   }
 }

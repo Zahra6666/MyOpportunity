@@ -1,5 +1,6 @@
 const cvRepository = require("./cv.repository");
 const { extractText } = require("./cv.parser");
+const { extractCvInfo } = require("../cv-ai/cv-ai.service");
 
 class CvService {
   async uploadCv(userId, filePath, fileMimetype) {
@@ -8,12 +9,14 @@ class CvService {
     }
 
     const parsedText = await extractText(filePath, fileMimetype);
-    const cv = await cvRepository.saveOrUpdateCv(userId, filePath, parsedText);
 
-    return {
-      ...cv,
-      parsed_text: parsedText,
-    };
+    await cvRepository.saveOrUpdateCv(userId, filePath, parsedText);
+
+    await extractCvInfo(userId, parsedText);
+
+    const updatedCv = await cvRepository.getCvByUserId(userId);
+
+    return updatedCv;
   }
 
   async getMyCv(userId) {

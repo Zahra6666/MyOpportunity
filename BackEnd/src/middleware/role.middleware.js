@@ -7,7 +7,13 @@ const allowRoles = (...allowedRoles) => {
       });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const userRole = req.user.role;
+
+    const hasPermission =
+      allowedRoles.includes(userRole) ||
+      (userRole === "company" && allowedRoles.includes("user"));
+
+    if (!hasPermission) {
       return res.status(403).json({
         success: false,
         message: "You do not have permission",

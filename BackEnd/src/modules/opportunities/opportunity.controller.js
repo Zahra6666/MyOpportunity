@@ -98,6 +98,31 @@ class OpportunityController {
     try {
       const { id } = req.params;
 
+      const opportunity = await opportunityService.getOpportunityById(id);
+
+      if (req.user.role !== "admin") {
+        const companyResult = await db.query(
+          "SELECT id FROM companies WHERE user_id = $1",
+          [req.user.id],
+        );
+
+        if (companyResult.rows.length === 0) {
+          return res.status(403).json({
+            success: false,
+            message: "Company profile not found.",
+          });
+        }
+
+        const companyId = companyResult.rows[0].id;
+
+        if (opportunity.company_id !== companyId) {
+          return res.status(403).json({
+            success: false,
+            message: "You are not allowed to update this opportunity.",
+          });
+        }
+      }
+
       const updatedOpportunity = await opportunityService.updateOpportunity(
         id,
         req.body,
@@ -120,6 +145,31 @@ class OpportunityController {
   async delete(req, res) {
     try {
       const { id } = req.params;
+
+      const opportunity = await opportunityService.getOpportunityById(id);
+
+      if (req.user.role !== "admin") {
+        const companyResult = await db.query(
+          "SELECT id FROM companies WHERE user_id = $1",
+          [req.user.id],
+        );
+
+        if (companyResult.rows.length === 0) {
+          return res.status(403).json({
+            success: false,
+            message: "Company profile not found.",
+          });
+        }
+
+        const companyId = companyResult.rows[0].id;
+
+        if (opportunity.company_id !== companyId) {
+          return res.status(403).json({
+            success: false,
+            message: "You are not allowed to delete this opportunity.",
+          });
+        }
+      }
 
       await opportunityService.deleteOpportunity(id);
 

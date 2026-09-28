@@ -9,14 +9,16 @@ class CvController {
       const fileMimetype = req.file ? req.file.mimetype : null;
 
       const result = await cvService.uploadCv(userId, filePath, fileMimetype);
+
       return res.status(201).json({
         success: true,
         message: "CV uploaded successfully",
         data: result,
       });
     } catch (error) {
-      return res.status(400).json({
+      return res.status(error.statusCode || 400).json({
         success: false,
+        code: error.code || "CV_UPLOAD_ERROR",
         message: error.message,
       });
     }

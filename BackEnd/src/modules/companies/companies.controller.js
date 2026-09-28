@@ -240,10 +240,51 @@ const deleteCompany = async (req, res) => {
 
 // PUT /api/companies/:id/approve
 const approveCompany = async (req, res) => {
+  const client = await pool.connect();
+
   try {
     const { id } = req.params;
 
-    const result = await pool.query(
+    await client.query("BEGIN");
+
+    const companyResult = await client.query(
+      `SELECT user_id
+       FROM companies
+       WHERE id = $1`,
+      [id],
+    );
+
+    if (companyResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return res.status(404).json({
+        success: false,
+        message: "Company not found.",
+      });
+    }
+
+    const userId = companyResult.rows[0].user_id;
+
+    const userResult = await client.query(
+      `SELECT u.id, r.name AS role
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE u.id = $1`,
+      [userId],
+    );
+
+    if (userResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return res.status(404).json({
+        success: false,
+        message: "Company owner not found.",
+      });
+    }
+
+    const currentRole = userResult.rows[0].role;
+
+    const result = await client.query(
       `UPDATE companies
        SET status = 'approved'
        WHERE id = $1
@@ -251,34 +292,102 @@ const approveCompany = async (req, res) => {
       [id],
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Company not found.",
-      });
+    if (currentRole === "user") {
+      const companyRoleResult = await client.query(
+        `SELECT id
+         FROM roles
+         WHERE name = 'company'`,
+      );
+
+      if (companyRoleResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(500).json({
+          success: false,
+          message: "Company role not found.",
+        });
+      }
+
+      const companyRoleId = companyRoleResult.rows[0].id;
+
+      await client.query(
+        `UPDATE users
+         SET role_id = $1
+         WHERE id = $2`,
+        [companyRoleId, userId],
+      );
     }
+
+    await client.query("COMMIT");
 
     return res.status(200).json({
       success: true,
-      message: "Company approved successfully.",
+      message:
+        currentRole === "user"
+          ? "Company approved successfully. User role changed to company."
+          : "Company approved successfully.",
       data: result.rows[0],
     });
   } catch (error) {
+    await client.query("ROLLBACK");
+
     console.error("Error approving company:", error);
 
     return res.status(500).json({
       success: false,
       message: "A server error occurred while approving the company.",
     });
+  } finally {
+    client.release();
   }
 };
-
 // PUT /api/companies/:id/reject
 const rejectCompany = async (req, res) => {
+  const client = await pool.connect();
+
   try {
     const { id } = req.params;
 
-    const result = await pool.query(
+    await client.query("BEGIN");
+
+    const companyResult = await client.query(
+      `SELECT user_id
+       FROM companies
+       WHERE id = $1`,
+      [id],
+    );
+
+    if (companyResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return res.status(404).json({
+        success: false,
+        message: "Company not found.",
+      });
+    }
+
+    const userId = companyResult.rows[0].user_id;
+
+    const userResult = await client.query(
+      `SELECT u.id, r.name AS role
+       FROM users u
+       JOIN roles r ON u.role_id = r.id
+       WHERE u.id = $1`,
+      [userId],
+    );
+
+    if (userResult.rows.length === 0) {
+      await client.query("ROLLBACK");
+
+      return res.status(404).json({
+        success: false,
+        message: "Company owner not found.",
+      });
+    }
+
+    const currentRole = userResult.rows[0].role;
+
+    const result = await client.query(
       `UPDATE companies
        SET status = 'rejected'
        WHERE id = $1
@@ -286,27 +395,56 @@ const rejectCompany = async (req, res) => {
       [id],
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Company not found.",
-      });
+    if (currentRole === "company") {
+      const userRoleResult = await client.query(
+        `SELECT id
+         FROM roles
+         WHERE name = 'user'`,
+      );
+
+      if (userRoleResult.rows.length === 0) {
+        await client.query("ROLLBACK");
+
+        return res.status(500).json({
+          success: false,
+          message: "User role not found.",
+        });
+      }
+
+      const userRoleId = userRoleResult.rows[0].id;
+
+      await client.query(
+        `UPDATE users
+         SET role_id = $1
+         WHERE id = $2`,
+        [userRoleId, userId],
+      );
     }
+
+    await client.query("COMMIT");
 
     return res.status(200).json({
       success: true,
-      message: "Company rejected successfully.",
+      message:
+        currentRole === "company"
+          ? "Company rejected successfully. User role changed back to user."
+          : "Company rejected successfully.",
       data: result.rows[0],
     });
   } catch (error) {
+    await client.query("ROLLBACK");
+
     console.error("Error rejecting company:", error);
 
     return res.status(500).json({
       success: false,
       message: "A server error occurred while rejecting the company.",
     });
+  } finally {
+    client.release();
   }
 };
+
 module.exports = {
   getCompanies,
   getCompanyById,

@@ -13,6 +13,8 @@ const typesRouter = require("./modules/types/types.routes");
 const opportunitiesRouter = require("./modules/opportunities/opportunity.routes");
 const savedRoutes = require("./modules/saved/saved.routes");
 const cvRoutes = require("./modules/cvs/cv.routes");
+const cvAiRoutes = require("./modules/cv-ai/cv-ai.routes");
+const matchingRoutes = require("./modules/matching/matching.routes");
 
 const app = express();
 
@@ -40,5 +42,7 @@ app.use("/api/companies", adminCompaniesRouter);
 app.use("/api/opportunities", opportunitiesRouter);
 app.use("/api", savedRoutes);
 app.use("/api/cvs", cvRoutes);
+app.use("/api/cv-ai", cvAiRoutes);
+app.use("/api", matchingRoutes);
 
 module.exports = app;

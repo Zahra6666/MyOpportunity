@@ -7,6 +7,7 @@
     "dev": "nodemon src/server.js"
   },
   "dependencies": {
+    "@google/genai": "^2.24.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^18.0.1",
@@ -15,6 +16,7 @@
     "mammoth": "^1.12.3",
     "multer": "^2.4.0",
     "pdf-parse": "^2.4.5",
+    "pdf-to-img": "^7.0.0",
     "pg": "^8.23.0",
     "tesseract.js": "^7.0.0",
     "word-extractor": "^1.0.4",

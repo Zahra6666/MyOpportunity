@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
+const db = require("../config/db");
 
-const authMiddleware = (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
@@ -24,7 +25,29 @@ const authMiddleware = (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = decoded;
+    const result = await db.query(
+      `
+      SELECT
+        u.id,
+        u.email,
+        u.full_name,
+        u.phone,
+        r.name AS role
+      FROM users u
+      JOIN roles r ON u.role_id = r.id
+      WHERE u.id = $1
+      `,
+      [decoded.id],
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    req.user = result.rows[0];
 
     next();
   } catch (error) {

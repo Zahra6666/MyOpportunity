@@ -101,6 +101,24 @@ const deleteUser = async (userId) => {
   return result.rows[0];
 };
 
+const updateUserCvInfo = async (userId, fullName, email, phone) => {
+  const result = await pool.query(
+    `UPDATE users
+     SET full_name = COALESCE(NULLIF($2, ''), full_name),
+         email = COALESCE(NULLIF($3, ''), email),
+         phone = COALESCE(NULLIF($4, ''), phone)
+     WHERE id = $1
+     RETURNING id, full_name, email, phone, role_id`,
+    [userId, fullName, email, phone],
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error("User not found");
+  }
+
+  return result.rows[0];
+};
+
 module.exports = {
   findUserById,
   findAllUsers,
@@ -108,4 +126,5 @@ module.exports = {
   updateUser,
   deleteMe,
   deleteUser,
+  updateUserCvInfo,
 };

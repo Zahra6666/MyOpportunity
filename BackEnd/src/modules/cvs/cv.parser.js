@@ -1,5 +1,5 @@
 const fs = require("fs");
-const path = require("path");
+
 const pdfParse = require("pdf-parse");
 const mammoth = require("mammoth");
 const WordExtractor = require("word-extractor");
@@ -36,24 +36,49 @@ async function extractImageText(filePath) {
   return result.data.text;
 }
 
+function validateEnglishText(text) {
+  const arabicCharacters = text.match(/[\u0600-\u06FF]/g);
+
+  if (arabicCharacters && arabicCharacters.length > 0) {
+    const error = new Error(
+      "Arabic CVs are not supported. Please upload an English CV.",
+    );
+
+    error.statusCode = 400;
+    error.code = "UNSUPPORTED_LANGUAGE";
+
+    throw error;
+  }
+}
+
 async function extractText(filePath, mimetype) {
+  let text;
+
   switch (mimetype) {
     case "application/pdf":
-      return await extractPdfText(filePath);
+      text = await extractPdfText(filePath);
+      break;
 
     case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-      return await extractDocxText(filePath);
+      text = await extractDocxText(filePath);
+      break;
 
     case "application/msword":
-      return await extractDocText(filePath);
+      text = await extractDocText(filePath);
+      break;
 
     case "image/jpeg":
     case "image/png":
-      return await extractImageText(filePath);
+      text = await extractImageText(filePath);
+      break;
 
     default:
       throw new Error("Unsupported CV file type");
   }
+
+  validateEnglishText(text);
+
+  return text;
 }
 
 module.exports = {
