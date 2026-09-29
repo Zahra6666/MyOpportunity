@@ -16,10 +16,7 @@ import {
   CircleAlert,
 } from "lucide-react";
 
-import {
-  Link,
-  useParams,
-} from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import { useEffect, useState } from "react";
 
@@ -54,20 +51,14 @@ function OpportunityDetails() {
       try {
         const response = await getOpportunityById(id);
 
-        const data =
-          response?.opportunity ||
-          response?.data ||
-          response;
+        const data = response?.opportunity || response?.data || response;
 
         if (isMounted) {
           setOpportunity(data);
         }
       } catch (error) {
         if (isMounted) {
-          setError(
-            error?.message ||
-              "تعذر تحميل تفاصيل الفرصة."
-          );
+          setError(error?.message || "تعذر تحميل تفاصيل الفرصة.");
         }
       } finally {
         if (isMounted) {
@@ -105,10 +96,7 @@ function OpportunityDetails() {
         setIsSaved(true);
       }
     } catch (error) {
-      setError(
-        error?.message ||
-          "تعذر تحديث حالة حفظ الفرصة."
-      );
+      setError(error?.message || "تعذر تحديث حالة حفظ الفرصة.");
     } finally {
       setSaving(false);
     }
@@ -119,9 +107,7 @@ function OpportunityDetails() {
       <PageContainer className="opportunity-details-page">
         <div className="container">
           <div className="details-card">
-            <p>
-              جارٍ تحميل تفاصيل الفرصة...
-            </p>
+            <p>جارٍ تحميل تفاصيل الفرصة...</p>
           </div>
         </div>
       </PageContainer>
@@ -133,14 +119,9 @@ function OpportunityDetails() {
       <PageContainer className="opportunity-details-page">
         <div className="container">
           <div className="details-card">
-            <p>
-              {error ||
-                "تعذر العثور على الفرصة المطلوبة."}
-            </p>
+            <p>{error || "تعذر العثور على الفرصة المطلوبة."}</p>
 
-            <Link to="/opportunities">
-              العودة إلى الفرص
-            </Link>
+            <Link to="/opportunities">العودة إلى الفرص</Link>
           </div>
         </div>
       </PageContainer>
@@ -148,28 +129,18 @@ function OpportunityDetails() {
   }
 
   const matchingSkills =
-    opportunity.matchingSkills ||
-    opportunity.matching_skills ||
-    [];
+    opportunity.matchingSkills || opportunity.matching_skills || [];
 
   const missingSkills =
-    opportunity.missingSkills ||
-    opportunity.missing_skills ||
-    [];
+    opportunity.missingSkills || opportunity.missing_skills || [];
 
-  const responsibilities =
-    opportunity.responsibilities || [];
+  const responsibilities = opportunity.responsibilities || [];
 
-  const requirements =
-    opportunity.requirements || [];
+  const requirements = opportunity.requirements || [];
 
-  const benefits =
-    opportunity.benefits || [];
+  const benefits = opportunity.benefits || [];
 
-  const match =
-    opportunity.match ??
-    opportunity.match_percentage ??
-    0;
+  const match = opportunity.match ?? opportunity.match_percentage ?? 0;
 
   const companyId =
     opportunity.companyId ||
@@ -183,15 +154,9 @@ function OpportunityDetails() {
     opportunity.company?.name ||
     "الجهة الناشرة";
 
-  const title =
-    opportunity.title ||
-    opportunity.name ||
-    "فرصة وظيفية";
+  const title = opportunity.title || opportunity.name || "فرصة وظيفية";
 
-  const titleEn =
-    opportunity.titleEn ||
-    opportunity.title_en ||
-    "";
+  const titleEn = opportunity.titleEn || opportunity.title_en || "";
 
   const type =
     opportunity.type ||
@@ -199,39 +164,22 @@ function OpportunityDetails() {
     opportunity.opportunity_type ||
     "";
 
-  const location =
-    opportunity.location ||
-    "";
+  const location = opportunity.location || "";
 
   const mode =
-    opportunity.mode ||
-    opportunity.work_mode ||
-    opportunity.work_type ||
-    "";
+    opportunity.mode || opportunity.work_mode || opportunity.work_type || "";
 
-  const salary =
-    opportunity.salary ||
-    "غير محدد";
+  const salary = opportunity.salary || "غير محدد";
 
   const deadline =
-    opportunity.deadline ||
-    opportunity.application_deadline ||
-    "غير محدد";
+    opportunity.deadline || opportunity.application_deadline || "غير محدد";
 
-  const posted =
-    opportunity.posted ||
-    opportunity.posted_at ||
-    "";
+  const posted = opportunity.posted || opportunity.posted_at || "";
 
-  const description =
-    opportunity.description ||
-    opportunity.details ||
-    "";
+  const description = opportunity.description || opportunity.details || "";
 
   const learningTime =
-    opportunity.learningTime ||
-    opportunity.learning_time ||
-    "";
+    opportunity.learningTime || opportunity.learning_time || "";
 
   const companyDescription =
     opportunity.companyDescription ||
@@ -241,62 +189,36 @@ function OpportunityDetails() {
 
   return (
     <PageContainer className="opportunity-details-page">
-
       <div className="container">
-
         <div className="details-breadcrumb">
-
-          <Link to="/">
-            الرئيسية
-          </Link>
+          <Link to="/">الرئيسية</Link>
 
           <span>/</span>
 
-          <Link to="/opportunities">
-            استكشف الفرص
-          </Link>
+          <Link to="/opportunities">استكشف الفرص</Link>
 
           <span>/</span>
 
-          <span>
-            تفاصيل الفرصة
-          </span>
-
+          <span>تفاصيل الفرصة</span>
         </div>
 
         <div className="opportunity-details-layout">
-
           <main className="opportunity-details-main">
-
             <section className="details-header-card">
-
               <div className="details-company-logo">
                 <Building2 size={30} />
               </div>
 
               <div className="details-header-content">
-
                 <div className="details-type-row">
+                  <span className="details-type-badge">{type}</span>
 
-                  <span className="details-type-badge">
-                    {type}
-                  </span>
-
-                  <span className="details-posted">
-                    {posted}
-                  </span>
-
+                  <span className="details-posted">{posted}</span>
                 </div>
 
-                <h1>
-                  {title}
-                </h1>
+                <h1>{title}</h1>
 
-                {titleEn && (
-                  <p className="details-title-en">
-                    {titleEn}
-                  </p>
-                )}
+                {titleEn && <p className="details-title-en">{titleEn}</p>}
 
                 {companyId ? (
                   <Link
@@ -315,7 +237,6 @@ function OpportunityDetails() {
                 )}
 
                 <div className="details-meta">
-
                   <span>
                     <MapPin size={15} />
                     {location}
@@ -330,177 +251,112 @@ function OpportunityDetails() {
                     <CalendarDays size={15} />
                     آخر موعد: {deadline}
                   </span>
-
                 </div>
-
               </div>
-
             </section>
 
             <section className="details-card">
-
               <div className="details-section-heading">
-
                 <div className="details-section-icon">
                   <FileText size={17} />
                 </div>
 
                 <div>
-                  <h2>
-                    عن الفرصة
-                  </h2>
+                  <h2>عن الفرصة</h2>
 
-                  <p>
-                    نبذة عن الوظيفة والدور المطلوب
-                  </p>
+                  <p>نبذة عن الوظيفة والدور المطلوب</p>
                 </div>
-
               </div>
 
-              <p className="details-description">
-                {description}
-              </p>
-
+              <p className="details-description">{description}</p>
             </section>
 
             {responsibilities.length > 0 && (
               <section className="details-card">
-
                 <div className="details-section-heading">
-
                   <div className="details-section-icon">
                     <BriefcaseBusiness size={17} />
                   </div>
 
                   <div>
-                    <h2>
-                      المسؤوليات
-                    </h2>
+                    <h2>المسؤوليات</h2>
 
-                    <p>
-                      المهام الأساسية في هذه الفرصة
-                    </p>
+                    <p>المهام الأساسية في هذه الفرصة</p>
                   </div>
-
                 </div>
 
                 <ul className="details-list">
-
-                  {responsibilities.map(
-                    (item, index) => (
-                      <li key={index}>
-                        <CheckCircle2 size={16} />
-                        <span>
-                          {item}
-                        </span>
-                      </li>
-                    )
-                  )}
-
+                  {responsibilities.map((item, index) => (
+                    <li key={index}>
+                      <CheckCircle2 size={16} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
                 </ul>
-
               </section>
             )}
 
             {requirements.length > 0 && (
               <section className="details-card">
-
                 <div className="details-section-heading">
-
                   <div className="details-section-icon">
                     <GraduationCap size={17} />
                   </div>
 
                   <div>
-                    <h2>
-                      المتطلبات
-                    </h2>
+                    <h2>المتطلبات</h2>
 
-                    <p>
-                      المهارات والخبرات المطلوبة
-                    </p>
+                    <p>المهارات والخبرات المطلوبة</p>
                   </div>
-
                 </div>
 
                 <ul className="details-list">
-
-                  {requirements.map(
-                    (item, index) => (
-                      <li key={index}>
-                        <CheckCircle2 size={16} />
-                        <span>
-                          {item}
-                        </span>
-                      </li>
-                    )
-                  )}
-
+                  {requirements.map((item, index) => (
+                    <li key={index}>
+                      <CheckCircle2 size={16} />
+                      <span>{item}</span>
+                    </li>
+                  ))}
                 </ul>
-
               </section>
             )}
 
             {benefits.length > 0 && (
               <section className="details-card">
-
                 <div className="details-section-heading">
-
                   <div className="details-section-icon">
                     <ShieldCheck size={17} />
                   </div>
 
                   <div>
-                    <h2>
-                      المزايا
-                    </h2>
+                    <h2>المزايا</h2>
 
-                    <p>
-                      ما توفره الجهة للمتقدم
-                    </p>
+                    <p>ما توفره الجهة للمتقدم</p>
                   </div>
-
                 </div>
 
                 <div className="benefits-grid">
-
-                  {benefits.map(
-                    (benefit, index) => (
-                      <div
-                        className="benefit-item"
-                        key={index}
-                      >
-                        <CheckCircle2 size={15} />
-                        <span>
-                          {benefit}
-                        </span>
-                      </div>
-                    )
-                  )}
-
+                  {benefits.map((benefit, index) => (
+                    <div className="benefit-item" key={index}>
+                      <CheckCircle2 size={15} />
+                      <span>{benefit}</span>
+                    </div>
+                  ))}
                 </div>
-
               </section>
             )}
 
             <section className="details-card">
-
               <div className="details-section-heading">
-
                 <div className="details-section-icon">
                   <Building2 size={17} />
                 </div>
 
                 <div>
-                  <h2>
-                    عن {companyName}
-                  </h2>
+                  <h2>عن {companyName}</h2>
 
-                  <p>
-                    معلومات عن الجهة الناشرة
-                  </p>
+                  <p>معلومات عن الجهة الناشرة</p>
                 </div>
-
               </div>
 
               <p className="details-description">
@@ -517,137 +373,84 @@ function OpportunityDetails() {
                   <ArrowLeft size={15} />
                 </Link>
               )}
-
             </section>
-
           </main>
 
           <aside className="opportunity-details-sidebar">
-
             <section className="match-card">
-
               <div className="match-card-header">
-
                 <div>
-                  <h2>
-                    مدى توافقك
-                  </h2>
+                  <h2>مدى توافقك</h2>
 
-                  <p>
-                    مقارنة ملفك مع متطلبات الفرصة
-                  </p>
+                  <p>مقارنة ملفك مع متطلبات الفرصة</p>
                 </div>
 
                 <div className="match-circle">
+                  <strong>{match}%</strong>
 
-                  <strong>
-                    {match}%
-                  </strong>
-
-                  <span>
-                    توافق
-                  </span>
-
+                  <span>توافق</span>
                 </div>
-
               </div>
 
               <div className="match-progress">
-
                 <span
                   style={{
                     width: `${match}%`,
                   }}
                 />
-
               </div>
 
               {matchingSkills.length > 0 && (
                 <div className="match-group">
-
                   <div className="match-group-title">
                     <CheckCircle2 size={15} />
                     مهارات متوافقة
                   </div>
 
                   <div className="match-tags">
-
-                    {matchingSkills.map(
-                      (skill) => (
-                        <span key={skill}>
-                          {skill}
-                        </span>
-                      )
-                    )}
-
+                    {matchingSkills.map((skill) => (
+                      <span key={skill}>{skill}</span>
+                    ))}
                   </div>
-
                 </div>
               )}
 
               {missingSkills.length > 0 && (
                 <div className="match-group">
-
                   <div className="match-group-title missing">
                     <CircleAlert size={15} />
                     مهارات تحتاج إلى تطوير
                   </div>
 
                   <div className="match-tags missing-tags">
-
-                    {missingSkills.map(
-                      (skill) => (
-                        <span key={skill}>
-                          {skill}
-                        </span>
-                      )
-                    )}
-
+                    {missingSkills.map((skill) => (
+                      <span key={skill}>{skill}</span>
+                    ))}
                   </div>
-
                 </div>
               )}
 
               {learningTime && (
                 <div className="learning-time">
-
                   <Clock3 size={15} />
 
                   <div>
+                    <span>الوقت التقديري للتطوير</span>
 
-                    <span>
-                      الوقت التقديري للتطوير
-                    </span>
-
-                    <strong>
-                      {learningTime}
-                    </strong>
-
+                    <strong>{learningTime}</strong>
                   </div>
-
                 </div>
               )}
-
             </section>
 
             <section className="apply-card">
-
               <div className="apply-card-info">
+                <span>آخر موعد للتقديم</span>
 
-                <span>
-                  آخر موعد للتقديم
-                </span>
-
-                <strong>
-                  {deadline}
-                </strong>
-
+                <strong>{deadline}</strong>
               </div>
 
-              <Button
-                variant="primary"
-                className="apply-button"
-              >
+              <Button variant="primary" className="apply-button">
                 التقديم على الفرصة
                 <ArrowLeft size={17} />
               </Button>
@@ -657,107 +460,66 @@ function OpportunityDetails() {
                 className="save-details-button"
                 onClick={handleSave}
                 disabled={saving}
-                aria-label={
-                  isSaved
-                    ? "إلغاء حفظ الفرصة"
-                    : "حفظ الفرصة"
-                }
+                aria-label={isSaved ? "إلغاء حفظ الفرصة" : "حفظ الفرصة"}
               >
-                <Bookmark
-                  size={17}
-                  fill={
-                    isSaved
-                      ? "currentColor"
-                      : "none"
-                  }
-                />
+                <Bookmark size={17} fill={isSaved ? "currentColor" : "none"} />
 
                 {saving
                   ? "جارٍ الحفظ..."
                   : isSaved
-                  ? "إلغاء حفظ الفرصة"
-                  : "حفظ الفرصة"}
+                    ? "إلغاء حفظ الفرصة"
+                    : "حفظ الفرصة"}
               </button>
-
             </section>
 
             <section className="details-info-card">
-
-              <h3>
-                معلومات الفرصة
-              </h3>
+              <h3>معلومات الفرصة</h3>
 
               <div className="details-info-row">
-
                 <span>
                   <MapPin size={15} />
                   الموقع
                 </span>
 
-                <strong>
-                  {location}
-                </strong>
-
+                <strong>{location}</strong>
               </div>
 
               <div className="details-info-row">
-
                 <span>
                   <BriefcaseBusiness size={15} />
                   نوع العمل
                 </span>
 
-                <strong>
-                  {mode}
-                </strong>
-
+                <strong>{mode}</strong>
               </div>
 
               <div className="details-info-row">
-
                 <span>
                   <Users size={15} />
                   الراتب
                 </span>
 
-                <strong>
-                  {salary}
-                </strong>
-
+                <strong>{salary}</strong>
               </div>
-
             </section>
 
             <section className="cv-reminder">
-
               <FileText size={18} />
 
               <div>
+                <strong>حدّث سيرتك الذاتية</strong>
 
-                <strong>
-                  حدّث سيرتك الذاتية
-                </strong>
-
-                <p>
-                  السيرة المحدثة تساعدك على الحصول
-                  على تطابق أدق مع الفرص.
-                </p>
+                <p>السيرة المحدثة تساعدك على الحصول على تطابق أدق مع الفرص.</p>
 
                 <Link to="/cv/upload">
                   تحديث السيرة
                   <ArrowLeft size={13} />
                 </Link>
-
               </div>
-
             </section>
-
           </aside>
-
         </div>
-
       </div>
-
     </PageContainer>
   );
 }

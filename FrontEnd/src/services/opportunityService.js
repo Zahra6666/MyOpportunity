@@ -7,9 +7,7 @@ async function request(endpoint, options = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token
-        ? { Authorization: `Bearer ${token}` }
-        : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
   });
@@ -17,13 +15,11 @@ async function request(endpoint, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(
-      data?.message || "حدث خطأ أثناء تنفيذ الطلب"
-    );
+    throw new Error(data?.message || "حدث خطأ أثناء تنفيذ الطلب");
   }
 
   return data;
-};
+}
 
 export async function getOpportunities(params = {}) {
   const query = new URLSearchParams();
@@ -46,9 +42,7 @@ export async function getOpportunities(params = {}) {
 
   const queryString = query.toString();
 
-  return request(
-    `/opportunities${queryString ? `?${queryString}` : ""}`
-  );
+  return request(`/opportunities${queryString ? `?${queryString}` : ""}`);
 }
 
 export async function getOpportunityById(id) {
@@ -62,11 +56,7 @@ export async function createOpportunity(opportunityData) {
   });
 }
 
-
-export async function updateOpportunity(
-  id,
-  opportunityData
-) {
+export async function updateOpportunity(id, opportunityData) {
   return request(`/opportunities/${id}`, {
     method: "PUT",
     body: JSON.stringify(opportunityData),
