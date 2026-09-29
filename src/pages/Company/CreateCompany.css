@@ -1,0 +1,182 @@
+.create-company-page {
+  padding: 40px 0 70px;
+}
+
+.create-company-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.create-company-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #7b8494;
+}
+
+.create-company-breadcrumb a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.create-company-header h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.create-company-header p {
+  margin: 0;
+  color: #7b8494;
+}
+
+.create-company-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  color: inherit;
+  white-space: nowrap;
+}
+
+.create-company-card {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #fff;
+  border: 1px solid #e8ebf0;
+  border-radius: 18px;
+  box-shadow: 0 12px 35px rgba(20, 30, 50, 0.06);
+}
+
+.create-company-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.create-company-icon {
+  width: 46px;
+  height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: #f1f5ff;
+}
+
+.create-company-title h2 {
+  margin: 0 0 5px;
+  font-size: 20px;
+}
+
+.create-company-title p {
+  margin: 0;
+  color: #7b8494;
+  font-size: 14px;
+}
+
+.create-company-error {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #fff1f1;
+  color: #c62828;
+  font-size: 14px;
+}
+
+.create-company-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.create-company-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.create-company-field-full {
+  grid-column: 1 / -1;
+}
+
+.create-company-field label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.create-company-field input,
+.create-company-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #dfe3e9;
+  border-radius: 10px;
+  background: #fff;
+  font: inherit;
+  outline: none;
+  transition: border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.create-company-field textarea {
+  resize: vertical;
+  min-height: 140px;
+}
+
+.create-company-field input:focus,
+.create-company-field textarea:focus {
+  border-color: #6c7cff;
+  box-shadow: 0 0 0 3px rgba(108, 124, 255, 0.1);
+}
+
+.create-company-field input:disabled,
+.create-company-field textarea:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.create-company-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid #edf0f4;
+}
+
+.create-company-cancel {
+  padding: 11px 18px;
+  border: 1px solid #dfe3e9;
+  border-radius: 10px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+@media (max-width: 700px) {
+  .create-company-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .create-company-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .create-company-field-full {
+    grid-column: auto;
+  }
+
+  .create-company-card {
+    padding: 20px;
+  }
+}

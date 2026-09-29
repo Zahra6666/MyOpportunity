@@ -1,121 +1,61 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 async function request(endpoint, options = {}) {
-  const response = await fetch(
-    `${API_BASE_URL}${endpoint}`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-      ...options,
-    }
-  );
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token
+        ? { Authorization: `Bearer ${token}` }
+        : {}),
+      ...(options.headers || {}),
+    },
+  });
 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
     throw new Error(
       data?.message ||
-        "حدث خطأ أثناء جلب بيانات المستخدم"
+        "تعذر تنفيذ الطلب."
     );
   }
 
   return data;
 }
 
-/**
- * Get current user profile
- */
-export async function getProfile() {
+export async function getMyProfile() {
   return request("/users/me");
 }
 
-/**
- * Update current user profile
- */
-export async function updateProfile(profileData) {
+export async function updateMyProfile(data) {
   return request("/users/me", {
     method: "PUT",
-    body: JSON.stringify(profileData),
+    body: JSON.stringify(data),
   });
 }
 
-/**
- * Get user dashboard data
- */
-export async function getDashboard() {
-  return request("/users/me/dashboard");
+export async function deleteMyAccount() {
+  return request("/users/me", {
+    method: "DELETE",
+  });
 }
 
-/**
- * Get user's skills
- */
-export async function getUserSkills() {
-  return request("/users/me/skills");
+export async function getUsers() {
+  return request("/users");
 }
 
-/**
- * Update user's skills
- */
-export async function updateUserSkills(skills) {
-  return request("/users/me/skills", {
+export async function updateUser(id, data) {
+  return request(`/users/${id}`, {
     method: "PUT",
-    body: JSON.stringify({
-      skills,
-    }),
+    body: JSON.stringify(data),
   });
 }
 
-/**
- * Get user's education
- */
-export async function getUserEducation() {
-  return request("/users/me/education");
-}
-
-/**
- * Update user's education
- */
-export async function updateUserEducation(
-  education
-) {
-  return request("/users/me/education", {
-    method: "PUT",
-    body: JSON.stringify(education),
+export async function deleteUser(id) {
+  return request(`/users/${id}`, {
+    method: "DELETE",
   });
 }
-
-/**
- * Get user's application history
- */
-export async function getApplicationHistory() {
-  return request("/users/me/applications");
-}
-
-/**
- * Get user's notifications
- */
-export async function getNotifications() {
-  return request("/users/me/notifications");
-}
-
-export async function markNotificationsAsRead() {
-  return request("/users/me/notifications/read", {
-    method: "PUT",
-  });
-}
-
-export default {
-  getProfile,
-  updateProfile,
-  getDashboard,
-  getUserSkills,
-  updateUserSkills,
-  getUserEducation,
-  updateUserEducation,
-  getApplicationHistory,
-  getNotifications,
-  markNotificationsAsRead,
-};

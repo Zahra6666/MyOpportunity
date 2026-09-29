@@ -13,29 +13,37 @@ import { useAuthContext } from "../../context/AuthContext";
 
 function Login() {
   const navigate = useNavigate();
-  const { login } = useAuthContext();
+  const { login, loading } = useAuthContext();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    login({
-      name: email.split("@")[0] || "مستخدم",
-      email,
-    });
+    setError("");
 
-    navigate("/dashboard");
+    try {
+      await login({
+        email,
+        password,
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      setError(
+        error?.message ||
+          "تعذر تسجيل الدخول. يرجى التأكد من البريد الإلكتروني وكلمة المرور."
+      );
+    }
   };
 
   return (
     <main className="auth-page">
-
       <div className="auth-decoration" />
 
       <div className="container auth-container">
-
         <div className="auth-card">
 
           <div className="auth-logo">
@@ -51,8 +59,7 @@ function Login() {
             </h1>
 
             <p>
-              سجّل دخولك حتى تتابع فرصك
-              وتستفيد من التحليل الذكي.
+              سجّل دخولك لمتابعة فرصك والاستفادة من التحليل الذكي.
             </p>
           </div>
 
@@ -98,24 +105,32 @@ function Login() {
             </label>
 
             <div className="auth-options">
-
               <label className="remember-option">
                 <input type="checkbox" />
-                تذكرني
+                تذكّرني
               </label>
 
               <a href="/">
-                نسيت كلمة المرور؟
+                هل نسيت كلمة المرور؟
               </a>
-
             </div>
+
+            {error && (
+              <p className="auth-error">
+                {error}
+              </p>
+            )}
 
             <Button
               type="submit"
               className="btn-full"
+              disabled={loading}
             >
-              تسجيل الدخول
-              <ArrowLeft size={17} />
+              {loading
+                ? "جارٍ تسجيل الدخول..."
+                : "تسجيل الدخول"}
+
+              {!loading && <ArrowLeft size={17} />}
             </Button>
 
           </form>
@@ -125,16 +140,14 @@ function Login() {
           </div>
 
           <p className="auth-register">
-            ما عندك حساب؟
+            ليس لديك حساب؟
             <Link to="/register">
               إنشاء حساب جديد
             </Link>
           </p>
 
         </div>
-
       </div>
-
     </main>
   );
 }

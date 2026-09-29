@@ -7,58 +7,164 @@ import {
   CalendarDays,
   CheckCircle2,
   ArrowRight,
-  Bookmark,
   ExternalLink,
 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import PageContainer from "../../components/layout/PageContainer";
+
+import {
+  getCompanyById,
+} from "../../services/companyService";
+
+import {
+  getOpportunities,
+} from "../../services/opportunityService";
 
 import "./CompanyPage.css";
 
 function CompanyPage() {
   const { id } = useParams();
-  
-  const company = {
-    id: id || "company-1",
-    name: "شركة تقنية العراق",
-    shortName: "ITI",
-    description:
-      "شركة عراقية تعمل في مجال التكنولوجيا والحلول الرقمية، وتركز على تطوير المنتجات والخدمات التقنية ودعم الكفاءات المحلية.",
-    location: "بغداد، العراق",
-    website: "www.example.iq",
-    employees: "500+",
-    founded: "2012",
-    industry: "التكنولوجيا والخدمات الرقمية",
-    opportunities: 12,
+
+  const [company, setCompany] = useState(null);
+  const [opportunities, setOpportunities] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+  const [opportunitiesLoading, setOpportunitiesLoading] =
+    useState(true);
+
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadCompany();
+  }, [id]);
+
+  useEffect(() => {
+    loadCompanyOpportunities();
+  }, [id]);
+
+  const loadCompany = async () => {
+    if (!id) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getCompanyById(id);
+
+      const data =
+        response?.company ||
+        response?.data ||
+        response;
+
+      setCompany(data);
+    } catch (err) {
+      setError(
+        err?.message ||
+          "تعذر تحميل بيانات الشركة."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const opportunities = [
-    {
-      id: 1,
-      title: "مهندس Frontend أول",
-      type: "وظيفة",
-      location: "بغداد",
-      mode: "دوام كامل",
-      match: 92,
-    },
-    {
-      id: 2,
-      title: "Frontend Developer",
-      type: "تدريب وتوظيف",
-      location: "بغداد",
-      mode: "هجين",
-      match: 88,
-    },
-    {
-      id: 3,
-      title: "Software Engineering Internship",
-      type: "تدريب",
-      location: "بغداد",
-      mode: "حضوري",
-      match: 84,
-    },
-  ];
+  const loadCompanyOpportunities = async () => {
+    if (!id) return;
+
+    setOpportunitiesLoading(true);
+
+    try {
+      const response =
+        await getOpportunities();
+
+      const allOpportunities =
+        response?.opportunities ||
+        response?.data ||
+        response?.results ||
+        response ||
+        [];
+
+      const opportunitiesArray =
+        Array.isArray(allOpportunities)
+          ? allOpportunities
+          : [];
+
+      const companyOpportunities =
+        opportunitiesArray.filter(
+          (opportunity) => {
+            const opportunityCompanyId =
+              opportunity?.company_id ??
+              opportunity?.company?.id ??
+              opportunity?.companyId;
+
+            return String(opportunityCompanyId) ===
+              String(id);
+          }
+        );
+
+      setOpportunities(companyOpportunities);
+    } catch {
+      setOpportunities([]);
+    } finally {
+      setOpportunitiesLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PageContainer className="company-page">
+        <div className="container">
+          <div className="company-card">
+            جارٍ تحميل بيانات الشركة...
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  if (error || !company) {
+    return (
+      <PageContainer className="company-page">
+        <div className="container">
+          <div className="company-card">
+            <p>
+              {error || "لم يتم العثور على الشركة."}
+            </p>
+
+            <Link
+              to="/opportunities"
+              className="company-all-link"
+            >
+              العودة إلى الفرص
+              <ArrowRight size={15} />
+            </Link>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  const companyName =
+    company?.name ||
+    "شركة غير معروفة";
+
+  const companyDescription =
+    company?.description ||
+    "لا يوجد وصف متاح لهذه الشركة.";
+
+  const companyLocation =
+    company?.location ||
+    "غير متوفر";
+
+  const companyStatus =
+    company?.status ||
+    "";
+
+  const companyLogo =
+    company?.logo ||
+    company?.logo_url ||
+    null;
 
   return (
     <PageContainer className="company-page">
@@ -68,6 +174,7 @@ function CompanyPage() {
         {/* Breadcrumb */}
 
         <div className="company-breadcrumb">
+
           <Link to="/">
             الرئيسية
           </Link>
@@ -80,7 +187,10 @@ function CompanyPage() {
 
           <span>/</span>
 
-          <span>{company.name}</span>
+          <span>
+            {companyName}
+          </span>
+
         </div>
 
 
@@ -89,7 +199,16 @@ function CompanyPage() {
         <section className="company-hero">
 
           <div className="company-logo-large">
-            <Building2 size={34} />
+
+            {companyLogo ? (
+              <img
+                src={companyLogo}
+                alt={companyName}
+              />
+            ) : (
+              <Building2 size={34} />
+            )}
+
           </div>
 
           <div className="company-hero-content">
@@ -97,27 +216,23 @@ function CompanyPage() {
             <div className="company-title-row">
 
               <div>
-                <div className="company-verified">
-                  <CheckCircle2 size={13} />
-                  جهة موثقة
-                </div>
+
+                {companyStatus === "approved" && (
+                  <div className="company-verified">
+                    <CheckCircle2 size={13} />
+                    جهة موثقة
+                  </div>
+                )}
 
                 <h1>
-                  {company.name}
+                  {companyName}
                 </h1>
 
                 <p>
-                  {company.industry}
+                  شركة على منصة فرصتي
                 </p>
-              </div>
 
-              <button
-                type="button"
-                className="company-save-button"
-              >
-                <Bookmark size={17} />
-                حفظ الشركة
-              </button>
+              </div>
 
             </div>
 
@@ -126,17 +241,17 @@ function CompanyPage() {
 
               <span>
                 <MapPin size={15} />
-                {company.location}
+                {companyLocation}
               </span>
 
               <span>
-                <Users size={15} />
-                {company.employees} موظف
+                <BriefcaseBusiness size={15} />
+                {opportunities.length} فرصة
               </span>
 
               <span>
-                <CalendarDays size={15} />
-                تأسست {company.founded}
+                <CheckCircle2 size={15} />
+                {companyStatus || "غير محدد"}
               </span>
 
             </div>
@@ -165,6 +280,7 @@ function CompanyPage() {
                 </div>
 
                 <div>
+
                   <h2>
                     عن الشركة
                   </h2>
@@ -172,12 +288,13 @@ function CompanyPage() {
                   <p>
                     معلومات عامة عن الجهة
                   </p>
+
                 </div>
 
               </div>
 
               <p className="company-description">
-                {company.description}
+                {companyDescription}
               </p>
 
             </section>
@@ -194,77 +311,98 @@ function CompanyPage() {
                 </div>
 
                 <div>
+
                   <h2>
                     الفرص المتاحة
                   </h2>
 
                   <p>
-                    الفرص المنشورة من {company.name}
+                    الفرص المنشورة من {companyName}
                   </p>
+
                 </div>
 
               </div>
 
 
-              <div className="company-opportunities">
+              {opportunitiesLoading ? (
 
-                {opportunities.map((opportunity) => (
+                <div className="company-description">
+                  جارٍ تحميل الفرص...
+                </div>
 
-                  <article
-                    className="company-opportunity"
-                    key={opportunity.id}
-                  >
+              ) : opportunities.length === 0 ? (
 
-                    <div className="company-opportunity-logo">
-                      <Building2 size={18} />
-                    </div>
+                <div className="company-description">
+                  لا توجد فرص منشورة من هذه الشركة حاليًا.
+                </div>
 
-                    <div className="company-opportunity-info">
+              ) : (
 
-                      <div className="company-opportunity-top">
+                <div className="company-opportunities">
 
-                        <span className="company-opportunity-type">
-                          {opportunity.type}
-                        </span>
+                  {opportunities.map(
+                    (opportunity) => (
 
-                        <span className="company-opportunity-match">
-                          {opportunity.match}%
-                        </span>
+                      <article
+                        className="company-opportunity"
+                        key={opportunity.id}
+                      >
 
-                      </div>
+                        <div className="company-opportunity-logo">
+                          <Building2 size={18} />
+                        </div>
 
-                      <h3>
-                        {opportunity.title}
-                      </h3>
+                        <div className="company-opportunity-info">
 
-                      <div className="company-opportunity-meta">
+                          <div className="company-opportunity-top">
 
-                        <span>
-                          <MapPin size={13} />
-                          {opportunity.location}
-                        </span>
+                            <span className="company-opportunity-type">
+                              {opportunity?.type?.name ||
+                                opportunity?.type ||
+                                "فرصة"}
+                            </span>
 
-                        <span>
-                          {opportunity.mode}
-                        </span>
+                          </div>
 
-                      </div>
+                          <h3>
+                            {opportunity?.title ||
+                              "فرصة بدون عنوان"}
+                          </h3>
 
-                    </div>
+                          <div className="company-opportunity-meta">
 
-                    <Link
-                      to={`/opportunities/${opportunity.id}`}
-                      className="company-opportunity-link"
-                    >
-                      التفاصيل
-                      <ArrowRight size={15} />
-                    </Link>
+                            <span>
+                              <MapPin size={13} />
+                              {opportunity?.location ||
+                                "غير متوفر"}
+                            </span>
 
-                  </article>
+                            <span>
+                              {opportunity?.status ||
+                                "غير محدد"}
+                            </span>
 
-                ))}
+                          </div>
 
-              </div>
+                        </div>
+
+                        <Link
+                          to={`/opportunities/${opportunity.id}`}
+                          className="company-opportunity-link"
+                        >
+                          التفاصيل
+                          <ArrowRight size={15} />
+                        </Link>
+
+                      </article>
+
+                    )
+                  )}
+
+                </div>
+
+              )}
 
 
               <Link
@@ -290,18 +428,21 @@ function CompanyPage() {
                 معلومات الشركة
               </h3>
 
+
               <div className="company-side-item">
 
                 <Globe size={16} />
 
                 <div>
+
                   <span>
                     الموقع الإلكتروني
                   </span>
 
-                  <a href="/">
-                    {company.website}
-                  </a>
+                  <strong>
+                    غير متوفر
+                  </strong>
+
                 </div>
 
                 <ExternalLink size={13} />
@@ -314,13 +455,15 @@ function CompanyPage() {
                 <MapPin size={16} />
 
                 <div>
+
                   <span>
                     الموقع
                   </span>
 
                   <strong>
-                    {company.location}
+                    {companyLocation}
                   </strong>
+
                 </div>
 
               </div>
@@ -331,13 +474,15 @@ function CompanyPage() {
                 <Users size={16} />
 
                 <div>
+
                   <span>
                     حجم الشركة
                   </span>
 
                   <strong>
-                    {company.employees} موظف
+                    غير متوفر
                   </strong>
+
                 </div>
 
               </div>
@@ -348,13 +493,15 @@ function CompanyPage() {
                 <CalendarDays size={16} />
 
                 <div>
+
                   <span>
                     سنة التأسيس
                   </span>
 
                   <strong>
-                    {company.founded}
+                    غير متوفر
                   </strong>
+
                 </div>
 
               </div>
@@ -368,10 +515,11 @@ function CompanyPage() {
                 نشاط الشركة على فرصتي
               </h3>
 
+
               <div className="company-stat">
 
                 <strong>
-                  {company.opportunities}
+                  {opportunities.length}
                 </strong>
 
                 <span>
@@ -380,10 +528,11 @@ function CompanyPage() {
 
               </div>
 
+
               <div className="company-stat">
 
                 <strong>
-                  4.8
+                  —
                 </strong>
 
                 <span>

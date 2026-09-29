@@ -26,22 +26,29 @@ import AdminDashboard from "../pages/Admin/AdminDashboard";
 import ManageOpportunities from "../pages/Admin/ManageOpportunities";
 import ManageUsers from "../pages/Admin/ManageUsers";
 import ManageEmployers from "../pages/Admin/ManageEmployers";
+import CreateOpportunity from "../pages/Admin/CreateOpportunity";
+import EditOpportunity from "../pages/Admin/EditOpportunity";
+
 import Profile from "../pages/Profile/Profile";
 import SavedOpportunities from "../pages/Saved/SavedOpportunities";
+
 import CompanyPage from "../pages/Company/CompanyPage";
-import ChatbotWindow from "../components/Chatbot/ChatbotButton";
+import CreateCompany from "../pages/Company/CreateCompany";
+import EditCompany from "../pages/Company/EditCompany";
+
 import ChatbotButton from "../components/Chatbot/ChatbotButton";
 import NotFound from "../pages/NotFound";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
-
       <AuthProvider>
 
         <Navbar />
 
         <Routes>
 
+          {/* Public */}
           <Route
             path="/"
             element={<Home />}
@@ -58,6 +65,11 @@ function AppRoutes() {
           />
 
           <Route
+            path="/company/:id"
+            element={<CompanyPage />}
+          />
+
+          <Route
             path="/login"
             element={<Login />}
           />
@@ -67,6 +79,23 @@ function AppRoutes() {
             element={<Register />}
           />
 
+          {/* User */}
+          <Route
+            path="/dashboard"
+            element={<UserDashboard />}
+          />
+
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
+
+          <Route
+            path="/saved"
+            element={<SavedOpportunities />}
+          />
+
+          {/* CV */}
           <Route
             path="/cv/upload"
             element={<CVUploadPage />}
@@ -77,11 +106,7 @@ function AppRoutes() {
             element={<CVAnalysisPage />}
           />
 
-          <Route
-            path="/dashboard"
-            element={<UserDashboard />}
-          />
-
+          {/* Admin */}
           <Route
             path="/admin"
             element={<AdminDashboard />}
@@ -93,6 +118,16 @@ function AppRoutes() {
           />
 
           <Route
+            path="/admin/opportunities/new"
+            element={<CreateOpportunity />}
+          />
+
+          <Route
+            path="/admin/opportunities/:id/edit"
+            element={<EditOpportunity />}
+          />
+
+          <Route
             path="/admin/users"
             element={<ManageUsers />}
           />
@@ -101,18 +136,18 @@ function AppRoutes() {
             path="/admin/employers"
             element={<ManageEmployers />}
           />
+
           <Route
-            path="/profile"
-            element={<Profile />}
+            path="/admin/employers/new"
+            element={<CreateCompany />}
           />
+
           <Route
-            path="/saved"
-            element={<SavedOpportunities />}
+            path="/admin/employers/:id/edit"
+            element={<EditCompany />}
           />
-          <Route
-            path="/company/:id"
-            element={<CompanyPage />}
-          />
+
+          {/* Not Found */}
           <Route
             path="*"
             element={<NotFound />}
@@ -120,12 +155,11 @@ function AppRoutes() {
 
         </Routes>
 
-      <ChatbotButton />
+        <ChatbotButton />
 
         <Footer />
 
       </AuthProvider>
-
     </BrowserRouter>
   );
 }

@@ -15,89 +15,234 @@ import {
   BriefcaseBusiness,
   CircleAlert,
 } from "lucide-react";
-import { Link, useParams } from "react-router-dom";
+
+import {
+  Link,
+  useParams,
+} from "react-router-dom";
+
+import { useEffect, useState } from "react";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Button from "../../components/common/Button";
+
+import {
+  getOpportunityById,
+  saveOpportunity,
+  unsaveOpportunity,
+} from "../../services/opportunityService";
 
 import "./OpportunityDetails.css";
 
 function OpportunityDetails() {
   const { id } = useParams();
 
-  // Temporary frontend data.
-  // Later this will come from opportunityService / Backend API.
-  const opportunity = {
-    id: id || "1",
+  const [opportunity, setOpportunity] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    title: "Frontend Developer",
-    titleEn: "Frontend Developer",
+  const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-    company: "شركة تقنية العراق",
-    companyId: "company-1",
+  useEffect(() => {
+    let isMounted = true;
 
-    type: "وظيفة",
-    location: "بغداد، العراق",
-    mode: "دوام كامل",
+    const loadOpportunity = async () => {
+      setLoading(true);
+      setError("");
 
-    salary: "حسب الخبرة",
-    deadline: "15 أكتوبر 2026",
+      try {
+        const response = await getOpportunityById(id);
 
-    posted: "منشورة منذ 4 أيام",
+        const data =
+          response?.opportunity ||
+          response?.data ||
+          response;
 
-    description:
-      "نبحث عن مطور Frontend للانضمام إلى فريقنا التقني والمساهمة في تطوير واجهات ويب حديثة وسهلة الاستخدام. سيكون المرشح مسؤولاً عن تحويل التصاميم إلى واجهات عملية ومتجاوبة والعمل مع فريق التطوير لتحسين تجربة المستخدم.",
+        if (isMounted) {
+          setOpportunity(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setError(
+            error?.message ||
+              "تعذر تحميل تفاصيل الفرصة."
+          );
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
 
-    match: 92,
+    if (id) {
+      loadOpportunity();
+    } else {
+      setLoading(false);
+      setError("معرّف الفرصة غير صالح.");
+    }
 
-    matchingSkills: [
-      "HTML",
-      "CSS",
-      "JavaScript",
-      "React",
-      "Git",
-    ],
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
 
-    missingSkills: [
-      "TypeScript",
-      "Unit Testing",
-    ],
+  const handleSave = async () => {
+    if (!id || saving) {
+      return;
+    }
 
-    learningTime: "2 - 4 أسابيع",
+    setSaving(true);
+    setError("");
 
-    responsibilities: [
-      "تطوير واجهات ويب متجاوبة وسهلة الاستخدام.",
-      "تحويل التصاميم إلى مكونات React قابلة لإعادة الاستخدام.",
-      "التعاون مع المصممين والمطورين ضمن فريق العمل.",
-      "تحسين أداء وتجربة المستخدم.",
-      "المشاركة في مراجعة واختبار الكود.",
-    ],
-
-    requirements: [
-      "معرفة جيدة بـ HTML و CSS.",
-      "خبرة في JavaScript.",
-      "معرفة أساسية أو جيدة بـ React.",
-      "القدرة على استخدام Git و GitHub.",
-      "القدرة على العمل ضمن فريق.",
-    ],
-
-    benefits: [
-      "بيئة عمل مهنية.",
-      "فرص للتعلم والتطور.",
-      "تدريب عملي أثناء العمل.",
-      "تأمين صحي حسب سياسة الشركة.",
-    ],
-
-    companyDescription:
-      "شركة تقنية عراقية تعمل في مجال الحلول الرقمية وتطوير المنتجات والخدمات التقنية، وتركز على دعم الكفاءات المحلية وبناء فرق تقنية متخصصة.",
+    try {
+      if (isSaved) {
+        await unsaveOpportunity(id);
+        setIsSaved(false);
+      } else {
+        await saveOpportunity(id);
+        setIsSaved(true);
+      }
+    } catch (error) {
+      setError(
+        error?.message ||
+          "تعذر تحديث حالة حفظ الفرصة."
+      );
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <PageContainer className="opportunity-details-page">
+        <div className="container">
+          <div className="details-card">
+            <p>
+              جارٍ تحميل تفاصيل الفرصة...
+            </p>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  if (error || !opportunity) {
+    return (
+      <PageContainer className="opportunity-details-page">
+        <div className="container">
+          <div className="details-card">
+            <p>
+              {error ||
+                "تعذر العثور على الفرصة المطلوبة."}
+            </p>
+
+            <Link to="/opportunities">
+              العودة إلى الفرص
+            </Link>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  const matchingSkills =
+    opportunity.matchingSkills ||
+    opportunity.matching_skills ||
+    [];
+
+  const missingSkills =
+    opportunity.missingSkills ||
+    opportunity.missing_skills ||
+    [];
+
+  const responsibilities =
+    opportunity.responsibilities || [];
+
+  const requirements =
+    opportunity.requirements || [];
+
+  const benefits =
+    opportunity.benefits || [];
+
+  const match =
+    opportunity.match ??
+    opportunity.match_percentage ??
+    0;
+
+  const companyId =
+    opportunity.companyId ||
+    opportunity.company_id ||
+    opportunity.company?.id ||
+    "";
+
+  const companyName =
+    opportunity.company ||
+    opportunity.company_name ||
+    opportunity.company?.name ||
+    "الجهة الناشرة";
+
+  const title =
+    opportunity.title ||
+    opportunity.name ||
+    "فرصة وظيفية";
+
+  const titleEn =
+    opportunity.titleEn ||
+    opportunity.title_en ||
+    "";
+
+  const type =
+    opportunity.type ||
+    opportunity.type_name ||
+    opportunity.opportunity_type ||
+    "";
+
+  const location =
+    opportunity.location ||
+    "";
+
+  const mode =
+    opportunity.mode ||
+    opportunity.work_mode ||
+    opportunity.work_type ||
+    "";
+
+  const salary =
+    opportunity.salary ||
+    "غير محدد";
+
+  const deadline =
+    opportunity.deadline ||
+    opportunity.application_deadline ||
+    "غير محدد";
+
+  const posted =
+    opportunity.posted ||
+    opportunity.posted_at ||
+    "";
+
+  const description =
+    opportunity.description ||
+    opportunity.details ||
+    "";
+
+  const learningTime =
+    opportunity.learningTime ||
+    opportunity.learning_time ||
+    "";
+
+  const companyDescription =
+    opportunity.companyDescription ||
+    opportunity.company_description ||
+    opportunity.company?.description ||
+    "";
 
   return (
     <PageContainer className="opportunity-details-page">
 
       <div className="container">
-
-        {/* Breadcrumb */}
 
         <div className="details-breadcrumb">
 
@@ -119,16 +264,9 @@ function OpportunityDetails() {
 
         </div>
 
-
-        {/* Main Grid */}
-
         <div className="opportunity-details-layout">
 
-          {/* Main Content */}
-
           <main className="opportunity-details-main">
-
-            {/* Header */}
 
             <section className="details-header-card">
 
@@ -141,47 +279,56 @@ function OpportunityDetails() {
                 <div className="details-type-row">
 
                   <span className="details-type-badge">
-                    {opportunity.type}
+                    {type}
                   </span>
 
                   <span className="details-posted">
-                    {opportunity.posted}
+                    {posted}
                   </span>
 
                 </div>
 
                 <h1>
-                  {opportunity.title}
+                  {title}
                 </h1>
 
-                <p className="details-title-en">
-                  {opportunity.titleEn}
-                </p>
+                {titleEn && (
+                  <p className="details-title-en">
+                    {titleEn}
+                  </p>
+                )}
 
-                <Link
-                  to={`/company/${opportunity.companyId}`}
-                  className="details-company-link"
-                >
-                  <Building2 size={15} />
-                  {opportunity.company}
-                  <ExternalLink size={13} />
-                </Link>
+                {companyId ? (
+                  <Link
+                    to={`/company/${companyId}`}
+                    className="details-company-link"
+                  >
+                    <Building2 size={15} />
+                    {companyName}
+                    <ExternalLink size={13} />
+                  </Link>
+                ) : (
+                  <span className="details-company-link">
+                    <Building2 size={15} />
+                    {companyName}
+                  </span>
+                )}
 
                 <div className="details-meta">
 
                   <span>
                     <MapPin size={15} />
-                    {opportunity.location}
+                    {location}
                   </span>
 
                   <span>
                     <BriefcaseBusiness size={15} />
-                    {opportunity.mode}
+                    {mode}
                   </span>
 
                   <span>
                     <CalendarDays size={15} />
-                    آخر موعد: {opportunity.deadline}
+                    آخر موعد: {deadline}
                   </span>
 
                 </div>
@@ -189,9 +336,6 @@ function OpportunityDetails() {
               </div>
 
             </section>
-
-
-            {/* Description */}
 
             <section className="details-card">
 
@@ -214,130 +358,130 @@ function OpportunityDetails() {
               </div>
 
               <p className="details-description">
-                {opportunity.description}
+                {description}
               </p>
 
             </section>
 
+            {responsibilities.length > 0 && (
+              <section className="details-card">
 
-            {/* Responsibilities */}
+                <div className="details-section-heading">
 
-            <section className="details-card">
+                  <div className="details-section-icon">
+                    <BriefcaseBusiness size={17} />
+                  </div>
 
-              <div className="details-section-heading">
+                  <div>
+                    <h2>
+                      المسؤوليات
+                    </h2>
 
-                <div className="details-section-icon">
-                  <BriefcaseBusiness size={17} />
+                    <p>
+                      المهام الأساسية في هذه الفرصة
+                    </p>
+                  </div>
+
                 </div>
 
-                <div>
-                  <h2>
-                    المسؤوليات
-                  </h2>
+                <ul className="details-list">
 
-                  <p>
-                    المهام الأساسية في هذه الفرصة
-                  </p>
+                  {responsibilities.map(
+                    (item, index) => (
+                      <li key={index}>
+                        <CheckCircle2 size={16} />
+                        <span>
+                          {item}
+                        </span>
+                      </li>
+                    )
+                  )}
+
+                </ul>
+
+              </section>
+            )}
+
+            {requirements.length > 0 && (
+              <section className="details-card">
+
+                <div className="details-section-heading">
+
+                  <div className="details-section-icon">
+                    <GraduationCap size={17} />
+                  </div>
+
+                  <div>
+                    <h2>
+                      المتطلبات
+                    </h2>
+
+                    <p>
+                      المهارات والخبرات المطلوبة
+                    </p>
+                  </div>
+
                 </div>
 
-              </div>
+                <ul className="details-list">
 
-              <ul className="details-list">
+                  {requirements.map(
+                    (item, index) => (
+                      <li key={index}>
+                        <CheckCircle2 size={16} />
+                        <span>
+                          {item}
+                        </span>
+                      </li>
+                    )
+                  )}
 
-                {opportunity.responsibilities.map(
-                  (item, index) => (
-                    <li key={index}>
-                      <CheckCircle2 size={16} />
-                      <span>{item}</span>
-                    </li>
-                  )
-                )}
+                </ul>
 
-              </ul>
+              </section>
+            )}
 
-            </section>
+            {benefits.length > 0 && (
+              <section className="details-card">
 
+                <div className="details-section-heading">
 
-            {/* Requirements */}
+                  <div className="details-section-icon">
+                    <ShieldCheck size={17} />
+                  </div>
 
-            <section className="details-card">
+                  <div>
+                    <h2>
+                      المزايا
+                    </h2>
 
-              <div className="details-section-heading">
+                    <p>
+                      ما توفره الجهة للمتقدم
+                    </p>
+                  </div>
 
-                <div className="details-section-icon">
-                  <GraduationCap size={17} />
                 </div>
 
-                <div>
-                  <h2>
-                    المتطلبات
-                  </h2>
+                <div className="benefits-grid">
 
-                  <p>
-                    المهارات والخبرات المطلوبة
-                  </p>
+                  {benefits.map(
+                    (benefit, index) => (
+                      <div
+                        className="benefit-item"
+                        key={index}
+                      >
+                        <CheckCircle2 size={15} />
+                        <span>
+                          {benefit}
+                        </span>
+                      </div>
+                    )
+                  )}
+
                 </div>
 
-              </div>
-
-              <ul className="details-list">
-
-                {opportunity.requirements.map(
-                  (item, index) => (
-                    <li key={index}>
-                      <CheckCircle2 size={16} />
-                      <span>{item}</span>
-                    </li>
-                  )
-                )}
-
-              </ul>
-
-            </section>
-
-
-            {/* Benefits */}
-
-            <section className="details-card">
-
-              <div className="details-section-heading">
-
-                <div className="details-section-icon">
-                  <ShieldCheck size={17} />
-                </div>
-
-                <div>
-                  <h2>
-                    المزايا
-                  </h2>
-
-                  <p>
-                    ما توفره الجهة للمتقدم
-                  </p>
-                </div>
-
-              </div>
-
-              <div className="benefits-grid">
-
-                {opportunity.benefits.map(
-                  (benefit, index) => (
-                    <div
-                      className="benefit-item"
-                      key={index}
-                    >
-                      <CheckCircle2 size={15} />
-                      <span>{benefit}</span>
-                    </div>
-                  )
-                )}
-
-              </div>
-
-            </section>
-
-
-            {/* Company */}
+              </section>
+            )}
 
             <section className="details-card">
 
@@ -349,7 +493,7 @@ function OpportunityDetails() {
 
                 <div>
                   <h2>
-                    عن {opportunity.company}
+                    عن {companyName}
                   </h2>
 
                   <p>
@@ -360,27 +504,25 @@ function OpportunityDetails() {
               </div>
 
               <p className="details-description">
-                {opportunity.companyDescription}
+                {companyDescription ||
+                  "لا تتوفر معلومات إضافية عن الجهة الناشرة حالياً."}
               </p>
 
-              <Link
-                to={`/company/${opportunity.companyId}`}
-                className="view-company-link"
-              >
-                عرض صفحة الشركة
-                <ArrowLeft size={15} />
-              </Link>
+              {companyId && (
+                <Link
+                  to={`/company/${companyId}`}
+                  className="view-company-link"
+                >
+                  عرض صفحة الشركة
+                  <ArrowLeft size={15} />
+                </Link>
+              )}
 
             </section>
 
           </main>
 
-
-          {/* Sidebar */}
-
           <aside className="opportunity-details-sidebar">
-
-            {/* Match Card */}
 
             <section className="match-card">
 
@@ -397,97 +539,96 @@ function OpportunityDetails() {
                 </div>
 
                 <div className="match-circle">
+
                   <strong>
-                    {opportunity.match}%
+                    {match}%
                   </strong>
 
                   <span>
                     توافق
                   </span>
+
                 </div>
 
               </div>
-
 
               <div className="match-progress">
 
                 <span
                   style={{
-                    width: `${opportunity.match}%`,
+                    width: `${match}%`,
                   }}
                 />
 
               </div>
 
+              {matchingSkills.length > 0 && (
+                <div className="match-group">
 
-              {/* Matching */}
+                  <div className="match-group-title">
+                    <CheckCircle2 size={15} />
+                    مهارات متوافقة
+                  </div>
 
-              <div className="match-group">
+                  <div className="match-tags">
 
-                <div className="match-group-title">
-                  <CheckCircle2 size={15} />
-                  مهارات متوافقة
-                </div>
+                    {matchingSkills.map(
+                      (skill) => (
+                        <span key={skill}>
+                          {skill}
+                        </span>
+                      )
+                    )}
 
-                <div className="match-tags">
-
-                  {opportunity.matchingSkills.map(
-                    (skill) => (
-                      <span key={skill}>
-                        {skill}
-                      </span>
-                    )
-                  )}
-
-                </div>
-
-              </div>
-
-
-              {/* Missing */}
-
-              <div className="match-group">
-
-                <div className="match-group-title missing">
-                  <CircleAlert size={15} />
-                  مهارات تحتاجين تطويرها
-                </div>
-
-                <div className="match-tags missing-tags">
-
-                  {opportunity.missingSkills.map(
-                    (skill) => (
-                      <span key={skill}>
-                        {skill}
-                      </span>
-                    )
-                  )}
+                  </div>
 
                 </div>
+              )}
 
-              </div>
+              {missingSkills.length > 0 && (
+                <div className="match-group">
 
+                  <div className="match-group-title missing">
+                    <CircleAlert size={15} />
+                    مهارات تحتاج إلى تطوير
+                  </div>
 
-              <div className="learning-time">
+                  <div className="match-tags missing-tags">
 
-                <Clock3 size={15} />
+                    {missingSkills.map(
+                      (skill) => (
+                        <span key={skill}>
+                          {skill}
+                        </span>
+                      )
+                    )}
 
-                <div>
-                  <span>
-                    الوقت التقديري للتطوير
-                  </span>
+                  </div>
 
-                  <strong>
-                    {opportunity.learningTime}
-                  </strong>
                 </div>
+              )}
 
-              </div>
+              {learningTime && (
+                <div className="learning-time">
+
+                  <Clock3 size={15} />
+
+                  <div>
+
+                    <span>
+                      الوقت التقديري للتطوير
+                    </span>
+
+                    <strong>
+                      {learningTime}
+                    </strong>
+
+                  </div>
+
+                </div>
+              )}
 
             </section>
-
-
-            {/* Apply */}
 
             <section className="apply-card">
 
@@ -498,7 +639,7 @@ function OpportunityDetails() {
                 </span>
 
                 <strong>
-                  {opportunity.deadline}
+                  {deadline}
                 </strong>
 
               </div>
@@ -514,15 +655,31 @@ function OpportunityDetails() {
               <button
                 type="button"
                 className="save-details-button"
+                onClick={handleSave}
+                disabled={saving}
+                aria-label={
+                  isSaved
+                    ? "إلغاء حفظ الفرصة"
+                    : "حفظ الفرصة"
+                }
               >
-                <Bookmark size={17} />
-                حفظ الفرصة
+                <Bookmark
+                  size={17}
+                  fill={
+                    isSaved
+                      ? "currentColor"
+                      : "none"
+                  }
+                />
+
+                {saving
+                  ? "جارٍ الحفظ..."
+                  : isSaved
+                  ? "إلغاء حفظ الفرصة"
+                  : "حفظ الفرصة"}
               </button>
 
             </section>
-
-
-            {/* Opportunity Info */}
 
             <section className="details-info-card">
 
@@ -538,7 +695,7 @@ function OpportunityDetails() {
                 </span>
 
                 <strong>
-                  {opportunity.location}
+                  {location}
                 </strong>
 
               </div>
@@ -551,7 +708,7 @@ function OpportunityDetails() {
                 </span>
 
                 <strong>
-                  {opportunity.mode}
+                  {mode}
                 </strong>
 
               </div>
@@ -564,21 +721,19 @@ function OpportunityDetails() {
                 </span>
 
                 <strong>
-                  {opportunity.salary}
+                  {salary}
                 </strong>
 
               </div>
 
             </section>
 
-
-            {/* CV Reminder */}
-
             <section className="cv-reminder">
 
               <FileText size={18} />
 
               <div>
+
                 <strong>
                   حدّث سيرتك الذاتية
                 </strong>
@@ -592,6 +747,7 @@ function OpportunityDetails() {
                   تحديث السيرة
                   <ArrowLeft size={13} />
                 </Link>
+
               </div>
 
             </section>

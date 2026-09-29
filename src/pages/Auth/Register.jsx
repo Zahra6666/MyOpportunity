@@ -18,13 +18,15 @@ import { useAuthContext } from "../../context/AuthContext";
 
 function Register() {
   const navigate = useNavigate();
-  const { login } = useAuthContext();
+  const { register, loading } = useAuthContext();
 
   const [form, setForm] = useState({
     name: "",
     email: "",
     password: "",
   });
+
+  const [error, setError] = useState("");
 
   const updateField = (field, value) => {
     setForm((previous) => ({
@@ -33,24 +35,32 @@ function Register() {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
-    login({
-      name: form.name,
-      email: form.email,
-    });
+    setError("");
 
-    navigate("/dashboard");
+    try {
+      await register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+      });
+
+      navigate("/dashboard");
+    } catch (error) {
+      setError(
+        error?.message ||
+          "تعذر إنشاء الحساب. يرجى التحقق من البيانات والمحاولة مرة أخرى."
+      );
+    }
   };
 
   return (
     <main className="auth-page">
-
       <div className="auth-decoration" />
 
       <div className="container auth-container">
-
         <div className="auth-card">
 
           <div className="auth-logo">
@@ -66,8 +76,7 @@ function Register() {
             </h1>
 
             <p>
-              ابدأ رحلة اكتشاف الفرص
-              المناسبة لمسارك.
+              ابدأ رحلة اكتشاف الفرص المناسبة لمسارك.
             </p>
           </div>
 
@@ -91,7 +100,7 @@ function Register() {
                       e.target.value
                     )
                   }
-                  placeholder="الاسم الكامل"
+                  placeholder="أدخل اسمك الكامل"
                   required
                 />
               </div>
@@ -146,31 +155,38 @@ function Register() {
                 required
               />
 
-              أوافق على شروط الاستخدام
-              وسياسة الخصوصية.
+              أوافق على شروط الاستخدام وسياسة الخصوصية.
             </label>
+
+            {error && (
+              <p className="auth-error">
+                {error}
+              </p>
+            )}
 
             <Button
               type="submit"
               className="btn-full"
+              disabled={loading}
             >
-              إنشاء الحساب
-              <ArrowLeft size={17} />
+              {loading
+                ? "جارٍ إنشاء الحساب..."
+                : "إنشاء الحساب"}
+
+              {!loading && <ArrowLeft size={17} />}
             </Button>
 
           </form>
 
           <p className="auth-register">
-            لديك حساب؟
+            لديك حساب بالفعل؟
             <Link to="/login">
               تسجيل الدخول
             </Link>
           </p>
 
         </div>
-
       </div>
-
     </main>
   );
 }

@@ -12,120 +12,421 @@ import {
   ChevronDown,
   CheckCircle2,
 } from "lucide-react";
-import { useState } from "react";
-import PageContainer from "../../components/layout/PageContainer";
-import "./ManageEmployers.css";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const employersData = [
-  {
-    id: 1,
-    company: "شركة تقنية العراق",
-    email: "hr@iti.iq",
-    industry: "التكنولوجيا",
-    status: "معتمد",
-    opportunities: 12,
-    joined: "20 سبتمبر 2026",
-  },
-  {
-    id: 2,
-    company: "Zain Iraq",
-    email: "careers@zain.iq",
-    industry: "الاتصالات",
-    status: "معتمد",
-    opportunities: 24,
-    joined: "18 سبتمبر 2026",
-  },
-  {
-    id: 3,
-    company: "Asiacell",
-    email: "jobs@asiacell.com",
-    industry: "الاتصالات",
-    status: "بانتظار المراجعة",
-    opportunities: 7,
-    joined: "16 سبتمبر 2026",
-  },
-  {
-    id: 4,
-    company: "شركة البصرة للطاقة",
-    email: "hr@basra-energy.iq",
-    industry: "الطاقة",
-    status: "معتمد",
-    opportunities: 9,
-    joined: "13 سبتمبر 2026",
-  },
-  {
-    id: 5,
-    company: "Iraq Digital",
-    email: "hello@iraqdigital.iq",
-    industry: "الخدمات الرقمية",
-    status: "معلّق",
-    opportunities: 4,
-    joined: "10 سبتمبر 2026",
-  },
-  {
-    id: 6,
-    company: "Future Skills Academy",
-    email: "info@futureskills.iq",
-    industry: "التدريب والتعليم",
-    status: "بانتظار المراجعة",
-    opportunities: 6,
-    joined: "7 سبتمبر 2026",
-  },
-];
+import PageContainer from "../../components/layout/PageContainer";
+
+import {
+  getCompanies,
+  deleteCompany,
+  approveCompany,
+  rejectCompany,
+} from "../../services/companyService";
+
+import "./ManageEmployers.css";
 
 const statusOptions = [
   "الكل",
   "معتمد",
   "بانتظار المراجعة",
-  "معلّق",
+  "مرفوض",
 ];
 
+function normalizeStatus(status) {
+  if (!status) {
+    return "بانتظار المراجعة";
+  }
+
+  const value = String(status).toLowerCase();
+
+  if (
+    value === "approved" ||
+    value === "active" ||
+    value === "معتمد"
+  ) {
+    return "معتمد";
+  }
+
+  if (
+    value === "pending" ||
+    value === "بانتظار المراجعة"
+  ) {
+    return "بانتظار المراجعة";
+  }
+
+  if (
+    value === "rejected" ||
+    value === "مرفوض"
+  ) {
+    return "مرفوض";
+  }
+
+  if (
+    value === "suspended" ||
+    value === "blocked" ||
+    value === "معلّق"
+  ) {
+    return "معلّق";
+  }
+
+  return status;
+}
+
+function normalizeCompany(company) {
+  return {
+    id: company?.id ?? company?._id,
+
+    company:
+      company?.name ||
+      company?.company_name ||
+      company?.companyName ||
+      company?.title ||
+      "شركة غير معروفة",
+
+    email:
+      company?.email ||
+      company?.contact_email ||
+      company?.contactEmail ||
+      "—",
+
+    industry:
+      company?.industry ||
+      company?.industry_name ||
+      company?.industryName ||
+      company?.sector ||
+      "—",
+
+    status: normalizeStatus(
+      company?.status ||
+        company?.approval_status ||
+        company?.approvalStatus
+    ),
+
+    opportunities:
+      company?.opportunities_count ??
+      company?.opportunitiesCount ??
+      company?.opportunities ??
+      null,
+
+    joined:
+      company?.created_at ||
+      company?.createdAt ||
+      company?.joined_at ||
+      company?.joinedAt,
+  };
+}
+
+function extractCompanies(response) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if (Array.isArray(response?.companies)) {
+    return response.companies;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.results)) {
+    return response.results;
+  }
+
+  return [];
+}
+
+function formatDate(dateValue) {
+  if (!dateValue) {
+    return "—";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(dateValue);
+  }
+
+  return date.toLocaleDateString("ar-IQ", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 function ManageEmployers() {
+  const navigate = useNavigate();
+
+  const [employers, setEmployers] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("الكل");
 
-  const filteredEmployers = employersData.filter((employer) => {
-    const searchValue = search.toLowerCase();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    const matchesSearch =
-      employer.company.toLowerCase().includes(searchValue) ||
-      employer.email.toLowerCase().includes(searchValue) ||
-      employer.industry.toLowerCase().includes(searchValue);
+  const [actionId, setActionId] = useState(null);
 
-    const matchesStatus =
-      status === "الكل" ||
-      employer.status === status;
+  useEffect(() => {
+    loadCompanies();
+  }, []);
 
-    return matchesSearch && matchesStatus;
-  });
+  async function loadCompanies() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getCompanies();
+
+      const companies = extractCompanies(response);
+
+      setEmployers(
+        companies.map(normalizeCompany)
+      );
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر تحميل الشركات."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleApprove(company) {
+    if (!company?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `هل أنت متأكد من اعتماد الشركة "${company.company}"؟`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionId(company.id);
+    setError("");
+
+    try {
+      await approveCompany(company.id);
+
+      setEmployers((currentEmployers) =>
+        currentEmployers.map((currentCompany) =>
+          currentCompany.id === company.id
+            ? {
+                ...currentCompany,
+                status: "معتمد",
+              }
+            : currentCompany
+        )
+      );
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر اعتماد الشركة."
+      );
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  async function handleReject(company) {
+    if (!company?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `هل أنت متأكد من رفض الشركة "${company.company}"؟`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionId(company.id);
+    setError("");
+
+    try {
+      await rejectCompany(company.id);
+
+      setEmployers((currentEmployers) =>
+        currentEmployers.map((currentCompany) =>
+          currentCompany.id === company.id
+            ? {
+                ...currentCompany,
+                status: "مرفوض",
+              }
+            : currentCompany
+        )
+      );
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر رفض الشركة."
+      );
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  async function handleDelete(company) {
+    if (!company?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `هل أنت متأكد من حذف الشركة "${company.company}"؟`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setActionId(company.id);
+    setError("");
+
+    try {
+      await deleteCompany(company.id);
+
+      setEmployers((currentEmployers) =>
+        currentEmployers.filter(
+          (currentCompany) =>
+            currentCompany.id !== company.id
+        )
+      );
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر حذف الشركة."
+      );
+    } finally {
+      setActionId(null);
+    }
+  }
+
+  function handleMoreAction(company) {
+    if (!company?.id) {
+      return;
+    }
+
+    if (
+      company.status ===
+      "بانتظار المراجعة"
+    ) {
+      handleApprove(company);
+      return;
+    }
+
+    if (company.status === "معتمد") {
+      handleReject(company);
+      return;
+    }
+
+    handleDelete(company);
+  }
+
+  const filteredEmployers = useMemo(() => {
+    const searchValue = search
+      .trim()
+      .toLowerCase();
+
+    return employers.filter((employer) => {
+      const company = String(
+        employer.company
+      ).toLowerCase();
+
+      const email = String(
+        employer.email
+      ).toLowerCase();
+
+      const industry = String(
+        employer.industry
+      ).toLowerCase();
+
+      const matchesSearch =
+        !searchValue ||
+        company.includes(searchValue) ||
+        email.includes(searchValue) ||
+        industry.includes(searchValue);
+
+      const matchesStatus =
+        status === "الكل" ||
+        employer.status === status;
+
+      return (
+        matchesSearch &&
+        matchesStatus
+      );
+    });
+  }, [employers, search, status]);
+
+  const totalCompanies =
+    employers.length;
+
+  const approvedCompanies =
+    employers.filter(
+      (employer) =>
+        employer.status === "معتمد"
+    ).length;
+
+  const pendingCompanies =
+    employers.filter(
+      (employer) =>
+        employer.status ===
+        "بانتظار المراجعة"
+    ).length;
+
+  const suspendedCompanies =
+    employers.filter(
+      (employer) =>
+        employer.status === "معلّق" ||
+        employer.status === "مرفوض"
+    ).length;
 
   return (
     <PageContainer className="manage-employers-page">
       <div className="container">
 
+        {/* Header */}
         <section className="manage-employers-header">
           <div>
             <span className="manage-employers-eyebrow">
               إدارة الجهات
             </span>
 
-            <h1>إدارة الشركات وأصحاب العمل</h1>
+            <h1>
+              إدارة الشركات وأصحاب العمل
+            </h1>
 
             <p>
-              متابعة الشركات المسجلة ومراجعة طلبات اعتمادها
-              وإدارة الفرص التي تنشرها على منصة فرصتي.
+              متابعة الشركات المسجلة ومراجعة
+              طلبات اعتمادها وإدارة الفرص التي
+              تنشرها على منصة فرصتي.
             </p>
           </div>
 
           <button
             type="button"
             className="manage-employers-primary"
+            onClick={() =>
+              navigate("/admin/employers/new")
+            }
           >
             <UserPlus size={18} />
             إضافة شركة
           </button>
         </section>
 
+        {/* Error */}
+        {error && (
+          <div className="manage-employers-error">
+            {error}
+          </div>
+        )}
+
+        {/* Stats */}
         <section className="manage-employers-stats">
 
           <div className="manage-employers-stat">
@@ -134,8 +435,15 @@ function ManageEmployers() {
             </div>
 
             <div>
-              <span>إجمالي الشركات</span>
-              <strong>450</strong>
+              <span>
+                إجمالي الشركات
+              </span>
+
+              <strong>
+                {loading
+                  ? "..."
+                  : totalCompanies}
+              </strong>
             </div>
           </div>
 
@@ -145,8 +453,15 @@ function ManageEmployers() {
             </div>
 
             <div>
-              <span>الشركات المعتمدة</span>
-              <strong>392</strong>
+              <span>
+                الشركات المعتمدة
+              </span>
+
+              <strong>
+                {loading
+                  ? "..."
+                  : approvedCompanies}
+              </strong>
             </div>
           </div>
 
@@ -156,8 +471,15 @@ function ManageEmployers() {
             </div>
 
             <div>
-              <span>بانتظار المراجعة</span>
-              <strong>38</strong>
+              <span>
+                بانتظار المراجعة
+              </span>
+
+              <strong>
+                {loading
+                  ? "..."
+                  : pendingCompanies}
+              </strong>
             </div>
           </div>
 
@@ -167,15 +489,24 @@ function ManageEmployers() {
             </div>
 
             <div>
-              <span>الشركات المعلّقة</span>
-              <strong>20</strong>
+              <span>
+                الشركات المرفوضة
+              </span>
+
+              <strong>
+                {loading
+                  ? "..."
+                  : suspendedCompanies}
+              </strong>
             </div>
           </div>
 
         </section>
 
+        {/* Main panel */}
         <section className="manage-employers-panel">
 
+          {/* Toolbar */}
           <div className="manage-employers-toolbar">
 
             <div className="manage-employers-search">
@@ -186,7 +517,9 @@ function ManageEmployers() {
                 placeholder="ابحث باسم الشركة أو البريد أو المجال..."
                 value={search}
                 onChange={(event) =>
-                  setSearch(event.target.value)
+                  setSearch(
+                    event.target.value
+                  )
                 }
               />
             </div>
@@ -197,17 +530,21 @@ function ManageEmployers() {
               <select
                 value={status}
                 onChange={(event) =>
-                  setStatus(event.target.value)
+                  setStatus(
+                    event.target.value
+                  )
                 }
               >
-                {statusOptions.map((option) => (
-                  <option
-                    key={option}
-                    value={option}
-                  >
-                    {option}
-                  </option>
-                ))}
+                {statusOptions.map(
+                  (option) => (
+                    <option
+                      key={option}
+                      value={option}
+                    >
+                      {option}
+                    </option>
+                  )
+                )}
               </select>
 
               <ChevronDown size={15} />
@@ -215,131 +552,196 @@ function ManageEmployers() {
 
           </div>
 
+          {/* Table */}
           <div className="manage-employers-table-wrapper">
 
-            <table className="manage-employers-table">
-
-              <thead>
-                <tr>
-                  <th>الشركة</th>
-                  <th>المجال</th>
-                  <th>الحالة</th>
-                  <th>الفرص المنشورة</th>
-                  <th>تاريخ التسجيل</th>
-                  <th></th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {filteredEmployers.map((employer) => (
-                  <tr key={employer.id}>
-
-                    <td>
-                      <div className="manage-employer-info">
-
-                        <div className="manage-employer-avatar">
-                          <Building2 size={19} />
-                        </div>
-
-                        <div>
-                          <strong>
-                            {employer.company}
-                          </strong>
-
-                          <span>
-                            {employer.email}
-                          </span>
-                        </div>
-
-                      </div>
-                    </td>
-
-                    <td>
-                      <span className="manage-employer-industry">
-                        {employer.industry}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`manage-employer-status ${
-                          employer.status === "معتمد"
-                            ? "employer-status-approved"
-                            : employer.status === "بانتظار المراجعة"
-                            ? "employer-status-pending"
-                            : "employer-status-suspended"
-                        }`}
-                      >
-                        {employer.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className="manage-employer-opportunities">
-                        {employer.opportunities}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className="manage-employer-date">
-                        {employer.joined}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="manage-employer-actions">
-
-                        <button
-                          type="button"
-                          title="عرض الشركة"
-                        >
-                          <Eye size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          title="تعديل"
-                        >
-                          <Edit3 size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          title="المزيد"
-                        >
-                          <MoreHorizontal size={17} />
-                        </button>
-
-                      </div>
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-
-            </table>
-
-            {filteredEmployers.length === 0 && (
+            {loading ? (
               <div className="manage-employers-empty">
                 <Building size={35} />
 
                 <h3>
-                  لايوجد شركات مطابقة
+                  جارٍ تحميل الشركات...
                 </h3>
 
                 <p>
-                  جرب تغيير البحث أو الفلتر.
+                  يتم جلب بيانات الشركات من الخادم.
                 </p>
               </div>
+            ) : (
+              <>
+                <table className="manage-employers-table">
+
+                  <thead>
+                    <tr>
+                      <th>الشركة</th>
+                      <th>المجال</th>
+                      <th>الحالة</th>
+                      <th>الفرص المنشورة</th>
+                      <th>تاريخ التسجيل</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredEmployers.map(
+                      (employer) => (
+                        <tr key={employer.id}>
+
+                          <td>
+                            <div className="manage-employer-info">
+
+                              <div className="manage-employer-avatar">
+                                <Building2 size={19} />
+                              </div>
+
+                              <div>
+                                <strong>
+                                  {employer.company}
+                                </strong>
+
+                                <span>
+                                  {employer.email}
+                                </span>
+                              </div>
+
+                            </div>
+                          </td>
+
+                          <td>
+                            <span className="manage-employer-industry">
+                              {employer.industry}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span
+                              className={`manage-employer-status ${
+                                employer.status ===
+                                "معتمد"
+                                  ? "employer-status-approved"
+                                  : employer.status ===
+                                    "بانتظار المراجعة"
+                                  ? "employer-status-pending"
+                                  : "employer-status-suspended"
+                              }`}
+                            >
+                              {employer.status}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span className="manage-employer-opportunities">
+                              {employer.opportunities ??
+                                "—"}
+                            </span>
+                          </td>
+
+                          <td>
+                            <span className="manage-employer-date">
+                              {formatDate(
+                                employer.joined
+                              )}
+                            </span>
+                          </td>
+
+                          <td>
+                            <div className="manage-employer-actions">
+
+                              {/* عرض */}
+                              <button
+                                type="button"
+                                title="عرض الشركة"
+                                disabled={!employer.id}
+                                onClick={() =>
+                                  navigate(
+                                    `/companies/${employer.id}`
+                                  )
+                                }
+                              >
+                                <Eye size={15} />
+                              </button>
+
+                              {/* تعديل */}
+                              <button
+                                type="button"
+                                title="تعديل"
+                                disabled={
+                                  !employer.id ||
+                                  actionId ===
+                                    employer.id
+                                }
+                                onClick={() =>
+                                  navigate(
+                                    `/admin/employers/${employer.id}/edit`
+                                  )
+                                }
+                              >
+                                <Edit3 size={15} />
+                              </button>
+
+                              {/* إجراء حسب الحالة */}
+                              <button
+                                type="button"
+                                title={
+                                  employer.status ===
+                                  "بانتظار المراجعة"
+                                    ? "اعتماد الشركة"
+                                    : employer.status ===
+                                      "معتمد"
+                                    ? "رفض الشركة"
+                                    : "حذف الشركة"
+                                }
+                                disabled={
+                                  !employer.id ||
+                                  actionId ===
+                                    employer.id
+                                }
+                                onClick={() =>
+                                  handleMoreAction(
+                                    employer
+                                  )
+                                }
+                              >
+                                <MoreHorizontal size={17} />
+                              </button>
+
+                            </div>
+                          </td>
+
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+
+                </table>
+
+                {filteredEmployers.length ===
+                  0 && (
+                  <div className="manage-employers-empty">
+                    <Building size={35} />
+
+                    <h3>
+                      لا توجد شركات مطابقة
+                    </h3>
+
+                    <p>
+                      جرّب تغيير البحث أو الفلتر.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
 
           </div>
 
+          {/* Footer */}
           <div className="manage-employers-footer">
 
             <span>
-              عرض {filteredEmployers.length} من{" "}
-              {employersData.length} شركات
+              عرض{" "}
+              {filteredEmployers.length}{" "}
+              من{" "}
+              {employers.length} شركات
             </span>
 
             <div className="manage-employers-pagination">
@@ -358,15 +760,10 @@ function ManageEmployers() {
                 1
               </button>
 
-              <button type="button">
-                2
-              </button>
-
-              <button type="button">
-                3
-              </button>
-
-              <button type="button">
+              <button
+                type="button"
+                disabled
+              >
                 التالي
               </button>
 

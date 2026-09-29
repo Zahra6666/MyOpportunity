@@ -11,66 +11,10 @@ import {
   FileCheck2,
   ChevronDown,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import PageContainer from "../../components/layout/PageContainer";
+import { getUsers, deleteUser } from "../../services/userService";
 import "./ManageUsers.css";
-
-const usersData = [
-  {
-    id: 1,
-    name: "حوراء علي",
-    email: "hawraa@example.com",
-    role: "مستخدم",
-    status: "نشط",
-    applications: 12,
-    joined: "20 سبتمبر 2026",
-  },
-  {
-    id: 2,
-    name: "محمد أحمد",
-    email: "mohammed@example.com",
-    role: "مستخدم",
-    status: "نشط",
-    applications: 8,
-    joined: "18 سبتمبر 2026",
-  },
-  {
-    id: 3,
-    name: "سارة علي",
-    email: "sara@example.com",
-    role: "مستخدم",
-    status: "نشط",
-    applications: 15,
-    joined: "15 سبتمبر 2026",
-  },
-  {
-    id: 4,
-    name: "علي حسن",
-    email: "ali@example.com",
-    role: "مستخدم",
-    status: "محظور",
-    applications: 3,
-    joined: "12 سبتمبر 2026",
-  },
-  {
-    id: 5,
-    name: "نور حسين",
-    email: "noor@example.com",
-    role: "مشرف",
-    status: "نشط",
-    applications: 0,
-    joined: "10 سبتمبر 2026",
-  },
-  {
-    id: 6,
-    name: "زينب كريم",
-    email: "zainab@example.com",
-    role: "مستخدم",
-    status: "معلّق",
-    applications: 5,
-    joined: "7 سبتمبر 2026",
-  },
-];
 
 const statusOptions = [
   "الكل",
@@ -79,23 +23,237 @@ const statusOptions = [
   "محظور",
 ];
 
+function normalizeStatus(status) {
+  if (!status) {
+    return "معلّق";
+  }
+
+  const value = String(status).toLowerCase();
+
+  if (
+    value === "active" ||
+    value === "نشط" ||
+    value === "approved"
+  ) {
+    return "نشط";
+  }
+
+  if (
+    value === "blocked" ||
+    value === "banned" ||
+    value === "محظور"
+  ) {
+    return "محظور";
+  }
+
+  if (
+    value === "pending" ||
+    value === "معلّق" ||
+    value === "suspended"
+  ) {
+    return "معلّق";
+  }
+
+  return status;
+}
+
+function normalizeRole(role) {
+  if (!role) {
+    return "مستخدم";
+  }
+
+  const value = String(role).toLowerCase();
+
+  if (
+    value === "admin" ||
+    value === "administrator" ||
+    value === "مشرف"
+  ) {
+    return "مشرف";
+  }
+
+  if (
+    value === "company" ||
+    value === "employer" ||
+    value === "شركة"
+  ) {
+    return "شركة";
+  }
+
+  return "مستخدم";
+}
+
+function formatDate(dateValue) {
+  if (!dateValue) {
+    return "—";
+  }
+
+  const date = new Date(dateValue);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(dateValue);
+  }
+
+  return date.toLocaleDateString("ar-IQ", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function normalizeUser(user) {
+  return {
+    id: user?.id ?? user?._id,
+    name:
+      user?.name ||
+      user?.full_name ||
+      user?.fullName ||
+      user?.username ||
+      "مستخدم",
+    email: user?.email || "—",
+    role: normalizeRole(
+      user?.role ||
+        user?.user_role ||
+        user?.userRole
+    ),
+    status: normalizeStatus(
+      user?.status ||
+        user?.account_status ||
+        user?.accountStatus
+    ),
+    applications:
+      user?.applications_count ??
+      user?.applicationsCount ??
+      user?.applications ??
+      null,
+    joined:
+      user?.created_at ||
+      user?.createdAt ||
+      user?.joined_at ||
+      user?.joinedAt,
+  };
+}
+
+function extractUsers(response) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if (Array.isArray(response?.users)) {
+    return response.users;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.results)) {
+    return response.results;
+  }
+
+  return [];
+}
+
 function ManageUsers() {
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("الكل");
 
-  const filteredUsers = usersData.filter((user) => {
-    const searchValue = search.toLowerCase();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchValue) ||
-      user.email.toLowerCase().includes(searchValue);
+  const [deletingId, setDeletingId] = useState(null);
 
-    const matchesStatus =
-      status === "الكل" ||
-      user.status === status;
+  useEffect(() => {
+    loadUsers();
+  }, []);
 
-    return matchesSearch && matchesStatus;
-  });
+  async function loadUsers() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getUsers();
+
+      const usersList = extractUsers(response);
+
+      setUsers(usersList.map(normalizeUser));
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر تحميل المستخدمين."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDelete(user) {
+    if (!user?.id) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `هل أنت متأكد من حذف المستخدم "${user.name}"؟`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setDeletingId(user.id);
+    setError("");
+
+    try {
+      await deleteUser(user.id);
+
+      setUsers((currentUsers) =>
+        currentUsers.filter(
+          (currentUser) =>
+            currentUser.id !== user.id
+        )
+      );
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر حذف المستخدم."
+      );
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  const filteredUsers = useMemo(() => {
+    const searchValue = search
+      .trim()
+      .toLowerCase();
+
+    return users.filter((user) => {
+      const name = String(user.name).toLowerCase();
+      const email = String(user.email).toLowerCase();
+
+      const matchesSearch =
+        !searchValue ||
+        name.includes(searchValue) ||
+        email.includes(searchValue);
+
+      const matchesStatus =
+        status === "الكل" ||
+        user.status === status;
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [users, search, status]);
+
+  const totalUsers = users.length;
+
+  const activeUsers = users.filter(
+    (user) => user.status === "نشط"
+  ).length;
+
+  const blockedUsers = users.filter(
+    (user) => user.status === "محظور"
+  ).length;
 
   return (
     <PageContainer className="manage-users-page">
@@ -119,11 +277,20 @@ function ManageUsers() {
           <button
             type="button"
             className="manage-users-primary"
+            disabled
+            title="إضافة المستخدمين غير متوفرة في الخدمة الحالية"
           >
             <UserPlus size={18} />
             إضافة مستخدم
           </button>
         </section>
+
+        {/* Error */}
+        {error && (
+          <div className="manage-users-error">
+            {error}
+          </div>
+        )}
 
         {/* Stats */}
         <section className="manage-users-stats">
@@ -134,7 +301,9 @@ function ManageUsers() {
 
             <div>
               <span>إجمالي المستخدمين</span>
-              <strong>12,480</strong>
+              <strong>
+                {loading ? "..." : totalUsers}
+              </strong>
             </div>
           </div>
 
@@ -145,7 +314,9 @@ function ManageUsers() {
 
             <div>
               <span>المستخدمون النشطون</span>
-              <strong>11,932</strong>
+              <strong>
+                {loading ? "..." : activeUsers}
+              </strong>
             </div>
           </div>
 
@@ -156,7 +327,9 @@ function ManageUsers() {
 
             <div>
               <span>الحسابات المحظورة</span>
-              <strong>184</strong>
+              <strong>
+                {loading ? "..." : blockedUsers}
+              </strong>
             </div>
           </div>
 
@@ -167,7 +340,7 @@ function ManageUsers() {
 
             <div>
               <span>تقديمات هذا الشهر</span>
-              <strong>2,846</strong>
+              <strong>—</strong>
             </div>
           </div>
         </section>
@@ -201,7 +374,10 @@ function ManageUsers() {
                 }
               >
                 {statusOptions.map((option) => (
-                  <option key={option} value={option}>
+                  <option
+                    key={option}
+                    value={option}
+                  >
                     {option}
                   </option>
                 ))}
@@ -213,117 +389,156 @@ function ManageUsers() {
 
           {/* Table */}
           <div className="manage-users-table-wrapper">
-            <table className="manage-users-table">
-              <thead>
-                <tr>
-                  <th>المستخدم</th>
-                  <th>الدور</th>
-                  <th>الحالة</th>
-                  <th>التقديمات</th>
-                  <th>تاريخ التسجيل</th>
-                  <th></th>
-                </tr>
-              </thead>
 
-              <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id}>
-
-                    <td>
-                      <div className="manage-user-info">
-                        <div className="manage-user-avatar">
-                          {user.name.charAt(0)}
-                        </div>
-
-                        <div>
-                          <strong>{user.name}</strong>
-                          <span>{user.email}</span>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`manage-user-role ${
-                          user.role === "مشرف"
-                            ? "role-admin"
-                            : ""
-                        }`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span
-                        className={`manage-user-status ${
-                          user.status === "نشط"
-                            ? "user-status-active"
-                            : user.status === "معلّق"
-                            ? "user-status-pending"
-                            : "user-status-blocked"
-                        }`}
-                      >
-                        {user.status}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className="manage-user-applications">
-                        {user.applications}
-                      </span>
-                    </td>
-
-                    <td>
-                      <span className="manage-user-date">
-                        {user.joined}
-                      </span>
-                    </td>
-
-                    <td>
-                      <div className="manage-user-actions">
-
-                        <button
-                          type="button"
-                          title="عرض المستخدم"
-                        >
-                          <Eye size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          title="تعديل"
-                        >
-                          <Edit3 size={15} />
-                        </button>
-
-                        <button
-                          type="button"
-                          title="المزيد"
-                        >
-                          <MoreHorizontal size={17} />
-                        </button>
-
-                      </div>
-                    </td>
-
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {filteredUsers.length === 0 && (
+            {loading ? (
               <div className="manage-users-empty">
                 <Users size={35} />
 
                 <h3>
-                  لايوجد مستخدمين مطابقين
+                  جارٍ تحميل المستخدمين...
                 </h3>
 
                 <p>
-                  جرب تغيير البحث أو الفلتر.
+                  يتم جلب بيانات المستخدمين من الخادم.
                 </p>
               </div>
+            ) : (
+              <>
+                <table className="manage-users-table">
+                  <thead>
+                    <tr>
+                      <th>المستخدم</th>
+                      <th>الدور</th>
+                      <th>الحالة</th>
+                      <th>التقديمات</th>
+                      <th>تاريخ التسجيل</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {filteredUsers.map((user) => (
+                      <tr key={user.id}>
+
+                        <td>
+                          <div className="manage-user-info">
+                            <div className="manage-user-avatar">
+                              {user.name.charAt(0)}
+                            </div>
+
+                            <div>
+                              <strong>
+                                {user.name}
+                              </strong>
+
+                              <span>
+                                {user.email}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`manage-user-role ${
+                              user.role === "مشرف"
+                                ? "role-admin"
+                                : ""
+                            }`}
+                          >
+                            {user.role}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span
+                            className={`manage-user-status ${
+                              user.status === "نشط"
+                                ? "user-status-active"
+                                : user.status === "معلّق"
+                                ? "user-status-pending"
+                                : "user-status-blocked"
+                            }`}
+                          >
+                            {user.status}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span className="manage-user-applications">
+                            {user.applications ??
+                              "—"}
+                          </span>
+                        </td>
+
+                        <td>
+                          <span className="manage-user-date">
+                            {formatDate(user.joined)}
+                          </span>
+                        </td>
+
+                        <td>
+                          <div className="manage-user-actions">
+
+                            <button
+                              type="button"
+                              title="عرض المستخدم"
+                              onClick={() => {
+                                window.alert(
+                                  "صفحة عرض تفاصيل المستخدم غير متوفرة حاليًا."
+                                );
+                              }}
+                            >
+                              <Eye size={15} />
+                            </button>
+
+                            <button
+                              type="button"
+                              title="تعديل"
+                              onClick={() => {
+                                window.alert(
+                                  "صفحة تعديل المستخدم غير متوفرة حاليًا."
+                                );
+                              }}
+                            >
+                              <Edit3 size={15} />
+                            </button>
+
+                            <button
+                              type="button"
+                              title="حذف المستخدم"
+                              disabled={
+                                deletingId === user.id
+                              }
+                              onClick={() =>
+                                handleDelete(user)
+                              }
+                            >
+                              <MoreHorizontal size={17} />
+                            </button>
+
+                          </div>
+                        </td>
+
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {filteredUsers.length === 0 && (
+                  <div className="manage-users-empty">
+                    <Users size={35} />
+
+                    <h3>
+                      لا يوجد مستخدمون مطابقون
+                    </h3>
+
+                    <p>
+                      جرّب تغيير البحث أو الفلتر.
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
 
@@ -331,7 +546,7 @@ function ManageUsers() {
           <div className="manage-users-footer">
             <span>
               عرض {filteredUsers.length} من{" "}
-              {usersData.length} مستخدمين
+              {users.length} مستخدمين
             </span>
 
             <div className="manage-users-pagination">
@@ -349,15 +564,10 @@ function ManageUsers() {
                 1
               </button>
 
-              <button type="button">
-                2
-              </button>
-
-              <button type="button">
-                3
-              </button>
-
-              <button type="button">
+              <button
+                type="button"
+                disabled
+              >
                 التالي
               </button>
             </div>

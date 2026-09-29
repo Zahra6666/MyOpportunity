@@ -5,15 +5,211 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 
 import PageContainer from "../../components/layout/PageContainer";
-import { opportunities } from "../../data/opportunities";
+import {
+  getSavedOpportunities,
+  unsaveOpportunity,
+} from "../../services/opportunityService";
 
 import "./SavedOpportunities.css";
 
+function extractSavedOpportunities(response) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if (Array.isArray(response?.opportunities)) {
+    return response.opportunities;
+  }
+
+  if (Array.isArray(response?.savedOpportunities)) {
+    return response.savedOpportunities;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.results)) {
+    return response.results;
+  }
+
+  return [];
+}
+
+function normalizeOpportunity(opportunity) {
+  return {
+    id: opportunity?.id ?? opportunity?._id,
+
+    title:
+      opportunity?.title ||
+      opportunity?.name ||
+      "فرصة",
+
+    company:
+      opportunity?.company_name ||
+      opportunity?.companyName ||
+      opportunity?.company?.name ||
+      opportunity?.company ||
+      "—",
+
+    type:
+      opportunity?.type_name ||
+      opportunity?.type ||
+      opportunity?.opportunity_type ||
+      "فرصة",
+
+    location:
+      opportunity?.location ||
+      "—",
+
+    mode:
+      opportunity?.mode ||
+      opportunity?.work_mode ||
+      opportunity?.workMode ||
+      "—",
+
+    match:
+      opportunity?.match ??
+      opportunity?.match_percentage ??
+      opportunity?.matchPercentage ??
+      null,
+  };
+}
+
 function SavedOpportunities() {
-  const savedOpportunities =
-    opportunities?.slice(0, 4) || [];
+  const [opportunities, setOpportunities] =
+    useState([]);
+
+  const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] =
+    useState("all");
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [removingId, setRemovingId] =
+    useState(null);
+
+  useEffect(() => {
+    loadSavedOpportunities();
+  }, []);
+
+  async function loadSavedOpportunities() {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response =
+        await getSavedOpportunities();
+
+      const savedList =
+        extractSavedOpportunities(response);
+
+      setOpportunities(
+        savedList.map(normalizeOpportunity)
+      );
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر تحميل الفرص المحفوظة."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleRemove(opportunity) {
+    if (!opportunity?.id) {
+      return;
+    }
+
+    setRemovingId(opportunity.id);
+    setError("");
+
+    try {
+      await unsaveOpportunity(
+        opportunity.id
+      );
+
+      setOpportunities(
+        (currentOpportunities) =>
+          currentOpportunities.filter(
+            (currentOpportunity) =>
+              currentOpportunity.id !==
+              opportunity.id
+          )
+      );
+    } catch (requestError) {
+      setError(
+        requestError?.message ||
+          "تعذر إزالة الفرصة من المحفوظات."
+      );
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
+  const filteredOpportunities = useMemo(() => {
+    const searchValue = search
+      .trim()
+      .toLowerCase();
+
+    return opportunities.filter(
+      (opportunity) => {
+        const title = String(
+          opportunity.title
+        ).toLowerCase();
+
+        const company = String(
+          opportunity.company
+        ).toLowerCase();
+
+        const type = String(
+          opportunity.type
+        ).toLowerCase();
+
+        const matchesSearch =
+          !searchValue ||
+          title.includes(searchValue) ||
+          company.includes(searchValue) ||
+          type.includes(searchValue);
+
+        const normalizedType =
+          type.toLowerCase();
+
+        let matchesType = true;
+
+        if (typeFilter === "job") {
+          matchesType =
+            normalizedType.includes("وظيف") ||
+            normalizedType.includes("job");
+        }
+
+        if (typeFilter === "training") {
+          matchesType =
+            normalizedType.includes("تدريب") ||
+            normalizedType.includes("training");
+        }
+
+        if (typeFilter === "scholarship") {
+          matchesType =
+            normalizedType.includes("منح") ||
+            normalizedType.includes("scholarship");
+        }
+
+        return (
+          matchesSearch &&
+          matchesType
+        );
+      }
+    );
+  }, [
+    opportunities,
+    search,
+    typeFilter,
+  ]);
 
   return (
     <PageContainer className="saved-page">
@@ -41,11 +237,16 @@ function SavedOpportunities() {
 
           <div className="saved-count">
             <Bookmark size={16} />
-            {savedOpportunities.length} الفرص المحفوظة
+            {opportunities.length} الفرص المحفوظة
           </div>
 
         </div>
 
+        {error && (
+          <div className="saved-error">
+            {error}
+          </div>
+        )}
 
         <div className="saved-toolbar">
 
@@ -55,10 +256,23 @@ function SavedOpportunities() {
             <input
               type="text"
               placeholder="ابحث ضمن الفرص المحفوظة..."
+              value={search}
+              onChange={(event) =>
+                setSearch(
+                  event.target.value
+                )
+              }
             />
           </div>
 
-          <select defaultValue="all">
+          <select
+            value={typeFilter}
+            onChange={(event) =>
+              setTypeFilter(
+                event.target.value
+              )
+            }
+          >
             <option value="all">
               جميع الفرص
             </option>
@@ -78,87 +292,117 @@ function SavedOpportunities() {
 
         </div>
 
+        {loading ? (
 
-        {savedOpportunities.length > 0 ? (
+          <div className="saved-empty">
+
+            <div>
+              <Bookmark size={25} />
+            </div>
+
+            <h2>
+              جارٍ تحميل الفرص المحفوظة...
+            </h2>
+
+            <p>
+              يتم جلب الفرص المحفوظة من الخادم.
+            </p>
+
+          </div>
+
+        ) : filteredOpportunities.length > 0 ? (
 
           <div className="saved-grid">
 
-            {savedOpportunities.map((opportunity) => (
+            {filteredOpportunities.map(
+              (opportunity) => (
 
-              <article
-                className="saved-card"
-                key={opportunity.id}
-              >
+                <article
+                  className="saved-card"
+                  key={opportunity.id}
+                >
 
-                <div className="saved-card-top">
+                  <div className="saved-card-top">
 
-                  <div className="saved-company-icon">
-                    <Bookmark size={18} />
+                    <div className="saved-company-icon">
+                      <Bookmark size={18} />
+                    </div>
+
+                    <button
+                      type="button"
+                      className="remove-saved"
+                      aria-label="إزالة من المحفوظات"
+                      disabled={
+                        removingId ===
+                        opportunity.id
+                      }
+                      onClick={() =>
+                        handleRemove(
+                          opportunity
+                        )
+                      }
+                    >
+                      <Trash2 size={16} />
+                    </button>
+
                   </div>
 
-                  <button
-                    type="button"
-                    className="remove-saved"
-                    aria-label="إزالة من المحفوظات"
-                  >
-                    <Trash2 size={16} />
-                  </button>
-
-                </div>
-
-
-                <span className="saved-type">
-                  {opportunity.type || "فرصة"}
-                </span>
-
-
-                <h2>
-                  {opportunity.title}
-                </h2>
-
-
-                <p className="saved-company">
-                  {opportunity.company}
-                </p>
-
-
-                <div className="saved-meta">
-
-                  <span>
-                    {opportunity.location}
+                  <span className="saved-type">
+                    {opportunity.type ||
+                      "فرصة"}
                   </span>
 
-                  <span>
-                    {opportunity.mode}
-                  </span>
+                  <h2>
+                    {opportunity.title}
+                  </h2>
 
-                </div>
+                  <p className="saved-company">
+                    {opportunity.company}
+                  </p>
 
-
-                <div className="saved-bottom">
-
-                  <div className="saved-match">
-                    <strong>
-                      {opportunity.match || 90}%
-                    </strong>
+                  <div className="saved-meta">
 
                     <span>
-                      توافق
+                      {opportunity.location}
                     </span>
+
+                    <span>
+                      {opportunity.mode}
+                    </span>
+
                   </div>
 
-                  <Link
-                    to={`/opportunities/${opportunity.id}`}
-                  >
-                    عرض الفرصة
-                    <ArrowLeft size={15} />
-                  </Link>
+                  <div className="saved-bottom">
 
-                </div>
+                    <div className="saved-match">
+                      <strong>
+                        {opportunity.match ??
+                          "—"}
+                        {opportunity.match !==
+                          null &&
+                        opportunity.match !==
+                          undefined
+                          ? "%"
+                          : ""}
+                      </strong>
 
-              </article>
+                      <span>
+                        توافق
+                      </span>
+                    </div>
 
-            ))}
+                    <Link
+                      to={`/opportunities/${opportunity.id}`}
+                    >
+                      عرض الفرصة
+                      <ArrowLeft size={15} />
+                    </Link>
+
+                  </div>
+
+                </article>
+              )
+            )}
 
           </div>
 
@@ -171,17 +415,22 @@ function SavedOpportunities() {
             </div>
 
             <h2>
-              ما عندك فرص محفوظة حالياً
+              {opportunities.length > 0
+                ? "لا توجد فرص مطابقة"
+                : "ما عندك فرص محفوظة حالياً"}
             </h2>
 
             <p>
-              احفظ الفرص اللي تهمك حتى ترجع لها
-              بسهولة.
+              {opportunities.length > 0
+                ? "جرّب تغيير البحث أو الفلتر."
+                : "احفظ الفرص اللي تهمك حتى ترجع لها بسهولة."}
             </p>
 
-            <Link to="/opportunities">
-              استكشاف الفرص
-            </Link>
+            {opportunities.length === 0 && (
+              <Link to="/opportunities">
+                استكشاف الفرص
+              </Link>
+            )}
 
           </div>
 

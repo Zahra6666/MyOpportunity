@@ -11,16 +11,139 @@ import {
   ChevronLeft,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Button from "../../components/common/Button";
 
+import { getMyProfile, updateMyProfile } from "../../services/userService";
+
 import "./Profile.css";
 
 function Profile() {
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [editing, setEditing] = useState(false);
+
+  const [formData, setFormData] = useState({
+    full_name: "",
+    email: "",
+    phone: "",
+  });
+
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
+  const loadProfile = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getMyProfile();
+
+      const data =
+        response?.user ||
+        response?.data ||
+        response;
+
+      setProfile(data);
+
+      setFormData({
+        full_name: data?.full_name || data?.name || "",
+        email: data?.email || "",
+        phone: data?.phone || "",
+      });
+    } catch (err) {
+      setError(
+        err?.message ||
+          "تعذر تحميل بيانات الملف الشخصي."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdate = async () => {
+    setSaving(true);
+    setError("");
+
+    try {
+      const response = await updateMyProfile(formData);
+
+      const updatedProfile =
+        response?.user ||
+        response?.data ||
+        response;
+
+      setProfile(updatedProfile);
+
+      setFormData({
+        full_name:
+          updatedProfile?.full_name ||
+          updatedProfile?.name ||
+          formData.full_name,
+        email:
+          updatedProfile?.email ||
+          formData.email,
+        phone:
+          updatedProfile?.phone ||
+          formData.phone,
+      });
+
+      setEditing(false);
+    } catch (err) {
+      setError(
+        err?.message ||
+          "تعذر تحديث بيانات الملف الشخصي."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <PageContainer className="profile-page">
+        <div className="container">
+          <div className="profile-card">
+            جارٍ تحميل بيانات الملف الشخصي...
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  const fullName =
+    profile?.full_name ||
+    profile?.name ||
+    "المستخدم";
+
+  const email =
+    profile?.email || "غير متوفر";
+
+  const phone =
+    profile?.phone || "غير متوفر";
+
+  const role =
+    profile?.role || "user";
+
+  const avatarLetter =
+    fullName?.trim()?.charAt(0) || "م";
+
   return (
     <PageContainer className="profile-page">
-
       <div className="container">
 
         {/* Header */}
@@ -42,13 +165,21 @@ function Profile() {
             </p>
           </div>
 
-          <Button variant="primary">
+          <Button
+            variant="primary"
+            onClick={() => setEditing((previous) => !previous)}
+          >
             <Pencil size={16} />
-            تعديل الملف
+            {editing ? "إلغاء التعديل" : "تعديل الملف"}
           </Button>
 
         </div>
 
+        {error && (
+          <div className="profile-card">
+            {error}
+          </div>
+        )}
 
         {/* Main */}
 
@@ -61,17 +192,21 @@ function Profile() {
             <section className="profile-card profile-intro">
 
               <div className="profile-avatar">
-                ح
+                {avatarLetter}
               </div>
 
               <div className="profile-intro-info">
 
                 <h2>
-                  حوراء علي
+                  {fullName}
                 </h2>
 
                 <p>
-                  طالبة هندسة حاسبات
+                  {role === "company"
+                    ? "حساب شركة"
+                    : role === "admin"
+                    ? "مسؤول النظام"
+                    : "مستخدم"}
                 </p>
 
                 <div className="profile-location">
@@ -109,7 +244,6 @@ function Profile() {
 
             </section>
 
-
             {/* Personal information */}
 
             <section className="profile-card">
@@ -135,6 +269,7 @@ function Profile() {
                 <button
                   type="button"
                   className="edit-section-button"
+                  onClick={() => setEditing(true)}
                 >
                   <Pencil size={15} />
                   تعديل
@@ -142,39 +277,103 @@ function Profile() {
 
               </div>
 
+              {editing ? (
+                <div className="profile-info-grid">
 
-              <div className="profile-info-grid">
+                  <div className="profile-info-item">
+                    <label>
+                      الاسم الكامل
+                    </label>
 
-                <div className="profile-info-item">
-                  <span>الاسم الكامل</span>
-                  <strong>حوراء علي</strong>
+                    <input
+                      type="text"
+                      name="full_name"
+                      value={formData.full_name}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="profile-info-item">
+                    <label>
+                      البريد الإلكتروني
+                    </label>
+
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="profile-info-item">
+                    <label>
+                      رقم الهاتف
+                    </label>
+
+                    <input
+                      type="text"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                    />
+                  </div>
+
+                  <div className="profile-info-item">
+                    <span>الدور</span>
+                    <strong>
+                      {role}
+                    </strong>
+                  </div>
+
+                  <div>
+                    <Button
+                      variant="primary"
+                      onClick={handleUpdate}
+                      disabled={saving}
+                    >
+                      {saving
+                        ? "جارٍ الحفظ..."
+                        : "حفظ التغييرات"}
+                    </Button>
+                  </div>
+
                 </div>
+              ) : (
+                <div className="profile-info-grid">
 
-                <div className="profile-info-item">
-                  <span>البريد الإلكتروني</span>
-                  <strong>
-                    hawraa@example.com
-                  </strong>
+                  <div className="profile-info-item">
+                    <span>الاسم الكامل</span>
+                    <strong>
+                      {fullName}
+                    </strong>
+                  </div>
+
+                  <div className="profile-info-item">
+                    <span>البريد الإلكتروني</span>
+                    <strong>
+                      {email}
+                    </strong>
+                  </div>
+
+                  <div className="profile-info-item">
+                    <span>رقم الهاتف</span>
+                    <strong>
+                      {phone}
+                    </strong>
+                  </div>
+
+                  <div className="profile-info-item">
+                    <span>الدور</span>
+                    <strong>
+                      {role}
+                    </strong>
+                  </div>
+
                 </div>
-
-                <div className="profile-info-item">
-                  <span>رقم الهاتف</span>
-                  <strong>
-                    +964 7XX XXX XXXX
-                  </strong>
-                </div>
-
-                <div className="profile-info-item">
-                  <span>المحافظة</span>
-                  <strong>
-                    البصرة
-                  </strong>
-                </div>
-
-              </div>
+              )}
 
             </section>
-
 
             {/* Education */}
 
@@ -208,7 +407,6 @@ function Profile() {
 
               </div>
 
-
               <div className="education-item">
 
                 <div className="education-icon">
@@ -232,7 +430,6 @@ function Profile() {
               </div>
 
             </section>
-
 
             {/* Skills */}
 
@@ -266,7 +463,6 @@ function Profile() {
 
               </div>
 
-
               <div className="profile-skills">
 
                 {[
@@ -287,7 +483,6 @@ function Profile() {
               </div>
 
             </section>
-
 
             {/* CV */}
 
@@ -320,7 +515,6 @@ function Profile() {
 
               </div>
 
-
               <div className="cv-file-row">
 
                 <div className="cv-file-icon">
@@ -329,11 +523,11 @@ function Profile() {
 
                 <div>
                   <strong>
-                    Hawraa_Ali_CV.pdf
+                    السيرة الذاتية
                   </strong>
 
                   <span>
-                    آخر تحديث منذ 3 أيام
+                    ملف السيرة الذاتية
                   </span>
                 </div>
 
@@ -344,7 +538,6 @@ function Profile() {
             </section>
 
           </main>
-
 
           {/* Sidebar */}
 
@@ -376,7 +569,6 @@ function Profile() {
               </div>
 
             </div>
-
 
             <div className="profile-side-card">
 
@@ -420,7 +612,6 @@ function Profile() {
         </div>
 
       </div>
-
     </PageContainer>
   );
 }

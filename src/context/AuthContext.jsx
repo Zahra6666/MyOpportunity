@@ -5,44 +5,107 @@ import {
   useState,
 } from "react";
 
+import {
+  login as loginRequest,
+  register as registerRequest,
+} from "../services/authService";
+
 const AuthContext = createContext(null);
 
-function AuthProvider({ children }) {
+const USER_KEY = "myopportunity_user";
+const TOKEN_KEY = "token";
+
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const savedUser = localStorage.getItem("myopportunity_user");
-      return savedUser ? JSON.parse(savedUser) : null;
+      const savedUser =
+        localStorage.getItem(USER_KEY);
+
+      return savedUser
+        ? JSON.parse(savedUser)
+        : null;
     } catch {
       return null;
     }
   });
 
+  const [token, setToken] = useState(() =>
+    localStorage.getItem(TOKEN_KEY)
+  );
+
   useEffect(() => {
     if (user) {
       localStorage.setItem(
-        "myopportunity_user",
+        USER_KEY,
         JSON.stringify(user)
       );
     } else {
-      localStorage.removeItem("myopportunity_user");
+      localStorage.removeItem(USER_KEY);
     }
   }, [user]);
 
-  const login = (userData) => {
-    setUser(userData);
+  const login = async (credentials) => {
+    const response =
+      await loginRequest(credentials);
+
+    const data =
+      response?.user ||
+      response?.data ||
+      response;
+
+    const jwt =
+      response?.token ||
+      response?.access_token ||
+      response?.accessToken ||
+      data?.token ||
+      data?.access_token;
+
+    const loggedUser =
+      response?.user ||
+      response?.data?.user ||
+      data;
+
+    if (jwt) {
+      localStorage.setItem(
+        TOKEN_KEY,
+        jwt
+      );
+
+      setToken(jwt);
+    }
+
+    if (loggedUser) {
+      localStorage.setItem(
+        USER_KEY,
+        JSON.stringify(loggedUser)
+      );
+
+      setUser(loggedUser);
+    }
+
+    return response;
   };
 
-  const register = (userData) => {
-    setUser(userData);
+  const register = async (userData) => {
+    const response =
+      await registerRequest(userData);
+
+    return response;
   };
 
   const logout = () => {
+    localStorage.removeItem(USER_KEY);
+    localStorage.removeItem(TOKEN_KEY);
+
     setUser(null);
+    setToken(null);
   };
 
   const value = {
     user,
-    isAuthenticated: Boolean(user),
+    token,
+    isAuthenticated:
+      Boolean(user) && Boolean(token),
     login,
     register,
     logout,
@@ -55,19 +118,8 @@ function AuthProvider({ children }) {
   );
 }
 
-function useAuthContext() {
-  const context = useContext(AuthContext);
-
-  if (!context) {
-    throw new Error(
-      "useAuthContext must be used inside AuthProvider"
-    );
-  }
-
-  return context;
+export function useAuthContext() {
+  return useContext(AuthContext);
 }
 
-export {
-  AuthProvider,
-  useAuthContext,
-};
+export default AuthContext;

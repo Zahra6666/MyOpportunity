@@ -1,56 +1,46 @@
-const API_BASE_URL =
+const API_URL =
   import.meta.env.VITE_API_URL || "/api";
 
 async function request(endpoint, options = {}) {
   const response = await fetch(
-    `${API_BASE_URL}${endpoint}`,
+    `${API_URL}${endpoint}`,
     {
+      ...options,
       headers: {
         "Content-Type": "application/json",
         ...(options.headers || {}),
       },
-      ...options,
     }
   );
 
-  const data = await response.json().catch(() => null);
+  const data =
+    await response.json().catch(() => null);
 
   if (!response.ok) {
     throw new Error(
-      data?.message || "حدث خطأ أثناء تنفيذ الطلب"
+      data?.message ||
+        "تعذر تنفيذ عملية المصادقة."
     );
   }
 
   return data;
 }
 
-export async function loginUser(credentials) {
-  return request("/auth/login", {
-    method: "POST",
-    body: JSON.stringify(credentials),
-  });
-}
-
-export async function registerUser(userData) {
+export async function register(data) {
   return request("/auth/register", {
     method: "POST",
-    body: JSON.stringify(userData),
+    body: JSON.stringify(data),
   });
 }
 
-export async function getCurrentUser() {
-  return request("/auth/me");
-}
-
-export async function logoutUser() {
-  return request("/auth/logout", {
+export async function login(data) {
+  return request("/auth/login", {
     method: "POST",
+    body: JSON.stringify(data),
   });
 }
 
 export default {
-  loginUser,
-  registerUser,
-  getCurrentUser,
-  logoutUser,
+  register,
+  login,
 };

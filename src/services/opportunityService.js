@@ -1,133 +1,107 @@
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 async function request(endpoint, options = {}) {
-  const response = await fetch(
-    `${API_BASE_URL}${endpoint}`,
-    {
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {}),
-      },
-      ...options,
-    }
-  );
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...(token
+        ? { Authorization: `Bearer ${token}` }
+        : {}),
+      ...(options.headers || {}),
+    },
+  });
 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
     throw new Error(
-      data?.message ||
-        "حدث خطأ أثناء جلب بيانات الفرص"
+      data?.message || "حدث خطأ أثناء تنفيذ الطلب"
     );
   }
 
   return data;
-}
-
+};
 
 export async function getOpportunities(params = {}) {
   const query = new URLSearchParams();
 
-  Object.entries(params).forEach(([key, value]) => {
-    if (
-      value !== undefined &&
-      value !== null &&
-      value !== ""
-    ) {
-      query.append(key, value);
-    }
-  });
+  if (params.search !== undefined) {
+    query.append("search", params.search);
+  }
+
+  if (params.category_id !== undefined) {
+    query.append("category_id", params.category_id);
+  }
+
+  if (params.location !== undefined) {
+    query.append("location", params.location);
+  }
+
+  if (params.type_id !== undefined) {
+    query.append("type_id", params.type_id);
+  }
 
   const queryString = query.toString();
 
   return request(
-    `/opportunities${
-      queryString ? `?${queryString}` : ""
-    }`
+    `/opportunities${queryString ? `?${queryString}` : ""}`
   );
 }
 
 export async function getOpportunityById(id) {
-  if (!id) {
-    throw new Error("معرّف الفرصة مطلوب");
-  }
-
   return request(`/opportunities/${id}`);
 }
 
+export async function createOpportunity(opportunityData) {
+  return request("/opportunities", {
+    method: "POST",
+    body: JSON.stringify(opportunityData),
+  });
+}
 
-export async function searchOpportunities(
-  searchTerm,
-  filters = {}
+
+export async function updateOpportunity(
+  id,
+  opportunityData
 ) {
-  return getOpportunities({
-    search: searchTerm,
-    ...filters,
+  return request(`/opportunities/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(opportunityData),
+  });
+}
+
+export async function deleteOpportunity(id) {
+  return request(`/opportunities/${id}`, {
+    method: "DELETE",
   });
 }
 
 export async function saveOpportunity(id) {
-  if (!id) {
-    throw new Error("معرّف الفرصة مطلوب");
-  }
-
   return request(`/opportunities/${id}/save`, {
     method: "POST",
   });
 }
 
-export async function removeSavedOpportunity(id) {
-  if (!id) {
-    throw new Error("معرّف الفرصة مطلوب");
-  }
-
+export async function unsaveOpportunity(id) {
   return request(`/opportunities/${id}/save`, {
     method: "DELETE",
   });
 }
 
 export async function getSavedOpportunities() {
-  return request("/opportunities/saved");
-}
-
-
-export async function applyToOpportunity(
-  id,
-  applicationData = {}
-) {
-  if (!id) {
-    throw new Error("معرّف الفرصة مطلوب");
-  }
-
-  return request(`/opportunities/${id}/apply`, {
-    method: "POST",
-    body: JSON.stringify(applicationData),
-  });
-}
-
-
-export async function getMyApplications() {
-  return request("/applications/me");
-}
-
-export async function getOpportunityCategories() {
-  return request("/opportunities/categories");
-}
-
-export async function getGovernorates() {
-  return request("/opportunities/governorates");
+  return request("/me/savedCompanies");
 }
 
 export default {
   getOpportunities,
   getOpportunityById,
-  searchOpportunities,
+  createOpportunity,
+  updateOpportunity,
+  deleteOpportunity,
   saveOpportunity,
-  removeSavedOpportunity,
+  unsaveOpportunity,
   getSavedOpportunities,
-  applyToOpportunity,
-  getMyApplications,
-  getOpportunityCategories,
-  getGovernorates,
 };

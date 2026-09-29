@@ -8,16 +8,19 @@ import {
   Bookmark,
   Clock3,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Badge from "../../components/common/Badge";
-import { opportunities } from "../../data/opportunities";
+import { getOpportunities } from "../../services/opportunityService";
 
 import "./Opportunities.css";
 
 function Opportunities() {
+  const [opportunities, setOpportunities] = useState([]);
+
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [location, setLocation] = useState("all");
@@ -26,8 +29,41 @@ function Opportunities() {
   const [sort, setSort] = useState("match");
   const [mobileFilters, setMobileFilters] = useState(false);
 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const loadOpportunities = async () => {
+      setLoading(true);
+      setError("");
+
+      try {
+        const response = await getOpportunities();
+
+        const data =
+          response?.opportunities ||
+          response?.data ||
+          response?.results ||
+          response;
+
+        setOpportunities(
+          Array.isArray(data) ? data : []
+        );
+      } catch (error) {
+        setError(
+          error?.message ||
+            "تعذر تحميل الفرص. يرجى المحاولة مرة أخرى."
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOpportunities();
+  }, []);
+
   const filteredOpportunities = useMemo(() => {
-    let result = [...(opportunities || [])];
+    let result = [...opportunities];
 
     if (search.trim()) {
       const query = search.toLowerCase();
@@ -43,7 +79,9 @@ function Opportunities() {
         ]
           .filter(Boolean)
           .some((value) =>
-            String(value).toLowerCase().includes(query)
+            String(value)
+              .toLowerCase()
+              .includes(query)
           )
       );
     }
@@ -51,8 +89,14 @@ function Opportunities() {
     if (category !== "all") {
       result = result.filter(
         (item) =>
-          String(item.type || "").toLowerCase() ===
-          category.toLowerCase()
+          String(
+            item.type ||
+              item.category ||
+              item.category_name ||
+              ""
+          )
+            .toLowerCase()
+            .includes(category.toLowerCase())
       );
     }
 
@@ -73,12 +117,20 @@ function Opportunities() {
     }
 
     result = result.filter(
-      (item) => Number(item.match || 0) >= minMatch
+      (item) =>
+        Number(item.match || item.match_percentage || 0) >=
+        minMatch
     );
 
     if (sort === "match") {
       result.sort(
-        (a, b) => Number(b.match || 0) - Number(a.match || 0)
+        (a, b) =>
+          Number(
+            b.match || b.match_percentage || 0
+          ) -
+          Number(
+            a.match || a.match_percentage || 0
+          )
       );
     }
 
@@ -88,6 +140,7 @@ function Opportunities() {
 
     return result;
   }, [
+    opportunities,
     search,
     category,
     location,
@@ -108,12 +161,7 @@ function Opportunities() {
   return (
     <PageContainer className="opportunities-page">
 
-      {/* =================================
-          PAGE HEADER
-      ================================= */}
-
       <section className="opportunities-header">
-
         <div className="container">
 
           <div className="opportunities-breadcrumb">
@@ -149,26 +197,21 @@ function Opportunities() {
 
           </div>
 
-
-          {/* Search */}
-
           <div className="opportunities-search">
 
             <div className="main-search">
-
               <Search size={19} />
 
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
                 placeholder="ابحث عن مسمى وظيفي، شركة، مهارة..."
               />
-
             </div>
 
-
             <div className="search-location">
-
               <MapPin size={17} />
 
               <select
@@ -201,9 +244,7 @@ function Opportunities() {
                   السليمانية
                 </option>
               </select>
-
             </div>
-
 
             <button
               type="button"
@@ -216,22 +257,11 @@ function Opportunities() {
           </div>
 
         </div>
-
       </section>
-
-
-      {/* =================================
-          CONTENT
-      ================================= */}
 
       <section className="opportunities-content">
 
         <div className="container opportunities-layout">
-
-
-          {/* =================================
-              FILTERS
-          ================================= */}
 
           <aside
             className={`opportunities-filters ${
@@ -257,7 +287,6 @@ function Opportunities() {
               </button>
 
             </div>
-
 
             <div className="filter-section">
 
@@ -301,9 +330,7 @@ function Opportunities() {
 
             </div>
 
-
             <div className="filter-divider" />
-
 
             <div className="filter-section">
 
@@ -348,9 +375,7 @@ function Opportunities() {
 
             </div>
 
-
             <div className="filter-divider" />
-
 
             <div className="filter-section">
 
@@ -393,9 +418,7 @@ function Opportunities() {
 
             </div>
 
-
             <div className="filter-divider" />
-
 
             <div className="filter-section">
 
@@ -426,7 +449,6 @@ function Opportunities() {
 
             </div>
 
-
             <div className="filter-profile-box">
 
               <BriefcaseBusiness size={18} />
@@ -452,11 +474,6 @@ function Opportunities() {
 
           </aside>
 
-
-          {/* =================================
-              RESULTS
-          ================================= */}
-
           <div className="opportunities-results">
 
             <div className="mobile-filter-row">
@@ -476,7 +493,6 @@ function Opportunities() {
               </span>
 
             </div>
-
 
             <div className="results-toolbar">
 
@@ -517,8 +533,52 @@ function Opportunities() {
 
             </div>
 
+            {loading ? (
 
-            {filteredOpportunities.length > 0 ? (
+              <div className="opportunities-empty">
+
+                <div className="empty-icon">
+                  <Search size={25} />
+                </div>
+
+                <h3>
+                  جارٍ تحميل الفرص...
+                </h3>
+
+                <p>
+                  يرجى الانتظار حتى يتم تحميل الفرص المتاحة.
+                </p>
+
+              </div>
+
+            ) : error ? (
+
+              <div className="opportunities-empty">
+
+                <div className="empty-icon">
+                  <Search size={25} />
+                </div>
+
+                <h3>
+                  تعذر تحميل الفرص
+                </h3>
+
+                <p>
+                  {error}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    window.location.reload()
+                  }
+                >
+                  إعادة المحاولة
+                </button>
+
+              </div>
+
+            ) : filteredOpportunities.length > 0 ? (
 
               <div className="explorer-grid">
 
@@ -544,7 +604,7 @@ function Opportunities() {
                 </div>
 
                 <h3>
-                  ما لقينا فرص مطابقة
+                  لم نعثر على فرص مطابقة
                 </h3>
 
                 <p>
@@ -572,11 +632,6 @@ function Opportunities() {
   );
 }
 
-
-/* =========================================
-   EXPLORER CARD
-========================================= */
-
 function ExplorerCard({ opportunity }) {
   const {
     id,
@@ -585,13 +640,22 @@ function ExplorerCard({ opportunity }) {
     company,
     location,
     type,
+    category,
+    category_name,
     mode,
     salary,
     match,
+    match_percentage,
     description,
     skills = [],
     deadline,
   } = opportunity;
+
+  const opportunityType =
+    type || category || category_name || "فرصة";
+
+  const matchValue =
+    match ?? match_percentage ?? 0;
 
   return (
     <article className="explorer-card">
@@ -605,7 +669,7 @@ function ExplorerCard({ opportunity }) {
         <div className="explorer-card-title">
 
           <Badge variant="type">
-            {type || "فرصة"}
+            {opportunityType}
           </Badge>
 
           <h3>{title}</h3>
@@ -626,41 +690,37 @@ function ExplorerCard({ opportunity }) {
 
       </div>
 
-
       <div className="explorer-company">
 
         <span>
           <BriefcaseBusiness size={14} />
-          {company}
+          {company || "غير محدد"}
         </span>
 
         <span>
           <MapPin size={14} />
-          {location}
+          {location || "غير محدد"}
         </span>
 
       </div>
-
 
       <div className="explorer-details">
 
         <span>
           <BriefcaseBusiness size={14} />
-          {mode}
+          {mode || "غير محدد"}
         </span>
 
         <span>
           <Clock3 size={14} />
-          {deadline}
+          {deadline || "غير محدد"}
         </span>
 
       </div>
 
-
       <p className="explorer-description">
-        {description}
+        {description || "لا يوجد وصف متاح لهذه الفرصة."}
       </p>
-
 
       <div className="explorer-skills">
 
@@ -672,13 +732,12 @@ function ExplorerCard({ opportunity }) {
 
       </div>
 
-
       <div className="explorer-match">
 
         <div>
 
           <strong>
-            {match || 0}%
+            {matchValue}%
           </strong>
 
           <span>
@@ -688,20 +747,21 @@ function ExplorerCard({ opportunity }) {
         </div>
 
         <div className="explorer-match-bar">
+
           <span
             style={{
-              width: `${match || 0}%`,
+              width: `${matchValue}%`,
             }}
           />
+
         </div>
 
       </div>
 
-
       <div className="explorer-footer">
 
         <strong>
-          {salary}
+          {salary || "غير محدد"}
         </strong>
 
         <Link to={`/opportunities/${id}`}>
