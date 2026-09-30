@@ -3337,3 +3337,297 @@ textarea {
   box-shadow: none;
   border: none;
 }
+
+/* =========================================================
+   UNIFIED THEME LAYER
+   Keep shared surfaces and controls on the same design system
+   across Home, Explore, Auth and the remaining application pages.
+   ========================================================= */
+
+html,
+body {
+  min-height: 100%;
+  background: var(--bg-main);
+}
+
+body {
+  color: var(--text-primary);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+#root {
+  width: 100%;
+  max-width: none;
+  min-height: 100svh;
+  margin: 0;
+  overflow-x: hidden;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  text-align: initial;
+  border: 0;
+}
+
+.navbar {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.03);
+}
+
+.auth-card,
+.search-box,
+.opportunities-search,
+.opportunities-filters,
+.explorer-card,
+.details-card,
+.details-main,
+.apply-card,
+.details-meta-card,
+.cv-upload-card,
+.analysis-card,
+.dashboard-stat-card,
+.application-row,
+.profile-readiness-card,
+.quick-actions-card,
+.recommendation-card,
+.saved-deadline-item {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+.auth-card {
+  box-shadow: var(--shadow-lg);
+}
+
+.auth-page {
+  background-color: var(--bg-main);
+}
+
+.navbar-links a,
+.login-link,
+.brand-logo {
+  color: var(--text-primary);
+}
+
+.navbar-links a {
+  color: var(--text-secondary);
+}
+
+.navbar-links a:hover,
+.navbar-links a.active,
+.login-link:hover {
+  color: var(--primary-600);
+}
+
+.notification-button,
+.mobile-menu-button,
+.theme-toggle-btn {
+  color: var(--text-secondary);
+}
+
+.notification-button:hover,
+.mobile-menu-button:hover,
+.theme-toggle-btn:hover {
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+
+html.dark .navbar-links-open,
+html.dark .notification-panel,
+html.dark .notification-panel-header,
+html.dark .notification-item,
+html.dark .chatbot-window,
+html.dark .chatbot-input-area,
+html.dark .chatbot-message-bot .chatbot-message {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+html.dark .notification-panel-header,
+html.dark .notification-actions,
+html.dark .notification-item,
+html.dark .chatbot-message-bot .chatbot-message {
+  color: var(--text-primary);
+}
+
+html.dark .notification-actions,
+html.dark .notification-item:hover,
+html.dark .notification-item-unread,
+html.dark .chatbot-messages,
+html.dark .chatbot-input-wrapper {
+  background: var(--bg-soft);
+}
+
+html.dark .notification-panel-header h3,
+html.dark .notification-content strong,
+html.dark .chatbot-message-bot .chatbot-message,
+html.dark .chatbot-input-wrapper input {
+  color: var(--text-primary);
+}
+
+html.dark .notification-content > span,
+html.dark .notification-content small,
+html.dark .notification-panel-header span,
+html.dark .chatbot-input-wrapper input::placeholder {
+  color: var(--text-muted);
+}
+
+html.dark .notification-dot {
+  border-color: var(--bg-card);
+}
+
+html.dark .chatbot-message-user .chatbot-message {
+  background: rgba(59, 130, 246, 0.2);
+  color: var(--text-primary);
+}
+
+html.dark .chatbot-suggestions button {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+html.dark .chatbot-suggestions button:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-500);
+}
+
+html.dark .footer {
+  background: #080d19;
+}
+
+html.dark .auth-page {
+  background-color: var(--bg-main);
+  background-image:
+    radial-gradient(circle at 85% 15%, rgba(59, 130, 246, 0.18), transparent 38%),
+    radial-gradient(circle at 15% 85%, rgba(250, 204, 17, 0.1), transparent 38%),
+    linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+}
+
+html.dark .auth-card {
+  border-color: var(--border-light);
+  box-shadow:
+    0 22px 55px rgba(0, 0, 0, 0.32),
+    0 4px 18px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .filter-toggle,
+html.dark .search-filter,
+html.dark .filter-select,
+html.dark .opportunities-search,
+html.dark .main-search,
+html.dark .search-location {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-secondary);
+}
+
+html.dark .filter-select select,
+html.dark .search-location select,
+html.dark .main-search input {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+html.dark .cv-upload-card,
+html.dark .analysis-card,
+html.dark .dashboard-stat-card,
+html.dark .application-row,
+html.dark .profile-readiness-card,
+html.dark .quick-actions-card,
+html.dark .recommendation-card,
+html.dark .saved-deadline-item,
+html.dark .details-card,
+html.dark .details-main,
+html.dark .apply-card,
+html.dark .details-meta-card,
+html.dark .explorer-card {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+html.dark .auth-error {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+/* Home uses --white for light surfaces. These selectors preserve the
+   intentional white text on the blue CTA while making its cards theme-aware. */
+html.dark .home-page .hero-mini-label,
+html.dark .home-page .hero-mini-label::after,
+html.dark .home-page .hero-search-box,
+html.dark .home-page .preview-card,
+html.dark .home-page .preview-bookmark,
+html.dark .home-page .preview-floating-card,
+html.dark .home-page .home-section,
+html.dark .home-page .category-card,
+html.dark .home-page .matching-section,
+html.dark .home-page .step-card,
+html.dark .home-page .step-card-icon {
+  background: var(--bg-card);
+}
+
+html.dark .home-page .hero-search-input,
+html.dark .home-page .hero-search-location,
+html.dark .home-page .preview-meta span {
+  background: var(--bg-soft);
+}
+
+html.dark .home-page .match-ring,
+html.dark .home-page .preview-skills span {
+  background: var(--bg-card);
+}
+
+html.dark .home-page .home-section,
+html.dark .home-page .matching-section,
+html.dark .home-page .step-card,
+html.dark .home-page .category-card,
+html.dark .home-page .preview-card,
+html.dark .home-page .hero-search-box {
+  border-color: var(--border-light);
+}
+
+/* Shared state and mobile surfaces that previously used fixed light colors. */
+html.dark .state-icon,
+html.dark .not-found-icon {
+  background: var(--bg-soft);
+  color: var(--text-muted);
+}
+
+html.dark .state-container h3,
+html.dark .not-found-content h1 {
+  color: var(--text-primary);
+}
+
+html.dark .state-container p,
+html.dark .not-found-content p {
+  color: var(--text-secondary);
+}
+
+html.dark .state-retry {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+html.dark .state-retry:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-500);
+}
+
+html.dark .not-found-button {
+  background: var(--bg-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  body,
+  #root {
+    scroll-behavior: auto;
+  }
+}

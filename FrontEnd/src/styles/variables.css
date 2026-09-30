@@ -1,6 +1,7 @@
 :root {
   /* الخطوط */
   --font-main: 'Readex Pro', 'Cairo', sans-serif;
+  color-scheme: light;
 
   /* الألوان الشبابية الأساسية */
   --primary-50: #eff6ff;
@@ -81,12 +82,59 @@
   --radius-xl: 24px;
   --container-width: 1240px;
   --navbar-height: 76px;
+
+  /*
+   * Compatibility aliases
+   * --------------------
+   * A few older shared rules still use the original token names. Keeping
+   * these aliases here means every page follows the same theme tokens
+   * instead of falling back to invalid or browser-default values.
+   */
+  --background: var(--bg-main);
+  --bg-primary: var(--bg-main);
+  --bg: var(--bg-main);
+  --code-bg: var(--bg-soft);
+  --text: var(--text-secondary);
+  --text-h: var(--text-primary);
+  --text-soft: var(--text-secondary);
+  --accent: var(--primary-600);
+  --accent-bg: var(--primary-50);
+  --accent-border: var(--primary-100);
+  --sans: var(--font-main);
+  --heading: var(--font-main);
+  --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --primary: var(--primary-600);
+  --primary-dark: var(--primary-700);
+  --primary-light: var(--primary-50);
+  --primary-400: #60a5fa;
+  --border: var(--border-light);
+  --success: var(--accent-green-600);
+  --success-light: var(--accent-green-50);
+  --warning: var(--accent-yellow-600);
+  --warning-light: var(--accent-yellow-50);
+  --danger: var(--red-500);
+  --danger-light: var(--red-100);
+  --transition: var(--transition-normal);
+  --radius-full: 999px;
 }
 
 /* ==========================================
    الوضع الليلي (Dark Mode)
    ========================================== */
 html.dark, .dark {
+  color-scheme: dark;
+
+  /* Dark surfaces for the reusable pastel accents used by Home and Explore. */
+  --primary-50: rgba(59, 130, 246, 0.14);
+  --primary-100: rgba(59, 130, 246, 0.24);
+  --accent-yellow-50: rgba(250, 204, 17, 0.12);
+  --accent-yellow-100: rgba(250, 204, 17, 0.2);
+  --accent-green-50: rgba(16, 185, 129, 0.13);
+  --accent-green-100: rgba(16, 185, 129, 0.22);
+  --gray-50: #172033;
+  --gray-100: #1e293b;
+  --gray-200: #334155;
+
   --bg-main: #0f172a;        /* خلفية كحلية داكنة راقية */
   --bg-card: #1e293b;        /* كروت أغمق قليلاً من الخلفية */
   --bg-soft: #334155;

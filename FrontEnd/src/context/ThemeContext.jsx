@@ -10,11 +10,17 @@ export const ThemeProvider = ({ children }) => {
 
   useEffect(() => {
     const root = document.documentElement;
-    if (theme === 'dark') {
+    const isDark = theme === "dark";
+
+    if (isDark) {
       root.classList.add('dark');
     } else {
       root.classList.remove('dark');
     }
+
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+
     // حفظ التفضيل في localStorage
     localStorage.setItem('theme', theme);
   }, [theme]);

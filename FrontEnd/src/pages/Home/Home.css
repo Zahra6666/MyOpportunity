@@ -708,7 +708,7 @@
   background: var(--white);
   text-decoration: none;
   /* ظل ناعم وواضح لفصل الكارد عن الخلفية */
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.9);
+   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
   transition: all var(--transition-normal);
 }
 
@@ -1145,4 +1145,142 @@
 
 .home-cta-early {
   padding: 56px 0 0;
+}
+
+/* =========================================
+   DARK MODE - HOME PAGE
+   Keep Home readable when the old white
+   surfaces are replaced by the dark palette.
+========================================= */
+
+html.dark .home-page .forsati-hero,
+html.dark .home-page .categories-section,
+html.dark .home-page .featured-section,
+html.dark .home-page .home-final-cta {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+}
+
+html.dark .home-page .hero-mini-label,
+html.dark .home-page .hero-mini-label::after,
+html.dark .home-page .hero-outline-button,
+html.dark .home-page .hero-search-box,
+html.dark .home-page .preview-card,
+html.dark .home-page .preview-bookmark,
+html.dark .home-page .preview-floating-card,
+html.dark .home-page .home-section,
+html.dark .home-page .category-card,
+html.dark .home-page .matching-section,
+html.dark .home-page .step-card,
+html.dark .home-page .step-card-icon {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+html.dark .home-page .hero-search-input,
+html.dark .home-page .hero-search-location,
+html.dark .home-page .preview-meta span {
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+}
+
+html.dark .home-page .match-ring,
+html.dark .home-page .preview-skills span {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+}
+
+html.dark .home-page .hero-copy h1,
+html.dark .home-page .section-heading h2,
+html.dark .home-page .category-card h3,
+html.dark .home-page .step-card h3,
+html.dark .home-page .preview-title h3,
+html.dark .home-page .match-content > strong {
+  color: var(--text-primary);
+}
+
+html.dark .home-page .hero-copy > p,
+html.dark .home-page .section-heading p,
+html.dark .home-page .category-card p,
+html.dark .home-page .step-card p,
+html.dark .home-page .preview-title p,
+html.dark .home-page .match-content p,
+html.dark .home-page .preview-footer,
+html.dark .home-page .preview-floating-card span,
+html.dark .home-page .hero-scroll-indicator {
+  color: var(--text-secondary);
+}
+
+html.dark .home-page .hero-copy h1 span {
+  color: #93c5fd;
+  background: none;
+  -webkit-text-fill-color: #93c5fd;
+}
+
+html.dark .home-page .home-empty {
+  background: var(--bg-card);
+  border-color: var(--border-medium);
+  color: var(--text-secondary);
+}
+
+html.dark .home-page .category-bottom,
+html.dark .home-page .section-link,
+html.dark .home-page .preview-footer a {
+  color: #93c5fd;
+}
+
+html.dark .home-page .preview-match {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(52, 211, 153, 0.35);
+}
+
+/* Featured opportunity cards - Dark Mode */
+
+html.dark .home-page .opportunity-card {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+html.dark .home-page .opportunity-card:hover {
+  border-color: var(--primary-500);
+  box-shadow: var(--shadow-md);
+}
+
+html.dark .home-page .opportunity-title-row h3,
+html.dark .home-page .opportunity-meta strong {
+  color: var(--text-primary);
+}
+
+html.dark .home-page .opportunity-company,
+html.dark .home-page .opportunity-description,
+html.dark .home-page .opportunity-meta,
+html.dark .home-page .opportunity-en-title {
+  color: var(--text-secondary);
+}
+
+html.dark .home-page .opportunity-skills span {
+  background: var(--bg-soft);
+  color: var(--text-secondary);
+}
+
+html.dark .home-page .opportunity-divider {
+  background: var(--border-light);
+}
+
+html.dark .home-page .match-score {
+  background: rgba(16, 185, 129, 0.14);
+}
+
+html.dark .home-page .save-opportunity {
+  background: var(--bg-soft);
+  border-color: var(--border-medium);
+  color: var(--text-secondary);
+}
+
+html.dark .home-page .save-opportunity:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-500);
+  color: var(--primary-400);
 }
