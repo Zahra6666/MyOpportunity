@@ -1,3 +1,4 @@
+import "./CVUpload.css";
 import {
   ArrowLeft,
   FileText,

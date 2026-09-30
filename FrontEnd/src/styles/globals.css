@@ -13,10 +13,15 @@ html {
 body {
   direction: rtl;
   font-family: "Cairo", sans-serif;
-  background: var(--background);
-  color: var(--text);
+  /* background: var(--background); */
+  /* color: var(--text); */
   line-height: 1.7;
   min-width: 320px;
+
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+
 }
 
 body,
@@ -63,10 +68,8 @@ textarea {
 }
 
 .container {
-  width: min(
-    calc(100% - 40px),
-    var(--container)
-  );
+  width: min(calc(100% - 40px),
+      var(--container-width));
   margin-inline: auto;
 }
 
@@ -382,11 +385,9 @@ textarea {
 
   background:
     var(--gradient-hero),
-    linear-gradient(
-      180deg,
+    linear-gradient(180deg,
       #fbfaff 0%,
-      #f8f9fc 100%
-    );
+      #f8f9fc 100%);
 
   padding: 85px 0 70px;
 }
@@ -444,7 +445,7 @@ textarea {
   color: var(--primary);
 }
 
-.hero-copy > p {
+.hero-copy>p {
   max-width: 590px;
 
   color: var(--text-soft);
@@ -861,7 +862,7 @@ textarea {
   box-shadow: var(--shadow-md);
 }
 
-.category-card > svg {
+.category-card>svg {
   width: 23px;
   height: 23px;
 
@@ -1155,16 +1156,12 @@ textarea {
   color: white;
 
   background:
-    radial-gradient(
-      circle at 85% 30%,
-      rgba(255,255,255,0.13),
-      transparent 25%
-    ),
-    linear-gradient(
-      135deg,
+    radial-gradient(circle at 85% 30%,
+      rgba(255, 255, 255, 0.13),
+      transparent 25%),
+    linear-gradient(135deg,
       #5d42e8,
-      #7b5df4
-    );
+      #7b5df4);
 
   border-radius: 28px;
 
@@ -1186,7 +1183,7 @@ textarea {
   display: grid;
   place-items: center;
 
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
 
   border-radius: 14px;
 
@@ -1194,7 +1191,7 @@ textarea {
 }
 
 .ai-cta .section-kicker {
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .ai-cta h2 {
@@ -1203,7 +1200,7 @@ textarea {
 }
 
 .ai-cta p {
-  color: rgba(255,255,255,0.78);
+  color: rgba(255, 255, 255, 0.78);
 
   font-size: 13px;
 
@@ -1218,7 +1215,7 @@ textarea {
   left: 8%;
   bottom: -40px;
 
-  color: rgba(255,255,255,0.08);
+  color: rgba(255, 255, 255, 0.08);
 
   transform: rotate(-18deg);
 }
@@ -1421,11 +1418,9 @@ textarea {
   padding: 30px;
 
   background:
-    linear-gradient(
-      135deg,
+    linear-gradient(135deg,
       #fbfaff,
-      white
-    );
+      white);
 
   border-bottom: 1px solid var(--border);
 }
@@ -1614,7 +1609,7 @@ textarea {
   border-radius: inherit;
 }
 
-.apply-card > p {
+.apply-card>p {
   color: var(--text-muted);
 
   font-size: 10px;
@@ -1656,7 +1651,7 @@ textarea {
   gap: 20px;
 }
 
-.details-meta-card > div {
+.details-meta-card>div {
   display: flex;
   align-items: flex-start;
   gap: 11px;
@@ -1767,7 +1762,7 @@ textarea {
   gap: 16px;
 }
 
-.auth-form > label {
+.auth-form>label {
   display: grid;
   gap: 7px;
 
@@ -2124,13 +2119,13 @@ textarea {
 
   padding: 14px;
 
-  background: rgba(255,255,255,0.7);
+  background: rgba(255, 255, 255, 0.7);
 
   border: 1px solid var(--border);
   border-radius: 12px;
 }
 
-.cv-step > span {
+.cv-step>span {
   width: 30px;
   height: 30px;
 
@@ -2147,7 +2142,7 @@ textarea {
   font-weight: 800;
 }
 
-.cv-step.active > span {
+.cv-step.active>span {
   color: white;
   background: var(--primary);
 }
@@ -2295,7 +2290,7 @@ textarea {
   margin-top: 22px;
 }
 
-.analysis-info-grid > div {
+.analysis-info-grid>div {
   display: flex;
   align-items: flex-start;
   gap: 7px;
@@ -2396,7 +2391,7 @@ textarea {
   border-radius: 14px;
 }
 
-.analysis-success > div {
+.analysis-success>div {
   flex: 1;
 }
 
@@ -2474,7 +2469,7 @@ textarea {
   border-radius: 11px;
 }
 
-.dashboard-stat-card > div:nth-child(2) {
+.dashboard-stat-card>div:nth-child(2) {
   flex: 1;
 }
 
@@ -2492,7 +2487,7 @@ textarea {
   font-size: 21px;
 }
 
-.dashboard-stat-card > svg {
+.dashboard-stat-card>svg {
   color: var(--text-muted);
 }
 
@@ -2506,11 +2501,9 @@ textarea {
   color: white;
 
   background:
-    radial-gradient(
-      circle at 90% 10%,
-      rgba(255,255,255,0.12),
-      transparent 30%
-    ),
+    radial-gradient(circle at 90% 10%,
+      rgba(255, 255, 255, 0.12),
+      transparent 30%),
     var(--gradient-primary);
 
   border-radius: 20px;
@@ -2527,7 +2520,7 @@ textarea {
 
   flex-shrink: 0;
 
-  background: rgba(255,255,255,0.15);
+  background: rgba(255, 255, 255, 0.15);
 
   border-radius: 15px;
 }
@@ -2537,7 +2530,7 @@ textarea {
 }
 
 .dashboard-cv-content .section-kicker {
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .dashboard-cv-content h2 {
@@ -2545,7 +2538,7 @@ textarea {
 }
 
 .dashboard-cv-content p {
-  color: rgba(255,255,255,0.75);
+  color: rgba(255, 255, 255, 0.75);
   font-size: 10px;
   max-width: 600px;
 }
@@ -2559,7 +2552,7 @@ textarea {
 
   overflow: hidden;
 
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
 
   border-radius: 20px;
 }
@@ -2576,7 +2569,7 @@ textarea {
 .dashboard-cv-content small {
   display: block;
 
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
 
   font-size: 8px;
 
@@ -2843,7 +2836,7 @@ textarea {
   line-height: 1.7;
 }
 
-.admin-menu-card > svg {
+.admin-menu-card>svg {
   color: var(--text-muted);
 }
 
@@ -3067,7 +3060,7 @@ textarea {
 ========================================= */
 
 .footer {
-  color: rgba(255,255,255,0.72);
+  color: rgba(255, 255, 255, 0.72);
 
   background: #111523;
 
@@ -3086,7 +3079,7 @@ textarea {
 .footer-brand p {
   max-width: 330px;
 
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
 
   font-size: 10px;
   line-height: 2;
@@ -3126,7 +3119,7 @@ textarea {
   align-items: center;
   gap: 6px;
 
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
 
   font-size: 9px;
 
@@ -3140,9 +3133,9 @@ textarea {
 .footer-bottom {
   padding: 17px 0;
 
-  border-top: 1px solid rgba(255,255,255,0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 
-  color: rgba(255,255,255,0.35);
+  color: rgba(255, 255, 255, 0.35);
 
   font-size: 8px;
 }
@@ -3165,6 +3158,7 @@ textarea {
 .category-card {
   animation: fadeUp 0.55s ease both;
 }
+
 /* =========================
    Shared States
 ========================= */
@@ -3243,6 +3237,7 @@ textarea {
   color: #4f46e5;
   background: #f8faff;
 }
+
 /* =========================
    Not Found
 ========================= */
@@ -3274,7 +3269,7 @@ textarea {
   color: #4f46e5;
 }
 
-.not-found-content > span {
+.not-found-content>span {
   color: #4f46e5;
   font-size: 14px;
   font-weight: 800;
@@ -3312,4 +3307,33 @@ textarea {
 .not-found-button:hover {
   background: #1e293b;
   transform: translateY(-1px);
+}
+
+.theme-toggle-btn {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  color: inherit;
+  /* ليأخذ نفس لون نصوص الناف بار */
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* تأثير تحويم الماوس بدون إطار */
+.theme-toggle-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  /* تفاعل لطيف وخفيف */
+}
+
+.theme-toggle-btn:focus,
+.theme-toggle-btn:active {
+  outline: none;
+  box-shadow: none;
+  border: none;
 }
