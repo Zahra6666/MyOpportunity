@@ -1,0 +1,413 @@
+.contact-page {
+  min-height: 100vh;
+
+  background: var(--bg-main);
+
+  color: var(--text-primary);
+}
+
+.contact-container {
+  width: min(1180px, calc(100% - 40px));
+
+  margin: 0 auto;
+}
+
+/* =========================
+   HERO
+========================= */
+
+.contact-hero {
+  position: relative;
+  overflow: hidden;
+
+  padding: 70px 0 65px;
+
+  background:
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(37, 99, 235, 0.1),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 15% 85%,
+      rgba(250, 204, 17, 0.08),
+      transparent 25%
+    ),
+    var(--bg-main);
+}
+
+.contact-hero span,
+.contact-heading > span {
+  display: inline-flex;
+
+  margin-bottom: 14px;
+
+  color: var(--primary-600);
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.contact-hero h1 {
+  margin: 0;
+
+  color: var(--gray-900);
+
+  font-size: clamp(40px, 5vw, 58px);
+  line-height: 1.25;
+}
+
+.contact-hero h1 strong {
+  color: var(--primary-600);
+
+  font-weight: 800;
+}
+
+.contact-hero p {
+  max-width: 700px;
+
+  margin: 20px 0 0;
+
+  color: var(--text-secondary);
+
+  font-size: 16px;
+  line-height: 2;
+}
+
+/* =========================
+   MAIN
+========================= */
+
+.contact-section {
+  padding: 70px 0 90px;
+
+  background: var(--white);
+}
+
+.contact-grid {
+  display: grid;
+
+  grid-template-columns: 0.85fr 1.15fr;
+
+  gap: 55px;
+
+  align-items: start;
+}
+
+.contact-heading h2 {
+  margin: 0 0 13px;
+
+  color: var(--gray-900);
+
+  font-size: 32px;
+}
+
+.contact-heading p {
+  max-width: 500px;
+
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  line-height: 1.9;
+
+  font-size: 14px;
+}
+
+/* =========================
+   INFO
+========================= */
+
+.contact-info-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  margin-top: 32px;
+}
+
+.contact-info-card {
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  padding: 17px;
+
+  background: var(--white);
+
+  border: 1px solid var(--border-light);
+
+  border-radius: 14px;
+
+  transition:
+    transform var(--transition-normal),
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.contact-info-card:hover {
+  transform: translateY(-2px);
+
+  border-color: var(--primary-100);
+
+  box-shadow: var(--shadow-sm);
+}
+
+.contact-info-icon {
+  width: 46px;
+  height: 46px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+
+.contact-info-card span {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: var(--text-muted);
+
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.contact-info-card a,
+.contact-info-card p {
+  margin: 0;
+
+  color: var(--gray-900);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  text-decoration: none;
+}
+
+.contact-info-card a:hover {
+  color: var(--primary-600);
+}
+
+/* =========================
+   FORM
+========================= */
+
+.contact-form-card {
+  padding: 32px;
+
+  background: var(--white);
+
+  border: 1px solid var(--border-light);
+
+  border-radius: 20px;
+
+  box-shadow: var(--shadow-lg);
+}
+
+.contact-form-header {
+  display: flex;
+  align-items: center;
+
+  gap: 14px;
+
+  margin-bottom: 28px;
+}
+
+.contact-form-icon {
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 13px;
+
+  background: var(--primary-50);
+  color: var(--primary-600);
+}
+
+.contact-form-header h2 {
+  margin: 0 0 4px;
+
+  color: var(--gray-900);
+
+  font-size: 20px;
+}
+
+.contact-form-header p {
+  margin: 0;
+
+  color: var(--text-muted);
+
+  font-size: 13px;
+}
+
+.contact-form-row {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 16px;
+}
+
+.contact-field {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+
+  margin-bottom: 17px;
+}
+
+.contact-field label {
+  color: var(--gray-700);
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.contact-field input,
+.contact-field textarea {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--border-light);
+
+  border-radius: 10px;
+
+  outline: none;
+
+  background: var(--gray-50);
+
+  color: var(--gray-900);
+
+  font-family: inherit;
+
+  font-size: 14px;
+
+  transition:
+    border-color var(--transition-normal),
+    background var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.contact-field input {
+  height: 48px;
+
+  padding: 0 14px;
+}
+
+.contact-field textarea {
+  min-height: 140px;
+
+  padding: 13px 14px;
+
+  resize: vertical;
+
+  line-height: 1.8;
+}
+
+.contact-field input:focus,
+.contact-field textarea:focus {
+  border-color: var(--primary-600);
+
+  background: var(--white);
+
+  box-shadow:
+    0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.contact-field input::placeholder,
+.contact-field textarea::placeholder {
+  color: var(--gray-400);
+}
+
+.contact-submit {
+  width: 100%;
+
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  border: 0;
+
+  border-radius: 10px;
+
+  background: var(--gradient-primary);
+
+  color: var(--white);
+
+  cursor: pointer;
+
+  font-family: inherit;
+
+  font-size: 14px;
+  font-weight: 750;
+
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
+}
+
+.contact-submit:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 9px 20px rgba(37, 99, 235, 0.2);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 850px) {
+  .contact-grid {
+    grid-template-columns: 1fr;
+
+    gap: 45px;
+  }
+}
+
+@media (max-width: 600px) {
+  .contact-container {
+    width: calc(100% - 28px);
+  }
+
+  .contact-hero {
+    padding: 55px 0;
+  }
+
+  .contact-hero h1 {
+    font-size: 40px;
+  }
+
+  .contact-section {
+    padding: 55px 0 70px;
+  }
+
+  .contact-form-row {
+    grid-template-columns: 1fr;
+
+    gap: 0;
+  }
+
+  .contact-form-card {
+    padding: 23px;
+  }
+}

@@ -83,7 +83,7 @@ function CVUploadPage() {
             <span className="section-kicker">AI CV Builder</span>
 
             <h1>
-              خلّي الذكاء الاصطناعي <span>يفهم سيرتك</span>
+              خلي الذكاء الاصطناعي <span>يفهم سيرتك</span>
             </h1>
 
             <p>

@@ -21,7 +21,6 @@ function Navbar() {
   return (
     <header className="navbar">
       <div className="container navbar-inner">
-
         <Logo />
 
         <nav
@@ -37,31 +36,22 @@ function Navbar() {
             استكشف الفرص
           </Link>
 
-          <Link
-            to="/opportunities?category=scholarship"
-            onClick={closeMobile}
-          >
-            المنح الدراسية
+          <Link to="/about" onClick={closeMobile}>
+            من نحن
           </Link>
 
-          <Link
-            to="/opportunities?category=training"
-            onClick={closeMobile}
-          >
-            تدريب وتوظيف
+          <Link to="/contact" onClick={closeMobile}>
+            تواصل معنا
           </Link>
 
-          {isAuthenticated && (
-            <Link to="/dashboard" onClick={closeMobile}>
-              لوحة التحكم
-            </Link>
-          )}
+          <Link to="/dashboard" onClick={closeMobile}>
+            لوحة التحكم
+          </Link>
         </nav>
 
         <div className="navbar-actions">
-
           <Link to="/cv/upload" className="ai-navbar-button">
-          <FileCheck2 size={16} />
+            <FileCheck2 size={16} />
             <span>حلّل سيرتك بالذكاء الاصطناعي</span>
           </Link>
 
@@ -73,9 +63,7 @@ function Navbar() {
                 {user?.name?.charAt(0) || "م"}
               </span>
 
-              <span>
-                {user?.name || "حسابي"}
-              </span>
+              <span>{user?.name || "حسابي"}</span>
 
               <ChevronDown size={16} />
             </Link>
@@ -98,7 +86,6 @@ function Navbar() {
               <Menu size={23} />
             )}
           </button>
-
         </div>
       </div>
     </header>

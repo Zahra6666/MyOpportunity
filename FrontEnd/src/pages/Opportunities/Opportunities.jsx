@@ -7,20 +7,20 @@ import {
   RotateCcw,
   Bookmark,
   Clock3,
+  ArrowLeft,
+  Building2,
 } from "lucide-react";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Badge from "../../components/common/Badge";
-import { getOpportunities } from "../../services/opportunityService";
+import { opportunities as opportunitiesData } from "../../data/opportunities";
 
 import "./Opportunities.css";
 
 function Opportunities() {
-  const [opportunities, setOpportunities] = useState([]);
-
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [location, setLocation] = useState("all");
@@ -29,75 +29,51 @@ function Opportunities() {
   const [sort, setSort] = useState("match");
   const [mobileFilters, setMobileFilters] = useState(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    const loadOpportunities = async () => {
-      setLoading(true);
-      setError("");
-
-      try {
-        const response = await getOpportunities();
-
-        const data =
-          response?.opportunities ||
-          response?.data ||
-          response?.results ||
-          response;
-
-        setOpportunities(
-          Array.isArray(data) ? data : []
-        );
-      } catch (error) {
-        setError(
-          error?.message ||
-            "تعذر تحميل الفرص. يرجى المحاولة مرة أخرى."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadOpportunities();
-  }, []);
+  const opportunities = Array.isArray(opportunitiesData)
+    ? opportunitiesData
+    : [];
 
   const filteredOpportunities = useMemo(() => {
     let result = [...opportunities];
 
     if (search.trim()) {
-      const query = search.toLowerCase();
+      const query = search.trim().toLowerCase();
 
-      result = result.filter((item) =>
-        [
+      result = result.filter((item) => {
+        const searchableValues = [
           item.title,
           item.titleEn,
           item.company,
+          item.company_name,
           item.location,
           item.description,
-          ...(item.skills || []),
-        ]
+          item.type,
+          item.category,
+          item.category_name,
+          item.mode,
+          ...(Array.isArray(item.skills) ? item.skills : []),
+        ];
+
+        return searchableValues
           .filter(Boolean)
           .some((value) =>
-            String(value)
-              .toLowerCase()
-              .includes(query)
-          )
-      );
+            String(value).toLowerCase().includes(query)
+          );
+      });
     }
 
     if (category !== "all") {
-      result = result.filter(
-        (item) =>
-          String(
-            item.type ||
-              item.category ||
-              item.category_name ||
-              ""
-          )
-            .toLowerCase()
-            .includes(category.toLowerCase())
-      );
+      result = result.filter((item) => {
+        const value =
+          item.type ||
+          item.category ||
+          item.category_name ||
+          "";
+
+        return String(value)
+          .toLowerCase()
+          .includes(category.toLowerCase());
+      });
     }
 
     if (location !== "all") {
@@ -110,32 +86,61 @@ function Opportunities() {
 
     if (mode !== "all") {
       result = result.filter((item) =>
-        String(item.mode || "")
+        String(
+          item.mode ||
+            item.work_mode ||
+            item.work_type ||
+            ""
+        )
           .toLowerCase()
           .includes(mode.toLowerCase())
       );
     }
 
-    result = result.filter(
-      (item) =>
-        Number(item.match || item.match_percentage || 0) >=
-        minMatch
-    );
+    result = result.filter((item) => {
+      const match = Number(
+        item.match ??
+          item.match_percentage ??
+          0
+      );
+
+      return match >= minMatch;
+    });
 
     if (sort === "match") {
       result.sort(
         (a, b) =>
           Number(
-            b.match || b.match_percentage || 0
+            b.match ??
+              b.match_percentage ??
+              0
           ) -
           Number(
-            a.match || a.match_percentage || 0
+            a.match ??
+              a.match_percentage ??
+              0
           )
       );
     }
 
     if (sort === "latest") {
-      result.reverse();
+      result.sort((a, b) => {
+        const dateA = new Date(
+          a.posted_at ||
+            a.posted ||
+            a.created_at ||
+            0
+        ).getTime();
+
+        const dateB = new Date(
+          b.posted_at ||
+            b.posted ||
+            b.created_at ||
+            0
+        ).getTime();
+
+        return dateB - dateA;
+      });
     }
 
     return result;
@@ -160,10 +165,8 @@ function Opportunities() {
 
   return (
     <PageContainer className="opportunities-page">
-
       <section className="opportunities-header">
         <div className="container">
-
           <div className="opportunities-breadcrumb">
             <Link to="/">الرئيسية</Link>
             <span>/</span>
@@ -171,15 +174,12 @@ function Opportunities() {
           </div>
 
           <div className="opportunities-heading">
-
             <div>
               <span className="opportunities-overline">
                 فرص مهنية وتعليمية
               </span>
 
-              <h1>
-                استكشف الفرص المتاحة
-              </h1>
+              <h1>استكشف الفرص المتاحة</h1>
 
               <p>
                 ابحث بين الوظائف والمنح والتدريبات
@@ -194,20 +194,18 @@ function Opportunities() {
 
               <span>فرصة متاحة</span>
             </div>
-
           </div>
 
           <div className="opportunities-search">
-
             <div className="main-search">
               <Search size={19} />
 
               <input
                 value={search}
-                onChange={(e) =>
-                  setSearch(e.target.value)
+                onChange={(event) =>
+                  setSearch(event.target.value)
                 }
-                placeholder="ابحث عن مسمى وظيفي، شركة، مهارة..."
+                placeholder="ابحث عن فرصة، شركة، مهارة..."
               />
             </div>
 
@@ -216,53 +214,40 @@ function Opportunities() {
 
               <select
                 value={location}
-                onChange={(e) =>
-                  setLocation(e.target.value)
+                onChange={(event) =>
+                  setLocation(event.target.value)
                 }
               >
                 <option value="all">
                   كل المحافظات
                 </option>
 
-                <option value="بغداد">
-                  بغداد
-                </option>
-
-                <option value="البصرة">
-                  البصرة
-                </option>
-
-                <option value="أربيل">
-                  أربيل
-                </option>
-
-                <option value="النجف">
-                  النجف
-                </option>
-
+                <option value="بغداد">بغداد</option>
+                <option value="البصرة">البصرة</option>
+                <option value="أربيل">أربيل</option>
+                <option value="النجف">النجف</option>
                 <option value="السليمانية">
                   السليمانية
                 </option>
               </select>
+
+              <ChevronDown size={14} />
             </div>
 
             <button
               type="button"
               className="opportunities-search-button"
+              onClick={() => {}}
             >
               بحث
               <Search size={16} />
             </button>
-
           </div>
-
         </div>
       </section>
 
       <section className="opportunities-content">
-
         <div className="container opportunities-layout">
-
           <aside
             className={`opportunities-filters ${
               mobileFilters
@@ -270,9 +255,7 @@ function Opportunities() {
                 : ""
             }`}
           >
-
             <div className="filters-header">
-
               <div>
                 <SlidersHorizontal size={17} />
                 <h2>تصفية النتائج</h2>
@@ -285,17 +268,12 @@ function Opportunities() {
                 <RotateCcw size={14} />
                 إعادة ضبط
               </button>
-
             </div>
 
             <div className="filter-section">
-
-              <label>
-                نوع الفرصة
-              </label>
+              <label>نوع الفرصة</label>
 
               <div className="filter-options">
-
                 {[
                   ["all", "جميع الفرص"],
                   ["وظيفة", "وظائف"],
@@ -304,87 +282,63 @@ function Opportunities() {
                   ["مسابقة", "مسابقات"],
                   ["كورس", "كورسات"],
                 ].map(([value, label]) => (
-
                   <label
                     className="filter-radio"
                     key={value}
                   >
-
                     <input
                       type="radio"
                       name="category"
                       value={value}
                       checked={category === value}
-                      onChange={(e) =>
-                        setCategory(e.target.value)
+                      onChange={(event) =>
+                        setCategory(event.target.value)
                       }
                     />
 
                     <span>{label}</span>
-
                   </label>
-
                 ))}
-
               </div>
-
             </div>
 
             <div className="filter-divider" />
 
             <div className="filter-section">
-
-              <label>
-                مكان الفرصة
-              </label>
+              <label>مكان الفرصة</label>
 
               <div className="filter-select">
-
                 <MapPin size={15} />
 
                 <select
                   value={location}
-                  onChange={(e) =>
-                    setLocation(e.target.value)
+                  onChange={(event) =>
+                    setLocation(event.target.value)
                   }
                 >
                   <option value="all">
                     كل المحافظات
                   </option>
 
-                  <option value="بغداد">
-                    بغداد
-                  </option>
-
-                  <option value="البصرة">
-                    البصرة
-                  </option>
-
-                  <option value="أربيل">
-                    أربيل
-                  </option>
-
-                  <option value="النجف">
-                    النجف
+                  <option value="بغداد">بغداد</option>
+                  <option value="البصرة">البصرة</option>
+                  <option value="أربيل">أربيل</option>
+                  <option value="النجف">النجف</option>
+                  <option value="السليمانية">
+                    السليمانية
                   </option>
                 </select>
 
                 <ChevronDown size={14} />
-
               </div>
-
             </div>
 
             <div className="filter-divider" />
 
             <div className="filter-section">
-
-              <label>
-                نوع العمل
-              </label>
+              <label>نوع العمل</label>
 
               <div className="filter-options">
-
                 {[
                   ["all", "كل الأنواع"],
                   ["دوام كامل", "دوام كامل"],
@@ -392,39 +346,30 @@ function Opportunities() {
                   ["عن بعد", "عن بعد"],
                   ["تدريب", "تدريب"],
                 ].map(([value, label]) => (
-
                   <label
                     className="filter-radio"
                     key={value}
                   >
-
                     <input
                       type="radio"
                       name="mode"
                       value={value}
                       checked={mode === value}
-                      onChange={(e) =>
-                        setMode(e.target.value)
+                      onChange={(event) =>
+                        setMode(event.target.value)
                       }
                     />
 
                     <span>{label}</span>
-
                   </label>
-
                 ))}
-
               </div>
-
             </div>
 
             <div className="filter-divider" />
 
             <div className="filter-section">
-
-              <label>
-                الحد الأدنى للتوافق
-              </label>
+              <label>الحد الأدنى للتوافق</label>
 
               <div className="match-filter-value">
                 {minMatch}%
@@ -437,8 +382,10 @@ function Opportunities() {
                 max="100"
                 step="5"
                 value={minMatch}
-                onChange={(e) =>
-                  setMinMatch(Number(e.target.value))
+                onChange={(event) =>
+                  setMinMatch(
+                    Number(event.target.value)
+                  )
                 }
               />
 
@@ -446,18 +393,13 @@ function Opportunities() {
                 <span>0%</span>
                 <span>100%</span>
               </div>
-
             </div>
 
             <div className="filter-profile-box">
-
               <BriefcaseBusiness size={18} />
 
               <div>
-
-                <strong>
-                  حسّن نتائجك
-                </strong>
+                <strong>حسّن نتائجك</strong>
 
                 <p>
                   أضف سيرتك الذاتية للحصول على
@@ -467,17 +409,12 @@ function Opportunities() {
                 <Link to="/cv/upload">
                   إضافة السيرة الذاتية
                 </Link>
-
               </div>
-
             </div>
-
           </aside>
 
           <div className="opportunities-results">
-
             <div className="mobile-filter-row">
-
               <button
                 type="button"
                 onClick={() =>
@@ -491,31 +428,24 @@ function Opportunities() {
               <span>
                 {filteredOpportunities.length} نتائج
               </span>
-
             </div>
 
             <div className="results-toolbar">
-
               <div>
-
-                <strong>
-                  الفرص المتاحة
-                </strong>
+                <strong>الفرص المتاحة</strong>
 
                 <span>
                   {filteredOpportunities.length} فرصة
                 </span>
-
               </div>
 
               <div className="sort-select">
-
                 <span>ترتيب حسب</span>
 
                 <select
                   value={sort}
-                  onChange={(e) =>
-                    setSort(e.target.value)
+                  onChange={(event) =>
+                    setSort(event.target.value)
                   }
                 >
                   <option value="match">
@@ -528,77 +458,27 @@ function Opportunities() {
                 </select>
 
                 <ChevronDown size={14} />
-
               </div>
-
             </div>
 
-            {loading ? (
-
-              <div className="opportunities-empty">
-
-                <div className="empty-icon">
-                  <Search size={25} />
-                </div>
-
-                <h3>
-                  جارٍ تحميل الفرص...
-                </h3>
-
-                <p>
-                  يرجى الانتظار حتى يتم تحميل الفرص المتاحة.
-                </p>
-
-              </div>
-
-            ) : error ? (
-
-              <div className="opportunities-empty">
-
-                <div className="empty-icon">
-                  <Search size={25} />
-                </div>
-
-                <h3>
-                  تعذر تحميل الفرص
-                </h3>
-
-                <p>
-                  {error}
-                </p>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    window.location.reload()
-                  }
-                >
-                  إعادة المحاولة
-                </button>
-
-              </div>
-
-            ) : filteredOpportunities.length > 0 ? (
-
+            {filteredOpportunities.length > 0 ? (
               <div className="explorer-grid">
-
                 {filteredOpportunities.map(
-                  (opportunity) => (
-
+                  (opportunity, index) => (
                     <ExplorerCard
-                      key={opportunity.id}
+                      key={
+                        opportunity.id ??
+                        opportunity._id ??
+                        index
+                      }
                       opportunity={opportunity}
+                      index={index}
                     />
-
                   )
                 )}
-
               </div>
-
             ) : (
-
               <div className="opportunities-empty">
-
                 <div className="empty-icon">
                   <Search size={25} />
                 </div>
@@ -608,7 +488,8 @@ function Opportunities() {
                 </h3>
 
                 <p>
-                  جرّب تغيير البحث أو إزالة بعض الفلاتر.
+                  جرّب تغيير البحث أو إزالة بعض
+                  الفلاتر.
                 </p>
 
                 <button
@@ -617,67 +498,94 @@ function Opportunities() {
                 >
                   إعادة ضبط الفلاتر
                 </button>
-
               </div>
-
             )}
-
           </div>
-
         </div>
-
       </section>
-
     </PageContainer>
   );
 }
 
-function ExplorerCard({ opportunity }) {
-  const {
-    id,
-    title,
-    titleEn,
-    company,
-    location,
-    type,
-    category,
-    category_name,
-    mode,
-    salary,
-    match,
-    match_percentage,
-    description,
-    skills = [],
-    deadline,
-  } = opportunity;
+function ExplorerCard({ opportunity, index }) {
+  const id =
+    opportunity.id ??
+    opportunity._id ??
+    index;
 
-  const opportunityType =
-    type || category || category_name || "فرصة";
+  const title =
+    opportunity.title ||
+    opportunity.name ||
+    "فرصة متاحة";
 
-  const matchValue =
-    match ?? match_percentage ?? 0;
+  const company =
+    opportunity.company ||
+    opportunity.company_name ||
+    opportunity.company?.name ||
+    "جهة ناشرة";
+
+  const location =
+    opportunity.location || "العراق";
+
+  const type =
+    opportunity.type ||
+    opportunity.category ||
+    opportunity.category_name ||
+    "فرصة";
+
+  const mode =
+    opportunity.mode ||
+    opportunity.work_mode ||
+    opportunity.work_type ||
+    "غير محدد";
+
+  const match =
+    opportunity.match ??
+    opportunity.match_percentage ??
+    0;
+
+  const deadline =
+    opportunity.deadline ||
+    opportunity.application_deadline ||
+    "غير محدد";
+
+  const description =
+    opportunity.description ||
+    "اكتشف تفاصيل هذه الفرصة والمتطلبات الخاصة بها.";
+
+  const skills = Array.isArray(opportunity.skills)
+    ? opportunity.skills
+    : [];
 
   return (
-    <article className="explorer-card">
-
+    <article
+      className="explorer-card"
+      style={{
+        "--card-index": index,
+      }}
+    >
       <div className="explorer-card-top">
-
         <div className="explorer-company-logo">
-          <BriefcaseBusiness size={20} />
+          {opportunity.company_logo ||
+          opportunity.company?.logo ? (
+            <img
+              src={
+                opportunity.company_logo ||
+                opportunity.company?.logo
+              }
+              alt={company}
+            />
+          ) : (
+            <Building2 size={21} />
+          )}
         </div>
 
         <div className="explorer-card-title">
-
           <Badge variant="type">
-            {opportunityType}
+            {type}
           </Badge>
 
           <h3>{title}</h3>
-
-          {titleEn && (
-            <span>{titleEn}</span>
-          )}
-
         </div>
 
         <button
@@ -687,90 +595,74 @@ function ExplorerCard({ opportunity }) {
         >
           <Bookmark size={17} />
         </button>
-
       </div>
 
       <div className="explorer-company">
-
         <span>
           <BriefcaseBusiness size={14} />
-          {company || "غير محدد"}
+          {company}
         </span>
 
         <span>
           <MapPin size={14} />
-          {location || "غير محدد"}
+          {location}
         </span>
-
       </div>
 
       <div className="explorer-details">
-
         <span>
           <BriefcaseBusiness size={14} />
-          {mode || "غير محدد"}
+          {mode}
         </span>
 
         <span>
           <Clock3 size={14} />
-          {deadline || "غير محدد"}
+          آخر موعد: {deadline}
         </span>
-
       </div>
 
       <p className="explorer-description">
-        {description || "لا يوجد وصف متاح لهذه الفرصة."}
+        {description}
       </p>
 
-      <div className="explorer-skills">
-
-        {skills.slice(0, 4).map((skill) => (
-          <span key={skill}>
-            {skill}
-          </span>
-        ))}
-
-      </div>
+      {skills.length > 0 && (
+        <div className="explorer-skills">
+          {skills.slice(0, 4).map((skill, skillIndex) => (
+            <span key={`${skill}-${skillIndex}`}>
+              {skill}
+            </span>
+          ))}
+        </div>
+      )}
 
       <div className="explorer-match">
-
         <div>
-
-          <strong>
-            {matchValue}%
-          </strong>
-
-          <span>
-            نسبة التوافق
-          </span>
-
+          <strong>{match}%</strong>
+          <span>نسبة التوافق</span>
         </div>
 
         <div className="explorer-match-bar">
-
           <span
             style={{
-              width: `${matchValue}%`,
+              width: `${Math.min(
+                Math.max(Number(match), 0),
+                100
+              )}%`,
             }}
           />
-
         </div>
-
       </div>
 
       <div className="explorer-footer">
-
-        <strong>
-          {salary || "غير محدد"}
-        </strong>
+        <span className="explorer-opportunity-label">
+          فرصة مناسبة لك
+        </span>
 
         <Link to={`/opportunities/${id}`}>
           عرض التفاصيل
-          <span>←</span>
+          <ArrowLeft size={16} />
         </Link>
-
       </div>
-
     </article>
   );
 }

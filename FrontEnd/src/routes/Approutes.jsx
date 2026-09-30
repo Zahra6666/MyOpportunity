@@ -38,7 +38,8 @@ import EditCompany from "../pages/Company/EditCompany";
 
 import ChatbotButton from "../components/Chatbot/ChatbotButton";
 import NotFound from "../pages/NotFound";
-
+import About from "../pages/About/About";
+import Contact from "../pages/Contact/Contact";
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -147,11 +148,20 @@ function AppRoutes() {
             element={<EditCompany />}
           />
 
-          {/* Not Found */}
+          
           <Route
             path="*"
             element={<NotFound />}
           />
+          <Route
+            path="/about"
+            element={<About />}
+          />
+          <Route
+            path="/contact"
+            element={<Contact />}
+          />
+         
 
         </Routes>
 

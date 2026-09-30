@@ -55,7 +55,7 @@ function Login() {
 
           <div className="auth-heading">
             <h1>
-              أهلاً بعودتك
+              أهلاً بك
             </h1>
 
             <p>
