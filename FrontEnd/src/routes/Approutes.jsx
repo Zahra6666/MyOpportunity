@@ -37,6 +37,7 @@ import ChatbotButton from "../components/Chatbot/ChatbotButton";
 import NotFound from "../pages/NotFound";
 import About from "../pages/About/About";
 import Contact from "../pages/Contact/Contact";
+
 function AppRoutes() {
   return (
     <BrowserRouter>
@@ -51,6 +52,7 @@ function AppRoutes() {
         <Route path="/opportunities/:id" element={<OpportunityDetails />} />
 
         <Route path="/about" element={<About />} />
+
         <Route path="/contact" element={<Contact />} />
 
         <Route path="/company/:id" element={<CompanyPage />} />
@@ -104,6 +106,7 @@ function AppRoutes() {
       </Routes>
 
       <ChatbotButton />
+
       <Footer />
     </BrowserRouter>
   );

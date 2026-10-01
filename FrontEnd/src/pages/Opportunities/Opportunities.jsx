@@ -227,7 +227,6 @@ function Opportunities() {
                 onChange={(event) => setLocation(event.target.value)}
               >
                 <option value="all">كل المحافظات</option>
-
                 <option value="بغداد">بغداد</option>
                 <option value="البصرة">البصرة</option>
                 <option value="أربيل">أربيل</option>
@@ -309,7 +308,6 @@ function Opportunities() {
                   onChange={(event) => setLocation(event.target.value)}
                 >
                   <option value="all">كل المحافظات</option>
-
                   <option value="بغداد">بغداد</option>
                   <option value="البصرة">البصرة</option>
                   <option value="أربيل">أربيل</option>
@@ -413,7 +411,6 @@ function Opportunities() {
                   onChange={(event) => setSort(event.target.value)}
                 >
                   <option value="match">الأكثر توافقاً</option>
-
                   <option value="latest">الأحدث</option>
                 </select>
 

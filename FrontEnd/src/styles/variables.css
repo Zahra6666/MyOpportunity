@@ -1,6 +1,6 @@
 :root {
   /* الخطوط */
-  --font-main: 'Readex Pro', 'Cairo', sans-serif;
+  --font-main: "Readex Pro", "Cairo", sans-serif;
   color-scheme: light;
 
   /* الألوان الشبابية الأساسية */
@@ -68,8 +68,17 @@
   /* التدرجات */
   --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
   --gradient-accent: linear-gradient(135deg, #facc11 0%, #f59e0b 100%);
-  --gradient-hero: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.12), transparent 40%),
-    radial-gradient(circle at 20% 80%, rgba(250, 204, 17, 0.15), transparent 40%),
+  --gradient-hero:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(59, 130, 246, 0.12),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(250, 204, 17, 0.15),
+      transparent 40%
+    ),
     #f9f8f6;
 
   /* السرعة والمسافات */
@@ -121,7 +130,8 @@
 /* ==========================================
    الوضع الليلي (Dark Mode)
    ========================================== */
-html.dark, .dark {
+html.dark,
+.dark {
   color-scheme: dark;
 
   /* Dark surfaces for the reusable pastel accents used by Home and Explore. */
@@ -135,14 +145,14 @@ html.dark, .dark {
   --gray-100: #1e293b;
   --gray-200: #334155;
 
-  --bg-main: #0f172a;        /* خلفية كحلية داكنة راقية */
-  --bg-card: #1e293b;        /* كروت أغمق قليلاً من الخلفية */
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
   --bg-soft: #334155;
   --bg-dark: #020617;
 
   /* ألوان النصوص في الوضع الليلي */
-  --text-primary: #f8fafc;   /* نص أبيض ناعم */
-  --text-secondary: #cbd5e1; /* رمادي فاتح للوصف */
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
   --text-muted: #94a3b8;
   --text-light: #64748b;
 
@@ -156,17 +166,26 @@ html.dark, .dark {
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.45);
 
-  --gradient-hero: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.15), transparent 40%),
-    radial-gradient(circle at 20% 80%, rgba(250, 204, 17, 0.1), transparent 40%),
+  --gradient-hero:
+    radial-gradient(
+      circle at 80% 20%,
+      rgba(59, 130, 246, 0.15),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 20% 80%,
+      rgba(250, 204, 17, 0.1),
+      transparent 40%
+    ),
     #0f172a;
 }
-
-/* تطبيق الخط والخلفية والسلاسة عند التحويل */
 body {
   font-family: var(--font-main) !important;
   background-color: var(--bg-main);
   color: var(--text-primary);
   margin: 0;
   padding: 0;
-  transition: background-color var(--transition-normal), color var(--transition-normal);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
 }

@@ -19,11 +19,16 @@ import NotificationBell from "../notifications/NotificationBell";
 
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
+<<<<<<< HEAD
   const [accountOpen, setAccountOpen] = useState(false);
 
   const { isAuthenticated, user, logout } = useAuthContext();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
+=======
+  const { isAuthenticated, user } = useAuthContext();
+  const { theme, toggleTheme } = useTheme();
+>>>>>>> origin/frontend
 
   const closeMobile = () => setMobileOpen(false);
 
@@ -42,7 +47,12 @@ function Navbar() {
         <Logo />
 
         <nav
+<<<<<<< HEAD
           className={`navbar-links ${mobileOpen ? "navbar-links-open" : ""}`}
+=======
+          className={`navbar-links ${mobileOpen ? "navbar-links-open" : ""
+            }`}
+>>>>>>> origin/frontend
         >
           <Link to="/" onClick={closeMobile}>
             الرئيسية
@@ -71,6 +81,7 @@ function Navbar() {
             <span>حلّل سيرتك بالذكاء الاصطناعي</span>
           </Link>
 
+<<<<<<< HEAD
           <button
             type="button"
             onClick={toggleTheme}
@@ -80,6 +91,17 @@ function Navbar() {
             {theme === "dark" ? <Sun size={22} /> : <Moon size={22} />}
           </button>
 
+=======
+          
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label="تبديل المظهر"
+          >
+            {<Moon size={21} />}
+          </button>
+>>>>>>> origin/frontend
           <NotificationBell />
 
           {isAuthenticated ? (

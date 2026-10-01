@@ -46,7 +46,7 @@ function Register() {
         phone: form.phone || undefined,
       });
 
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
       setError(
         error?.message ||
