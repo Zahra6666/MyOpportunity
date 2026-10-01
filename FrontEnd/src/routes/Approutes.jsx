@@ -1,10 +1,7 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { AuthProvider } from "../context/AuthContext";
+import ProtectedRoute from "./ProtectedRoute";
+import RoleRoute from "./RoleRoute";
 
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
@@ -43,75 +40,38 @@ import Contact from "../pages/Contact/Contact";
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <Navbar />
 
-        <Navbar />
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
 
-        <Routes>
+        <Route path="/opportunities" element={<Opportunities />} />
 
-          {/* Public */}
-          <Route
-            path="/"
-            element={<Home />}
-          />
+        <Route path="/opportunities/:id" element={<OpportunityDetails />} />
 
-          <Route
-            path="/opportunities"
-            element={<Opportunities />}
-          />
+        <Route path="/company/:id" element={<CompanyPage />} />
 
-          <Route
-            path="/opportunities/:id"
-            element={<OpportunityDetails />}
-          />
+        <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/company/:id"
-            element={<CompanyPage />}
-          />
+        <Route path="/register" element={<Register />} />
 
-          <Route
-            path="/login"
-            element={<Login />}
-          />
+        {/* User */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<UserDashboard />} />
 
-          <Route
-            path="/register"
-            element={<Register />}
-          />
+          <Route path="/profile" element={<Profile />} />
 
-          {/* User */}
-          <Route
-            path="/dashboard"
-            element={<UserDashboard />}
-          />
+          <Route path="/saved" element={<SavedOpportunities />} />
 
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
+          <Route path="/cv/upload" element={<CVUploadPage />} />
 
-          <Route
-            path="/saved"
-            element={<SavedOpportunities />}
-          />
+          <Route path="/cv/analysis" element={<CVAnalysisPage />} />
+        </Route>
 
-          {/* CV */}
-          <Route
-            path="/cv/upload"
-            element={<CVUploadPage />}
-          />
-
-          <Route
-            path="/cv/analysis"
-            element={<CVAnalysisPage />}
-          />
-
-          {/* Admin */}
-          <Route
-            path="/admin"
-            element={<AdminDashboard />}
-          />
+        {/* Admin */}
+        <Route element={<RoleRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin" element={<AdminDashboard />} />
 
           <Route
             path="/admin/opportunities"
@@ -128,48 +88,20 @@ function AppRoutes() {
             element={<EditOpportunity />}
           />
 
-          <Route
-            path="/admin/users"
-            element={<ManageUsers />}
-          />
+          <Route path="/admin/users" element={<ManageUsers />} />
 
-          <Route
-            path="/admin/employers"
-            element={<ManageEmployers />}
-          />
+          <Route path="/admin/employers" element={<ManageEmployers />} />
 
-          <Route
-            path="/admin/employers/new"
-            element={<CreateCompany />}
-          />
+          <Route path="/admin/employers/new" element={<CreateCompany />} />
 
-          <Route
-            path="/admin/employers/:id/edit"
-            element={<EditCompany />}
-          />
+          <Route path="/admin/employers/:id/edit" element={<EditCompany />} />
+        </Route>
 
-          
-          <Route
-            path="*"
-            element={<NotFound />}
-          />
-          <Route
-            path="/about"
-            element={<About />}
-          />
-          <Route
-            path="/contact"
-            element={<Contact />}
-          />
-         
+        <Route path="*" element={<NotFound />} />
+      </Routes>
 
-        </Routes>
-
-        <ChatbotButton />
-
-        <Footer />
-
-      </AuthProvider>
+      <ChatbotButton />
+      <Footer />
     </BrowserRouter>
   );
 }

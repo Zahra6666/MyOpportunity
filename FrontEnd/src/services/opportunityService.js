@@ -82,7 +82,7 @@ export async function unsaveOpportunity(id) {
 }
 
 export async function getSavedOpportunities() {
-  return request("/me/savedCompanies");
+  return request("/me/saved");
 }
 
 export default {

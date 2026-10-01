@@ -3,6 +3,8 @@ import {
   FileCheck2,
   LogIn,
   Menu,
+  Moon,
+  Sun,
   X,
 } from "lucide-react";
 import { useState } from "react";
@@ -10,11 +12,13 @@ import { Link } from "react-router-dom";
 
 import Logo from "../common/Logo";
 import { useAuthContext } from "../../context/AuthContext";
+import { useTheme } from "../../context/ThemeContext";
 import NotificationBell from "../notifications/NotificationBell";
 
 function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isAuthenticated, user } = useAuthContext();
+  const { theme, toggleTheme } = useTheme();
 
   const closeMobile = () => setMobileOpen(false);
 
@@ -24,9 +28,8 @@ function Navbar() {
         <Logo />
 
         <nav
-          className={`navbar-links ${
-            mobileOpen ? "navbar-links-open" : ""
-          }`}
+          className={`navbar-links ${mobileOpen ? "navbar-links-open" : ""
+            }`}
         >
           <Link to="/" onClick={closeMobile}>
             الرئيسية
@@ -55,6 +58,15 @@ function Navbar() {
             <span>حلّل سيرتك بالذكاء الاصطناعي</span>
           </Link>
 
+          
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="theme-toggle"
+            aria-label="تبديل المظهر"
+          >
+            {<Moon size={21} />}
+          </button>
           <NotificationBell />
 
           {isAuthenticated ? (
