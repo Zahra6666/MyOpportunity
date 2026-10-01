@@ -242,6 +242,27 @@ function Home() {
         </div>
       </section>
 
+      {/* FINAL CTA */}
+      <section className="home-final-cta home-cta-early">
+        <div className="container">
+          <div className="final-cta-box reveal-on-scroll">
+            <div>
+              <span>ابدأ رحلتك المهنية اليوم</span>
+              <h2>فرصتك القادمة قد تكون أقرب مما تتوقع</h2>
+              <p>أنشئ ملفك المهني واستكشف آلاف الفرص المتاحة في مكان واحد.</p>
+            </div>
+            <div className="final-cta-buttons">
+              <Link to="/register" className="btn final-primary-button">
+                إنشاء حساب <ArrowLeft size={17} />
+              </Link>
+              <Link to="/opportunities" className="btn final-secondary-button">
+                استكشف الفرص
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CATEGORIES */}
       <section className="home-section categories-section">
         <div className="container">
@@ -321,27 +342,6 @@ function Home() {
             ) : (
               <div className="home-empty">لا توجد فرص متاحة حالياً.</div>
             )}
-          </div>
-        </div>
-      </section>
-
-      {/* FINAL CTA */}
-      <section className="home-final-cta">
-        <div className="container">
-          <div className="final-cta-box reveal-on-scroll">
-            <div>
-              <span>ابدأ رحلتك المهنية اليوم</span>
-              <h2>فرصتك القادمة قد تكون أقرب مما تتوقع</h2>
-              <p>أنشئ ملفك المهني واستكشف آلاف الفرص المتاحة في مكان واحد.</p>
-            </div>
-            <div className="final-cta-buttons">
-              <Link to="/register" className="btn final-primary-button">
-                إنشاء حساب <ArrowLeft size={17} />
-              </Link>
-              <Link to="/opportunities" className="btn final-secondary-button">
-                استكشف الفرص
-              </Link>
-            </div>
           </div>
         </div>
       </section>

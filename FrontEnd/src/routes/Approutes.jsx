@@ -4,8 +4,6 @@ import {
   Route,
 } from "react-router-dom";
 
-import { AuthProvider } from "../context/AuthContext";
-
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
 
@@ -43,9 +41,7 @@ import Contact from "../pages/Contact/Contact";
 function AppRoutes() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-
-        <Navbar />
+      <Navbar />
 
         <Routes>
 
@@ -165,11 +161,9 @@ function AppRoutes() {
 
         </Routes>
 
-        <ChatbotButton />
+      <ChatbotButton />
 
-        <Footer />
-
-      </AuthProvider>
+      <Footer />
     </BrowserRouter>
   );
 }
