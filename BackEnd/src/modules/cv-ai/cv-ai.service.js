@@ -44,6 +44,9 @@ ${parsedText}
 
   await cvRepository.updateCvAiData(
     userId,
+    cvInfo.full_name,
+    cvInfo.email,
+    cvInfo.phone,
     cvInfo.skills,
     cvInfo.experience_years,
     cvInfo.education,

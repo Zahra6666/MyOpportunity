@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import {
   login as loginRequest,
@@ -18,79 +13,62 @@ const TOKEN_KEY = "token";
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const savedUser =
-        localStorage.getItem(USER_KEY);
-
-      return savedUser
-        ? JSON.parse(savedUser)
-        : null;
+      const savedUser = localStorage.getItem(USER_KEY);
+      return savedUser ? JSON.parse(savedUser) : null;
     } catch {
       return null;
     }
   });
 
-  const [token, setToken] = useState(() =>
-    localStorage.getItem(TOKEN_KEY)
-  );
+  const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY));
+
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
-      localStorage.setItem(
-        USER_KEY,
-        JSON.stringify(user)
-      );
+      localStorage.setItem(USER_KEY, JSON.stringify(user));
     } else {
       localStorage.removeItem(USER_KEY);
     }
   }, [user]);
 
   const login = async (credentials) => {
-    const response =
-      await loginRequest(credentials);
+    try {
+      setLoading(true);
 
-    const data =
-      response?.user ||
-      response?.data ||
-      response;
+      const response = await loginRequest(credentials);
 
-    const jwt =
-      response?.token ||
-      response?.access_token ||
-      response?.accessToken ||
-      data?.token ||
-      data?.access_token;
+      const jwt =
+        response?.token || response?.access_token || response?.accessToken;
 
-    const loggedUser =
-      response?.user ||
-      response?.data?.user ||
-      data;
+      const loggedUser = response?.user;
 
-    if (jwt) {
-      localStorage.setItem(
-        TOKEN_KEY,
-        jwt
-      );
+      if (!jwt || !loggedUser) {
+        throw new Error("بيانات تسجيل الدخول غير مكتملة.");
+      }
+
+      localStorage.setItem(TOKEN_KEY, jwt);
+      localStorage.setItem(USER_KEY, JSON.stringify(loggedUser));
 
       setToken(jwt);
-    }
-
-    if (loggedUser) {
-      localStorage.setItem(
-        USER_KEY,
-        JSON.stringify(loggedUser)
-      );
-
       setUser(loggedUser);
-    }
 
-    return response;
+      return response;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const register = async (userData) => {
-    const response =
-      await registerRequest(userData);
+    try {
+      setLoading(true);
 
-    return response;
+      const response = await registerRequest(userData);
+
+      return response;
+    } finally {
+      setLoading(false);
+    }
   };
 
   const logout = () => {
@@ -104,18 +82,14 @@ export function AuthProvider({ children }) {
   const value = {
     user,
     token,
-    isAuthenticated:
-      Boolean(user) && Boolean(token),
+    loading,
+    isAuthenticated: Boolean(user && token),
     login,
     register,
     logout,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuthContext() {

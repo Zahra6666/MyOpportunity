@@ -542,8 +542,7 @@
   border-radius: var(--radius-lg);
   background: var(--bg-card);
   box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
-  opacity: 0;
-  animation: oppFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  animation: oppFadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   animation-delay: calc(var(--card-index) * 45ms);
   transition:
     transform 0.28s ease,

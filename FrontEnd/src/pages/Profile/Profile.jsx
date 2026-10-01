@@ -17,11 +17,14 @@ import PageContainer from "../../components/layout/PageContainer";
 import Button from "../../components/common/Button";
 
 import { getMyProfile, updateMyProfile } from "../../services/userService";
+import { getMyCV } from "../../services/cvService";
 
 import "./Profile.css";
 
 function Profile() {
   const [profile, setProfile] = useState(null);
+  const [cv, setCv] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -42,25 +45,26 @@ function Profile() {
     setError("");
 
     try {
-      const response = await getMyProfile();
+      const [profileResponse, cvResponse] = await Promise.all([
+        getMyProfile(),
+        getMyCV().catch(() => null),
+      ]);
 
-      const data =
-        response?.user ||
-        response?.data ||
-        response;
+      const profileData =
+        profileResponse?.user || profileResponse?.data || profileResponse;
 
-      setProfile(data);
+      const cvData = cvResponse?.data || cvResponse || null;
+
+      setProfile(profileData);
+      setCv(cvData);
 
       setFormData({
-        full_name: data?.full_name || data?.name || "",
-        email: data?.email || "",
-        phone: data?.phone || "",
+        full_name: profileData?.full_name || profileData?.name || "",
+        email: profileData?.email || "",
+        phone: profileData?.phone || "",
       });
     } catch (err) {
-      setError(
-        err?.message ||
-          "تعذر تحميل بيانات الملف الشخصي."
-      );
+      setError(err?.message || "تعذر تحميل بيانات الملف الشخصي.");
     } finally {
       setLoading(false);
     }
@@ -82,10 +86,7 @@ function Profile() {
     try {
       const response = await updateMyProfile(formData);
 
-      const updatedProfile =
-        response?.user ||
-        response?.data ||
-        response;
+      const updatedProfile = response?.user || response?.data || response;
 
       setProfile(updatedProfile);
 
@@ -94,20 +95,13 @@ function Profile() {
           updatedProfile?.full_name ||
           updatedProfile?.name ||
           formData.full_name,
-        email:
-          updatedProfile?.email ||
-          formData.email,
-        phone:
-          updatedProfile?.phone ||
-          formData.phone,
+        email: updatedProfile?.email || formData.email,
+        phone: updatedProfile?.phone || formData.phone,
       });
 
       setEditing(false);
     } catch (err) {
-      setError(
-        err?.message ||
-          "تعذر تحديث بيانات الملف الشخصي."
-      );
+      setError(err?.message || "تعذر تحديث بيانات الملف الشخصي.");
     } finally {
       setSaving(false);
     }
@@ -117,39 +111,34 @@ function Profile() {
     return (
       <PageContainer className="profile-page">
         <div className="container">
-          <div className="profile-card">
-            جارٍ تحميل بيانات الملف الشخصي...
-          </div>
+          <div className="profile-card">جارٍ تحميل بيانات الملف الشخصي...</div>
         </div>
       </PageContainer>
     );
   }
 
-  const fullName =
-    profile?.full_name ||
-    profile?.name ||
-    "المستخدم";
+  const fullName = profile?.full_name || profile?.name || "المستخدم";
 
-  const email =
-    profile?.email || "غير متوفر";
+  const email = profile?.email || "غير متوفر";
 
-  const phone =
-    profile?.phone || "غير متوفر";
+  const phone = profile?.phone || "غير متوفر";
 
-  const role =
-    profile?.role || "user";
+  const role = profile?.role || "user";
 
-  const avatarLetter =
-    fullName?.trim()?.charAt(0) || "م";
+  const avatarLetter = fullName?.trim()?.charAt(0) || "م";
+
+  const skills = Array.isArray(cv?.skills) ? cv.skills : [];
+
+  const education = cv?.education || "";
+
+  const hasCV = Boolean(cv);
+
+  const completion = hasCV ? 100 : 50;
 
   return (
     <PageContainer className="profile-page">
       <div className="container">
-
-        {/* Header */}
-
         <div className="profile-page-header">
-
           <div>
             <div className="profile-breadcrumb">
               الرئيسية
@@ -159,10 +148,7 @@ function Profile() {
 
             <h1>الملف الشخصي</h1>
 
-            <p>
-              حدّث معلوماتك ومهاراتك حتى تحصل على فرص
-              أكثر ملاءمة لملفك.
-            </p>
+            <p>حدّث معلوماتك ومهاراتك حتى تحصل على فرص أكثر ملاءمة لملفك.</p>
           </div>
 
           <Button
@@ -172,97 +158,66 @@ function Profile() {
             <Pencil size={16} />
             {editing ? "إلغاء التعديل" : "تعديل الملف"}
           </Button>
-
         </div>
 
-        {error && (
-          <div className="profile-card">
-            {error}
-          </div>
-        )}
-
-        {/* Main */}
+        {error && <div className="profile-card">{error}</div>}
 
         <div className="profile-layout">
-
-          {/* Main profile */}
-
           <main className="profile-main">
-
             <section className="profile-card profile-intro">
-
-              <div className="profile-avatar">
-                {avatarLetter}
-              </div>
+              <div className="profile-avatar">{avatarLetter}</div>
 
               <div className="profile-intro-info">
-
-                <h2>
-                  {fullName}
-                </h2>
+                <h2>{fullName}</h2>
 
                 <p>
                   {role === "company"
                     ? "حساب شركة"
                     : role === "admin"
-                    ? "مسؤول النظام"
-                    : "مستخدم"}
+                      ? "مسؤول النظام"
+                      : "مستخدم"}
                 </p>
 
                 <div className="profile-location">
                   <MapPin size={15} />
                   البصرة، العراق
                 </div>
-
               </div>
 
               <div className="profile-completion">
-
                 <div className="completion-top">
-                  <span>
-                    اكتمال الملف
-                  </span>
+                  <span>اكتمال الملف</span>
 
-                  <strong>
-                    82%
-                  </strong>
+                  <strong>{completion}%</strong>
                 </div>
 
                 <div className="completion-bar">
                   <span
                     style={{
-                      width: "82%",
+                      width: `${completion}%`,
                     }}
                   />
                 </div>
 
                 <small>
-                  أضف السيرة الذاتية لإكمال ملفك.
+                  {hasCV
+                    ? "تمت إضافة السيرة الذاتية."
+                    : "أضف السيرة الذاتية لإكمال ملفك."}
                 </small>
-
               </div>
-
             </section>
 
-            {/* Personal information */}
-
             <section className="profile-card">
-
               <div className="profile-section-heading">
-
                 <div>
                   <span className="profile-section-icon">
                     <UserRound size={17} />
                   </span>
 
                   <div>
-                    <h2>
-                      المعلومات الشخصية
-                    </h2>
+                    <h2>المعلومات الشخصية</h2>
 
-                    <p>
-                      معلوماتك الأساسية للتواصل
-                    </p>
+                    <p>معلوماتك الأساسية للتواصل</p>
                   </div>
                 </div>
 
@@ -274,16 +229,12 @@ function Profile() {
                   <Pencil size={15} />
                   تعديل
                 </button>
-
               </div>
 
               {editing ? (
                 <div className="profile-info-grid">
-
                   <div className="profile-info-item">
-                    <label>
-                      الاسم الكامل
-                    </label>
+                    <label>الاسم الكامل</label>
 
                     <input
                       type="text"
@@ -294,9 +245,7 @@ function Profile() {
                   </div>
 
                   <div className="profile-info-item">
-                    <label>
-                      البريد الإلكتروني
-                    </label>
+                    <label>البريد الإلكتروني</label>
 
                     <input
                       type="email"
@@ -307,9 +256,7 @@ function Profile() {
                   </div>
 
                   <div className="profile-info-item">
-                    <label>
-                      رقم الهاتف
-                    </label>
+                    <label>رقم الهاتف</label>
 
                     <input
                       type="text"
@@ -321,9 +268,8 @@ function Profile() {
 
                   <div className="profile-info-item">
                     <span>الدور</span>
-                    <strong>
-                      {role}
-                    </strong>
+
+                    <strong>{role}</strong>
                   </div>
 
                   <div>
@@ -332,230 +278,176 @@ function Profile() {
                       onClick={handleUpdate}
                       disabled={saving}
                     >
-                      {saving
-                        ? "جارٍ الحفظ..."
-                        : "حفظ التغييرات"}
+                      {saving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
                     </Button>
                   </div>
-
                 </div>
               ) : (
                 <div className="profile-info-grid">
-
                   <div className="profile-info-item">
                     <span>الاسم الكامل</span>
-                    <strong>
-                      {fullName}
-                    </strong>
+
+                    <strong>{fullName}</strong>
                   </div>
 
                   <div className="profile-info-item">
                     <span>البريد الإلكتروني</span>
-                    <strong>
-                      {email}
-                    </strong>
+
+                    <strong>{email}</strong>
                   </div>
 
                   <div className="profile-info-item">
                     <span>رقم الهاتف</span>
-                    <strong>
-                      {phone}
-                    </strong>
+
+                    <strong>{phone}</strong>
                   </div>
 
                   <div className="profile-info-item">
                     <span>الدور</span>
-                    <strong>
-                      {role}
-                    </strong>
-                  </div>
 
+                    <strong>{role}</strong>
+                  </div>
                 </div>
               )}
-
             </section>
 
-            {/* Education */}
-
             <section className="profile-card">
-
               <div className="profile-section-heading">
-
                 <div>
                   <span className="profile-section-icon">
                     <GraduationCap size={17} />
                   </span>
 
                   <div>
-                    <h2>
-                      التعليم
-                    </h2>
+                    <h2>التعليم</h2>
 
-                    <p>
-                      مؤهلاتك الدراسية
-                    </p>
+                    <p>مؤهلاتك الدراسية</p>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  className="edit-section-button"
-                >
+                <button type="button" className="edit-section-button">
                   <Pencil size={15} />
                   تعديل
                 </button>
-
               </div>
 
-              <div className="education-item">
+              {education ? (
+                <div className="education-item">
+                  <div className="education-icon">
+                    <GraduationCap size={18} />
+                  </div>
 
-                <div className="education-icon">
-                  <GraduationCap size={18} />
+                  <div>
+                    <strong>{education}</strong>
+
+                    <span>مستخرج من السيرة الذاتية</span>
+                  </div>
                 </div>
+              ) : (
+                <div className="education-item">
+                  <div className="education-icon">
+                    <GraduationCap size={18} />
+                  </div>
 
-                <div>
-                  <strong>
-                    هندسة حاسبات
-                  </strong>
+                  <div>
+                    <strong>لا توجد معلومات تعليمية</strong>
 
-                  <span>
-                    كلية الهندسة
-                  </span>
-
-                  <small>
-                    متوقع التخرج: 2027
-                  </small>
+                    <span>ارفع سيرتك الذاتية لإضافة مؤهلاتك الدراسية.</span>
+                  </div>
                 </div>
-
-              </div>
-
+              )}
             </section>
 
-            {/* Skills */}
-
             <section className="profile-card">
-
               <div className="profile-section-heading">
-
                 <div>
                   <span className="profile-section-icon">
                     <BriefcaseBusiness size={17} />
                   </span>
 
                   <div>
-                    <h2>
-                      المهارات
-                    </h2>
+                    <h2>المهارات</h2>
 
-                    <p>
-                      المهارات التي تمتلكها
-                    </p>
+                    <p>المهارات التي تمتلكها</p>
                   </div>
                 </div>
 
-                <button
-                  type="button"
-                  className="edit-section-button"
-                >
+                <button type="button" className="edit-section-button">
                   <Pencil size={15} />
                   تعديل
                 </button>
-
               </div>
 
               <div className="profile-skills">
-
-                {[
-                  "React",
-                  "JavaScript",
-                  "HTML",
-                  "CSS",
-                  "Git",
-                  "GitHub",
-                  "Networking",
-                  "Computer Engineering",
-                ].map((skill) => (
-                  <span key={skill}>
-                    {skill}
-                  </span>
-                ))}
-
+                {skills.length > 0 ? (
+                  skills.map((skill) => <span key={skill}>{skill}</span>)
+                ) : (
+                  <span>لم تتم إضافة مهارات بعد</span>
+                )}
               </div>
-
             </section>
 
-            {/* CV */}
-
             <section className="profile-card profile-cv-card">
-
               <div className="profile-section-heading">
-
                 <div>
                   <span className="profile-section-icon">
                     <FileText size={17} />
                   </span>
 
                   <div>
-                    <h2>
-                      السيرة الذاتية
-                    </h2>
+                    <h2>السيرة الذاتية</h2>
 
-                    <p>
-                      ملفك الحالي
-                    </p>
+                    <p>ملفك الحالي</p>
                   </div>
                 </div>
 
-                <Link
-                  to="/cv/upload"
-                  className="profile-text-link"
-                >
-                  تحديث السيرة
+                <Link to="/cv/upload" className="profile-text-link">
+                  {hasCV ? "تحديث السيرة" : "إضافة السيرة"}
                 </Link>
-
               </div>
 
-              <div className="cv-file-row">
+              {hasCV ? (
+                <div className="cv-file-row">
+                  <div className="cv-file-icon">
+                    <FileText size={19} />
+                  </div>
 
-                <div className="cv-file-icon">
-                  <FileText size={19} />
+                  <div>
+                    <strong>{cv?.original_filename || "السيرة الذاتية"}</strong>
+
+                    <span>ملف السيرة الذاتية</span>
+                  </div>
+
+                  <ChevronLeft size={17} />
                 </div>
+              ) : (
+                <div className="cv-file-row">
+                  <div className="cv-file-icon">
+                    <FileText size={19} />
+                  </div>
 
-                <div>
-                  <strong>
-                    السيرة الذاتية
-                  </strong>
+                  <div>
+                    <strong>لا توجد سيرة ذاتية</strong>
 
-                  <span>
-                    ملف السيرة الذاتية
-                  </span>
+                    <span>ارفع سيرتك الذاتية لتحليل مهاراتك وخبراتك.</span>
+                  </div>
+
+                  <ChevronLeft size={17} />
                 </div>
-
-                <ChevronLeft size={17} />
-
-              </div>
-
+              )}
             </section>
-
           </main>
 
-          {/* Sidebar */}
-
           <aside className="profile-sidebar">
-
             <div className="profile-side-card">
-
               <div className="side-card-icon">
                 <ShieldCheck size={19} />
               </div>
 
-              <h3>
-                حسابك محمي
-              </h3>
+              <h3>حسابك محمي</h3>
 
               <p>
-                نحافظ على معلومات ملفك ونستخدمها
-                لتحسين عرض الفرص المناسبة لك.
+                نحافظ على معلومات ملفك ونستخدمها لتحسين عرض الفرص المناسبة لك.
               </p>
 
               <div className="side-security-row">
@@ -567,50 +459,33 @@ function Profile() {
                 <span />
                 معلومات السيرة الذاتية
               </div>
-
             </div>
 
             <div className="profile-side-card">
+              <h3>أكمل ملفك</h3>
 
-              <h3>
-                أكمل ملفك
-              </h3>
-
-              <p>
-                إضافة المزيد من المعلومات تساعدك
-                على بناء ملف مهني متكامل.
-              </p>
+              <p>إضافة المزيد من المعلومات تساعدك على بناء ملف مهني متكامل.</p>
 
               <div className="profile-side-progress">
-
-                <strong>
-                  82%
-                </strong>
+                <strong>{completion}%</strong>
 
                 <div>
                   <span
                     style={{
-                      width: "82%",
+                      width: `${completion}%`,
                     }}
                   />
                 </div>
-
               </div>
 
-              <Link
-                to="/cv/upload"
-                className="profile-side-link"
-              >
-                إضافة السيرة الذاتية
+              <Link to="/cv/upload" className="profile-side-link">
+                {hasCV ? "تحديث السيرة الذاتية" : "إضافة السيرة الذاتية"}
+
                 <ChevronLeft size={15} />
               </Link>
-
             </div>
-
           </aside>
-
         </div>
-
       </div>
     </PageContainer>
   );

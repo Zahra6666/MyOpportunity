@@ -1,8 +1,7 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import ProtectedRoute from "./ProtectedRoute";
+import RoleRoute from "./RoleRoute";
 
 import Navbar from "../components/layout/Navbar";
 import Footer from "../components/layout/Footer";
@@ -43,71 +42,36 @@ function AppRoutes() {
     <BrowserRouter>
       <Navbar />
 
-        <Routes>
+      <Routes>
+        {/* Public */}
+        <Route path="/" element={<Home />} />
 
-          {/* Public */}
-          <Route
-            path="/"
-            element={<Home />}
-          />
+        <Route path="/opportunities" element={<Opportunities />} />
 
-          <Route
-            path="/opportunities"
-            element={<Opportunities />}
-          />
+        <Route path="/opportunities/:id" element={<OpportunityDetails />} />
 
-          <Route
-            path="/opportunities/:id"
-            element={<OpportunityDetails />}
-          />
+        <Route path="/company/:id" element={<CompanyPage />} />
 
-          <Route
-            path="/company/:id"
-            element={<CompanyPage />}
-          />
+        <Route path="/login" element={<Login />} />
 
-          <Route
-            path="/login"
-            element={<Login />}
-          />
+        <Route path="/register" element={<Register />} />
 
-          <Route
-            path="/register"
-            element={<Register />}
-          />
+        {/* User */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<UserDashboard />} />
 
-          {/* User */}
-          <Route
-            path="/dashboard"
-            element={<UserDashboard />}
-          />
+          <Route path="/profile" element={<Profile />} />
 
-          <Route
-            path="/profile"
-            element={<Profile />}
-          />
+          <Route path="/saved" element={<SavedOpportunities />} />
 
-          <Route
-            path="/saved"
-            element={<SavedOpportunities />}
-          />
+          <Route path="/cv/upload" element={<CVUploadPage />} />
 
-          {/* CV */}
-          <Route
-            path="/cv/upload"
-            element={<CVUploadPage />}
-          />
+          <Route path="/cv/analysis" element={<CVAnalysisPage />} />
+        </Route>
 
-          <Route
-            path="/cv/analysis"
-            element={<CVAnalysisPage />}
-          />
-
-          {/* Admin */}
-          <Route
-            path="/admin"
-            element={<AdminDashboard />}
-          />
+        {/* Admin */}
+        <Route element={<RoleRoute allowedRoles={["admin"]} />}>
+          <Route path="/admin" element={<AdminDashboard />} />
 
           <Route
             path="/admin/opportunities"
@@ -124,45 +88,19 @@ function AppRoutes() {
             element={<EditOpportunity />}
           />
 
-          <Route
-            path="/admin/users"
-            element={<ManageUsers />}
-          />
+          <Route path="/admin/users" element={<ManageUsers />} />
 
-          <Route
-            path="/admin/employers"
-            element={<ManageEmployers />}
-          />
+          <Route path="/admin/employers" element={<ManageEmployers />} />
 
-          <Route
-            path="/admin/employers/new"
-            element={<CreateCompany />}
-          />
+          <Route path="/admin/employers/new" element={<CreateCompany />} />
 
-          <Route
-            path="/admin/employers/:id/edit"
-            element={<EditCompany />}
-          />
+          <Route path="/admin/employers/:id/edit" element={<EditCompany />} />
+        </Route>
 
-          
-          <Route
-            path="*"
-            element={<NotFound />}
-          />
-          <Route
-            path="/about"
-            element={<About />}
-          />
-          <Route
-            path="/contact"
-            element={<Contact />}
-          />
-         
-
-        </Routes>
+        <Route path="*" element={<NotFound />} />
+      </Routes>
 
       <ChatbotButton />
-
       <Footer />
     </BrowserRouter>
   );

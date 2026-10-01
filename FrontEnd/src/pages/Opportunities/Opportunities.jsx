@@ -11,12 +11,12 @@ import {
   Building2,
 } from "lucide-react";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Badge from "../../components/common/Badge";
-import { opportunities as opportunitiesData } from "../../data/opportunities";
+import { getOpportunities } from "../../services/opportunityService";
 
 import "./Opportunities.css";
 
@@ -28,10 +28,30 @@ function Opportunities() {
   const [minMatch, setMinMatch] = useState(0);
   const [sort, setSort] = useState("match");
   const [mobileFilters, setMobileFilters] = useState(false);
+  const [opportunities, setOpportunities] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const opportunities = Array.isArray(opportunitiesData)
-    ? opportunitiesData
-    : [];
+  console.log("API opportunities:", opportunities);
+
+  useEffect(() => {
+    const fetchOpportunities = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getOpportunities();
+
+        setOpportunities(Array.isArray(response?.data) ? response.data : []);
+      } catch (error) {
+        setError(error.message || "فشل تحميل الفرص.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOpportunities();
+  }, []);
 
   const filteredOpportunities = useMemo(() => {
     let result = [...opportunities];
@@ -56,23 +76,15 @@ function Opportunities() {
 
         return searchableValues
           .filter(Boolean)
-          .some((value) =>
-            String(value).toLowerCase().includes(query)
-          );
+          .some((value) => String(value).toLowerCase().includes(query));
       });
     }
 
     if (category !== "all") {
       result = result.filter((item) => {
-        const value =
-          item.type ||
-          item.category ||
-          item.category_name ||
-          "";
+        const value = item.type || item.category || item.category_name || "";
 
-        return String(value)
-          .toLowerCase()
-          .includes(category.toLowerCase());
+        return String(value).toLowerCase().includes(category.toLowerCase());
       });
     }
 
@@ -80,29 +92,20 @@ function Opportunities() {
       result = result.filter((item) =>
         String(item.location || "")
           .toLowerCase()
-          .includes(location.toLowerCase())
+          .includes(location.toLowerCase()),
       );
     }
 
     if (mode !== "all") {
       result = result.filter((item) =>
-        String(
-          item.mode ||
-            item.work_mode ||
-            item.work_type ||
-            ""
-        )
+        String(item.mode || item.work_mode || item.work_type || "")
           .toLowerCase()
-          .includes(mode.toLowerCase())
+          .includes(mode.toLowerCase()),
       );
     }
 
     result = result.filter((item) => {
-      const match = Number(
-        item.match ??
-          item.match_percentage ??
-          0
-      );
+      const match = Number(item.match ?? item.match_percentage ?? 0);
 
       return match >= minMatch;
     });
@@ -110,33 +113,19 @@ function Opportunities() {
     if (sort === "match") {
       result.sort(
         (a, b) =>
-          Number(
-            b.match ??
-              b.match_percentage ??
-              0
-          ) -
-          Number(
-            a.match ??
-              a.match_percentage ??
-              0
-          )
+          Number(b.match ?? b.match_percentage ?? 0) -
+          Number(a.match ?? a.match_percentage ?? 0),
       );
     }
 
     if (sort === "latest") {
       result.sort((a, b) => {
         const dateA = new Date(
-          a.posted_at ||
-            a.posted ||
-            a.created_at ||
-            0
+          a.posted_at || a.posted || a.created_at || 0,
         ).getTime();
 
         const dateB = new Date(
-          b.posted_at ||
-            b.posted ||
-            b.created_at ||
-            0
+          b.posted_at || b.posted || b.created_at || 0,
         ).getTime();
 
         return dateB - dateA;
@@ -144,15 +133,7 @@ function Opportunities() {
     }
 
     return result;
-  }, [
-    opportunities,
-    search,
-    category,
-    location,
-    mode,
-    minMatch,
-    sort,
-  ]);
+  }, [opportunities, search, category, location, mode, minMatch, sort]);
 
   const resetFilters = () => {
     setSearch("");
@@ -175,22 +156,18 @@ function Opportunities() {
 
           <div className="opportunities-heading">
             <div>
-              <span className="opportunities-overline">
-                فرص مهنية وتعليمية
-              </span>
+              <span className="opportunities-overline">فرص مهنية وتعليمية</span>
 
               <h1>استكشف الفرص المتاحة</h1>
 
               <p>
-                ابحث بين الوظائف والمنح والتدريبات
-                والمسابقات والكورسات التي تناسبك.
+                ابحث بين الوظائف والمنح والتدريبات والمسابقات والكورسات التي
+                تناسبك.
               </p>
             </div>
 
             <div className="results-count">
-              <strong>
-                {filteredOpportunities.length}
-              </strong>
+              <strong>{filteredOpportunities.length}</strong>
 
               <span>فرصة متاحة</span>
             </div>
@@ -202,9 +179,7 @@ function Opportunities() {
 
               <input
                 value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
+                onChange={(event) => setSearch(event.target.value)}
                 placeholder="ابحث عن فرصة، شركة، مهارة..."
               />
             </div>
@@ -214,21 +189,15 @@ function Opportunities() {
 
               <select
                 value={location}
-                onChange={(event) =>
-                  setLocation(event.target.value)
-                }
+                onChange={(event) => setLocation(event.target.value)}
               >
-                <option value="all">
-                  كل المحافظات
-                </option>
+                <option value="all">كل المحافظات</option>
 
                 <option value="بغداد">بغداد</option>
                 <option value="البصرة">البصرة</option>
                 <option value="أربيل">أربيل</option>
                 <option value="النجف">النجف</option>
-                <option value="السليمانية">
-                  السليمانية
-                </option>
+                <option value="السليمانية">السليمانية</option>
               </select>
 
               <ChevronDown size={14} />
@@ -250,9 +219,7 @@ function Opportunities() {
         <div className="container opportunities-layout">
           <aside
             className={`opportunities-filters ${
-              mobileFilters
-                ? "opportunities-filters-open"
-                : ""
+              mobileFilters ? "opportunities-filters-open" : ""
             }`}
           >
             <div className="filters-header">
@@ -261,10 +228,7 @@ function Opportunities() {
                 <h2>تصفية النتائج</h2>
               </div>
 
-              <button
-                type="button"
-                onClick={resetFilters}
-              >
+              <button type="button" onClick={resetFilters}>
                 <RotateCcw size={14} />
                 إعادة ضبط
               </button>
@@ -282,18 +246,13 @@ function Opportunities() {
                   ["مسابقة", "مسابقات"],
                   ["كورس", "كورسات"],
                 ].map(([value, label]) => (
-                  <label
-                    className="filter-radio"
-                    key={value}
-                  >
+                  <label className="filter-radio" key={value}>
                     <input
                       type="radio"
                       name="category"
                       value={value}
                       checked={category === value}
-                      onChange={(event) =>
-                        setCategory(event.target.value)
-                      }
+                      onChange={(event) => setCategory(event.target.value)}
                     />
 
                     <span>{label}</span>
@@ -312,21 +271,15 @@ function Opportunities() {
 
                 <select
                   value={location}
-                  onChange={(event) =>
-                    setLocation(event.target.value)
-                  }
+                  onChange={(event) => setLocation(event.target.value)}
                 >
-                  <option value="all">
-                    كل المحافظات
-                  </option>
+                  <option value="all">كل المحافظات</option>
 
                   <option value="بغداد">بغداد</option>
                   <option value="البصرة">البصرة</option>
                   <option value="أربيل">أربيل</option>
                   <option value="النجف">النجف</option>
-                  <option value="السليمانية">
-                    السليمانية
-                  </option>
+                  <option value="السليمانية">السليمانية</option>
                 </select>
 
                 <ChevronDown size={14} />
@@ -346,18 +299,13 @@ function Opportunities() {
                   ["عن بعد", "عن بعد"],
                   ["تدريب", "تدريب"],
                 ].map(([value, label]) => (
-                  <label
-                    className="filter-radio"
-                    key={value}
-                  >
+                  <label className="filter-radio" key={value}>
                     <input
                       type="radio"
                       name="mode"
                       value={value}
                       checked={mode === value}
-                      onChange={(event) =>
-                        setMode(event.target.value)
-                      }
+                      onChange={(event) => setMode(event.target.value)}
                     />
 
                     <span>{label}</span>
@@ -371,9 +319,7 @@ function Opportunities() {
             <div className="filter-section">
               <label>الحد الأدنى للتوافق</label>
 
-              <div className="match-filter-value">
-                {minMatch}%
-              </div>
+              <div className="match-filter-value">{minMatch}%</div>
 
               <input
                 className="match-range"
@@ -382,11 +328,7 @@ function Opportunities() {
                 max="100"
                 step="5"
                 value={minMatch}
-                onChange={(event) =>
-                  setMinMatch(
-                    Number(event.target.value)
-                  )
-                }
+                onChange={(event) => setMinMatch(Number(event.target.value))}
               />
 
               <div className="range-labels">
@@ -401,14 +343,9 @@ function Opportunities() {
               <div>
                 <strong>حسّن نتائجك</strong>
 
-                <p>
-                  أضف سيرتك الذاتية للحصول على
-                  نتائج أكثر ملاءمة لملفك.
-                </p>
+                <p>أضف سيرتك الذاتية للحصول على نتائج أكثر ملاءمة لملفك.</p>
 
-                <Link to="/cv/upload">
-                  إضافة السيرة الذاتية
-                </Link>
+                <Link to="/cv/upload">إضافة السيرة الذاتية</Link>
               </div>
             </div>
           </aside>
@@ -417,26 +354,20 @@ function Opportunities() {
             <div className="mobile-filter-row">
               <button
                 type="button"
-                onClick={() =>
-                  setMobileFilters(!mobileFilters)
-                }
+                onClick={() => setMobileFilters(!mobileFilters)}
               >
                 <SlidersHorizontal size={16} />
                 الفلاتر
               </button>
 
-              <span>
-                {filteredOpportunities.length} نتائج
-              </span>
+              <span>{filteredOpportunities.length} نتائج</span>
             </div>
 
             <div className="results-toolbar">
               <div>
                 <strong>الفرص المتاحة</strong>
 
-                <span>
-                  {filteredOpportunities.length} فرصة
-                </span>
+                <span>{filteredOpportunities.length} فرصة</span>
               </div>
 
               <div className="sort-select">
@@ -444,17 +375,11 @@ function Opportunities() {
 
                 <select
                   value={sort}
-                  onChange={(event) =>
-                    setSort(event.target.value)
-                  }
+                  onChange={(event) => setSort(event.target.value)}
                 >
-                  <option value="match">
-                    الأكثر توافقاً
-                  </option>
+                  <option value="match">الأكثر توافقاً</option>
 
-                  <option value="latest">
-                    الأحدث
-                  </option>
+                  <option value="latest">الأحدث</option>
                 </select>
 
                 <ChevronDown size={14} />
@@ -463,19 +388,13 @@ function Opportunities() {
 
             {filteredOpportunities.length > 0 ? (
               <div className="explorer-grid">
-                {filteredOpportunities.map(
-                  (opportunity, index) => (
-                    <ExplorerCard
-                      key={
-                        opportunity.id ??
-                        opportunity._id ??
-                        index
-                      }
-                      opportunity={opportunity}
-                      index={index}
-                    />
-                  )
-                )}
+                {filteredOpportunities.map((opportunity, index) => (
+                  <ExplorerCard
+                    key={opportunity.id ?? opportunity._id ?? index}
+                    opportunity={opportunity}
+                    index={index}
+                  />
+                ))}
               </div>
             ) : (
               <div className="opportunities-empty">
@@ -483,19 +402,11 @@ function Opportunities() {
                   <Search size={25} />
                 </div>
 
-                <h3>
-                  لم نعثر على فرص مطابقة
-                </h3>
+                <h3>لم نعثر على فرص مطابقة</h3>
 
-                <p>
-                  جرّب تغيير البحث أو إزالة بعض
-                  الفلاتر.
-                </p>
+                <p>جرّب تغيير البحث أو إزالة بعض الفلاتر.</p>
 
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                >
+                <button type="button" onClick={resetFilters}>
                   إعادة ضبط الفلاتر
                 </button>
               </div>
@@ -508,15 +419,9 @@ function Opportunities() {
 }
 
 function ExplorerCard({ opportunity, index }) {
-  const id =
-    opportunity.id ??
-    opportunity._id ??
-    index;
+  const id = opportunity.id ?? opportunity._id ?? index;
 
-  const title =
-    opportunity.title ||
-    opportunity.name ||
-    "فرصة متاحة";
+  const title = opportunity.title || opportunity.name || "فرصة متاحة";
 
   const company =
     opportunity.company ||
@@ -524,8 +429,7 @@ function ExplorerCard({ opportunity, index }) {
     opportunity.company?.name ||
     "جهة ناشرة";
 
-  const location =
-    opportunity.location || "العراق";
+  const location = opportunity.location || "العراق";
 
   const type =
     opportunity.type ||
@@ -539,23 +443,15 @@ function ExplorerCard({ opportunity, index }) {
     opportunity.work_type ||
     "غير محدد";
 
-  const match =
-    opportunity.match ??
-    opportunity.match_percentage ??
-    0;
+  const match = opportunity.match ?? opportunity.match_percentage ?? 0;
 
   const deadline =
-    opportunity.deadline ||
-    opportunity.application_deadline ||
-    "غير محدد";
+    opportunity.deadline || opportunity.application_deadline || "غير محدد";
 
   const description =
-    opportunity.description ||
-    "اكتشف تفاصيل هذه الفرصة والمتطلبات الخاصة بها.";
+    opportunity.description || "اكتشف تفاصيل هذه الفرصة والمتطلبات الخاصة بها.";
 
-  const skills = Array.isArray(opportunity.skills)
-    ? opportunity.skills
-    : [];
+  const skills = Array.isArray(opportunity.skills) ? opportunity.skills : [];
 
   return (
     <article
@@ -566,13 +462,9 @@ function ExplorerCard({ opportunity, index }) {
     >
       <div className="explorer-card-top">
         <div className="explorer-company-logo">
-          {opportunity.company_logo ||
-          opportunity.company?.logo ? (
+          {opportunity.company_logo || opportunity.company?.logo ? (
             <img
-              src={
-                opportunity.company_logo ||
-                opportunity.company?.logo
-              }
+              src={opportunity.company_logo || opportunity.company?.logo}
               alt={company}
             />
           ) : (
@@ -581,18 +473,12 @@ function ExplorerCard({ opportunity, index }) {
         </div>
 
         <div className="explorer-card-title">
-          <Badge variant="type">
-            {type}
-          </Badge>
+          <Badge variant="type">{type}</Badge>
 
           <h3>{title}</h3>
         </div>
 
-        <button
-          type="button"
-          className="explorer-save"
-          aria-label="حفظ الفرصة"
-        >
+        <button type="button" className="explorer-save" aria-label="حفظ الفرصة">
           <Bookmark size={17} />
         </button>
       </div>
@@ -621,16 +507,12 @@ function ExplorerCard({ opportunity, index }) {
         </span>
       </div>
 
-      <p className="explorer-description">
-        {description}
-      </p>
+      <p className="explorer-description">{description}</p>
 
       {skills.length > 0 && (
         <div className="explorer-skills">
           {skills.slice(0, 4).map((skill, skillIndex) => (
-            <span key={`${skill}-${skillIndex}`}>
-              {skill}
-            </span>
+            <span key={`${skill}-${skillIndex}`}>{skill}</span>
           ))}
         </div>
       )}
@@ -644,19 +526,14 @@ function ExplorerCard({ opportunity, index }) {
         <div className="explorer-match-bar">
           <span
             style={{
-              width: `${Math.min(
-                Math.max(Number(match), 0),
-                100
-              )}%`,
+              width: `${Math.min(Math.max(Number(match), 0), 100)}%`,
             }}
           />
         </div>
       </div>
 
       <div className="explorer-footer">
-        <span className="explorer-opportunity-label">
-          فرصة مناسبة لك
-        </span>
+        <span className="explorer-opportunity-label">فرصة مناسبة لك</span>
 
         <Link to={`/opportunities/${id}`}>
           عرض التفاصيل

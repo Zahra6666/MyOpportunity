@@ -1,15 +1,6 @@
-import {
-  ArrowLeft,
-  LockKeyhole,
-  Mail,
-  User,
-  Sparkles,
-} from "lucide-react";
+import { ArrowLeft, LockKeyhole, Mail, User, Sparkles } from "lucide-react";
 
-import {
-  Link,
-  useNavigate,
-} from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useState } from "react";
 
@@ -42,16 +33,16 @@ function Register() {
 
     try {
       await register({
-        name: form.name,
+        fullName: form.name,
         email: form.email,
         password: form.password,
       });
 
-      navigate("/dashboard");
+      navigate("/login");
     } catch (error) {
       setError(
         error?.message ||
-          "تعذر إنشاء الحساب. يرجى التحقق من البيانات والمحاولة مرة أخرى."
+          "تعذر إنشاء الحساب. يرجى التحقق من البيانات والمحاولة مرة أخرى.",
       );
     }
   };
@@ -62,7 +53,6 @@ function Register() {
 
       <div className="container auth-container">
         <div className="auth-card">
-
           <div className="auth-logo">
             <span>
               <Sparkles size={18} />
@@ -71,35 +61,21 @@ function Register() {
           </div>
 
           <div className="auth-heading">
-            <h1>
-              أنشئ حسابك
-            </h1>
+            <h1>أنشئ حسابك</h1>
 
-            <p>
-              ابدأ رحلة اكتشاف الفرص المناسبة لمسارك.
-            </p>
+            <p>ابدأ رحلة اكتشاف الفرص المناسبة لمسارك.</p>
           </div>
 
-          <form
-            className="auth-form"
-            onSubmit={handleSubmit}
-          >
-
+          <form className="auth-form" onSubmit={handleSubmit}>
             <label>
               الاسم الكامل
-
               <div className="input-with-icon">
                 <User size={18} />
 
                 <input
                   type="text"
                   value={form.name}
-                  onChange={(e) =>
-                    updateField(
-                      "name",
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => updateField("name", e.target.value)}
                   placeholder="أدخل اسمك الكامل"
                   required
                 />
@@ -108,19 +84,13 @@ function Register() {
 
             <label>
               البريد الإلكتروني
-
               <div className="input-with-icon">
                 <Mail size={18} />
 
                 <input
                   type="email"
                   value={form.email}
-                  onChange={(e) =>
-                    updateField(
-                      "email",
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => updateField("email", e.target.value)}
                   placeholder="example@email.com"
                   required
                 />
@@ -129,19 +99,13 @@ function Register() {
 
             <label>
               كلمة المرور
-
               <div className="input-with-icon">
                 <LockKeyhole size={18} />
 
                 <input
                   type="password"
                   value={form.password}
-                  onChange={(e) =>
-                    updateField(
-                      "password",
-                      e.target.value
-                    )
-                  }
+                  onChange={(e) => updateField("password", e.target.value)}
                   placeholder="••••••••"
                   minLength={6}
                   required
@@ -150,41 +114,23 @@ function Register() {
             </label>
 
             <label className="terms-option">
-              <input
-                type="checkbox"
-                required
-              />
-
+              <input type="checkbox" required />
               أوافق على شروط الاستخدام وسياسة الخصوصية.
             </label>
 
-            {error && (
-              <p className="auth-error">
-                {error}
-              </p>
-            )}
+            {error && <p className="auth-error">{error}</p>}
 
-            <Button
-              type="submit"
-              className="btn-full"
-              disabled={loading}
-            >
-              {loading
-                ? "جارٍ إنشاء الحساب..."
-                : "إنشاء الحساب"}
+            <Button type="submit" className="btn-full" disabled={loading}>
+              {loading ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب"}
 
               {!loading && <ArrowLeft size={17} />}
             </Button>
-
           </form>
 
           <p className="auth-register">
             لديك حساب بالفعل؟
-            <Link to="/login">
-              تسجيل الدخول
-            </Link>
+            <Link to="/login">تسجيل الدخول</Link>
           </p>
-
         </div>
       </div>
     </main>

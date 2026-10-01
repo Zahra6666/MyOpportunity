@@ -5,7 +5,9 @@ const { extractCvInfo } = require("../cv-ai/cv-ai.service");
 class CvService {
   async uploadCv(userId, filePath, fileMimetype) {
     if (!filePath) {
-      throw new Error("CV file is required");
+      const error = new Error("CV file is required");
+      error.statusCode = 400;
+      throw error;
     }
 
     const parsedText = await extractText(filePath, fileMimetype);
@@ -21,36 +23,54 @@ class CvService {
 
   async getMyCv(userId) {
     const cv = await cvRepository.getCvByUserId(userId);
+
     if (!cv) {
-      throw new Error("No CV found for this user");
+      const error = new Error("No CV found for this user");
+      error.statusCode = 404;
+      throw error;
     }
+
     return cv;
   }
 
   async getCvById(id) {
     const cv = await cvRepository.getCvById(id);
+
     if (!cv) {
-      throw new Error("CV not found");
+      const error = new Error("CV not found");
+      error.statusCode = 404;
+      throw error;
     }
+
     return cv;
   }
 
   async deleteCv(userId) {
     const deleted = await cvRepository.deleteCv(userId);
+
     if (!deleted) {
-      throw new Error("No CV found to delete");
+      const error = new Error("No CV found to delete");
+      error.statusCode = 404;
+      throw error;
     }
-    return { message: "CV deleted successfully" };
+
+    return {
+      message: "CV deleted successfully",
+    };
   }
 
   async deleteCvById(id) {
     const deleted = await cvRepository.deleteCvById(id);
 
     if (!deleted) {
-      throw new Error("CV not found");
+      const error = new Error("CV not found");
+      error.statusCode = 404;
+      throw error;
     }
 
-    return { message: "CV deleted successfully" };
+    return {
+      message: "CV deleted successfully",
+    };
   }
 }
 

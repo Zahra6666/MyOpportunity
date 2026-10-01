@@ -8,7 +8,7 @@ import {
   BriefcaseBusiness,
   AlertCircle,
   Trash2,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -30,6 +30,8 @@ function CVAnalysisPage() {
     async function fetchCVData() {
       try {
         setLoading(true);
+        setError(null);
+
         const response = await getMyCV();
         setCvData(response?.data || response);
       } catch (err) {
@@ -61,7 +63,15 @@ function CVAnalysisPage() {
   if (loading) {
     return (
       <PageContainer className="cv-analysis-page">
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "300px", gap: "0.5rem" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "300px",
+            gap: "0.5rem",
+          }}
+        >
           <Loader2 size={24} className="animate-spin" />
           <span>جاري تحميل بيانات السيرة الذاتية...</span>
         </div>
@@ -69,23 +79,75 @@ function CVAnalysisPage() {
     );
   }
 
-  const name = cvData?.full_name || cvData?.name || "غير محدد";
+  if (error) {
+    return (
+      <PageContainer className="cv-analysis-page">
+        <div className="container cv-analysis-container">
+          <div
+            className="cv-analysis-success"
+            style={{
+              borderColor: "#fca5a5",
+              backgroundColor: "#fef2f2",
+            }}
+          >
+            <AlertCircle size={21} style={{ color: "#ef4444" }} />
+            <div>
+              <strong style={{ color: "#991b1b" }}>تنبيه</strong>
+              <span style={{ color: "#b91c1c" }}>{error}</span>
+            </div>
+          </div>
+        </div>
+      </PageContainer>
+    );
+  }
+
+  const name =
+    cvData?.full_name || cvData?.fullName || cvData?.name || "غير محدد";
+
   const email = cvData?.email || "غير محدد";
-  const phone = cvData?.phone || "غير محدد";
+
+  const phone =
+    cvData?.phone || cvData?.phone_number || cvData?.phoneNumber || "غير محدد";
+
   const education = cvData?.education || "غير محدد";
-  const experienceYears = cvData?.experience_years ? `${cvData.experience_years} سنوات` : (cvData?.experience || "غير محدد");
-  const skills = Array.isArray(cvData?.skills) ? cvData.skills : [];
+
+  const experienceYears =
+    cvData?.experience_years !== null &&
+    cvData?.experience_years !== undefined &&
+    cvData?.experience_years !== ""
+      ? `${cvData.experience_years} سنوات`
+      : cvData?.experience || "غير محدد";
+
+  let skills = cvData?.skills || [];
+
+  if (typeof skills === "string") {
+    try {
+      skills = JSON.parse(skills);
+    } catch {
+      skills = skills
+        .split(",")
+        .map((skill) => skill.trim())
+        .filter(Boolean);
+    }
+  }
+
+  if (!Array.isArray(skills)) {
+    skills = [];
+  }
+
   const parsedText = cvData?.parsed_text || cvData?.parsedText || "";
 
   return (
     <PageContainer className="cv-analysis-page">
       <div className="container cv-analysis-container">
-
         <section className="cv-analysis-header">
           <div>
             <span className="cv-eyebrow">تحليل السيرة الذاتية</span>
             <h1>لنراجع ملفك المهني</h1>
-            <p>هذه المعلومات المستخرجة من سيرتك الذاتية، ويمكن تعديلها من ملفك الشخصي.</p>
+            <p>
+              هذه المعلومات المستخرجة من سيرتك الذاتية، ويمكن تعديلها من ملفك
+              الشخصي.
+            </p>
           </div>
 
           <Link to="/profile" className="cv-back-link">
@@ -94,25 +156,16 @@ function CVAnalysisPage() {
           </Link>
         </section>
 
-        {error ? (
-          <div className="cv-analysis-success" style={{ borderColor: "#fca5a5", backgroundColor: "#fef2f2" }}>
-            <AlertCircle size={21} style={{ color: "#ef4444" }} />
-            <div>
-              <strong style={{ color: "#991b1b" }}>تنبيه</strong>
-              <span style={{ color: "#b91c1c" }}>{error} - يرجى رفع سيرة ذاتية جديدة.</span>
-            </div>
+        <div className="cv-analysis-success">
+          <div className="cv-success-icon">
+            <CheckCircle2 size={21} />
           </div>
-        ) : (
-          <div className="cv-analysis-success">
-            <div className="cv-success-icon">
-              <CheckCircle2 size={21} />
-            </div>
-            <div>
-              <strong>تم تحليل السيرة الذاتية بنجاح</strong>
-              <span>تم استخراج المعلومات الأساسية والمهارات من الملف.</span>
-            </div>
+
+          <div>
+            <strong>تم تحليل السيرة الذاتية بنجاح</strong>
+            <span>تم استخراج المعلومات الأساسية والمهارات من الملف.</span>
           </div>
-        )}
+        </div>
 
         <div className="cv-analysis-grid">
           <main>
@@ -122,6 +175,7 @@ function CVAnalysisPage() {
                   <h2>المعلومات الشخصية</h2>
                   <p>المعلومات الأساسية الموجودة في سيرتك.</p>
                 </div>
+
                 <span className="verified-label">
                   <CheckCircle2 size={14} /> مستخرجة
                 </span>
@@ -129,7 +183,10 @@ function CVAnalysisPage() {
 
               <div className="cv-personal-grid">
                 <div className="cv-info-item">
-                  <span className="cv-info-icon"><FileText size={17} /></span>
+                  <span className="cv-info-icon">
+                    <FileText size={17} />
+                  </span>
+
                   <div>
                     <small>الاسم الكامل</small>
                     <strong>{name}</strong>
@@ -137,7 +194,10 @@ function CVAnalysisPage() {
                 </div>
 
                 <div className="cv-info-item">
-                  <span className="cv-info-icon"><Mail size={17} /></span>
+                  <span className="cv-info-icon">
+                    <Mail size={17} />
+                  </span>
+
                   <div>
                     <small>البريد الإلكتروني</small>
                     <strong>{email}</strong>
@@ -145,15 +205,23 @@ function CVAnalysisPage() {
                 </div>
 
                 <div className="cv-info-item">
-                  <span className="cv-info-icon"><Phone size={17} /></span>
+                  <span className="cv-info-icon">
+                    <Phone size={17} />
+                  </span>
+
                   <div>
                     <small>رقم الهاتف</small>
-                    <strong>{phone}</strong>
+                    <strong dir="ltr" style={{ unicodeBidi: "isolate" }}>
+                      {phone}
+                    </strong>
                   </div>
                 </div>
 
                 <div className="cv-info-item">
-                  <span className="cv-info-icon"><GraduationCap size={17} /></span>
+                  <span className="cv-info-icon">
+                    <GraduationCap size={17} />
+                  </span>
+
                   <div>
                     <small>التخصص / التعليم</small>
                     <strong>{education}</strong>
@@ -174,6 +242,7 @@ function CVAnalysisPage() {
                 <div className="cv-experience-icon">
                   <BriefcaseBusiness size={20} />
                 </div>
+
                 <div>
                   <span>إجمالي الخبرة</span>
                   <strong>{experienceYears}</strong>
@@ -198,7 +267,9 @@ function CVAnalysisPage() {
                     </span>
                   ))
                 ) : (
-                  <p style={{ color: "#6b7280" }}>لم يتم التعرف على مهارات جديدة.</p>
+                  <p style={{ color: "#6b7280" }}>
+                    لم يتم التعرف على مهارات جديدة.
+                  </p>
                 )}
               </div>
             </section>
@@ -211,7 +282,19 @@ function CVAnalysisPage() {
                     <p>المحتوى النصي الذي تم استخراجه تلقائياً.</p>
                   </div>
                 </div>
-                <div style={{ backgroundColor: "#f9fafb", padding: "1rem", borderRadius: "8px", maxHeight: "200px", overflowY: "auto", fontSize: "0.875rem", whiteSpace: "pre-wrap", color: "#374151" }}>
+
+                <div
+                  style={{
+                    backgroundColor: "#f9fafb",
+                    padding: "1rem",
+                    borderRadius: "8px",
+                    maxHeight: "200px",
+                    overflowY: "auto",
+                    fontSize: "0.875rem",
+                    whiteSpace: "pre-wrap",
+                    color: "#374151",
+                  }}
+                >
                   {parsedText}
                 </div>
               </section>
@@ -220,16 +303,33 @@ function CVAnalysisPage() {
 
           <aside className="cv-analysis-sidebar">
             <section className="cv-file-card">
-              <div className="cv-file-icon"><FileText size={25} /></div>
+              <div className="cv-file-icon">
+                <FileText size={25} />
+              </div>
+
               <div className="cv-file-info">
-                <strong>{cvData?.original_filename || "ملف السيرة الذاتية"}</strong>
+                <strong>
+                  {cvData?.original_filename || "ملف السيرة الذاتية"}
+                </strong>
                 <span>تم تحليل الملف</span>
               </div>
+
               <CheckCircle2 className="cv-file-check" size={19} />
             </section>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
-              <Link to="/cv/upload" className="cv-reupload-link" style={{ textAlign: "center" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+                marginTop: "1rem",
+              }}
+            >
+              <Link
+                to="/cv/upload"
+                className="cv-reupload-link"
+                style={{ textAlign: "center" }}
+              >
                 رفع نسخة جديدة من السيرة
               </Link>
 
@@ -248,10 +348,14 @@ function CVAnalysisPage() {
                   backgroundColor: "#fff5f5",
                   color: "#e53e3e",
                   fontWeight: "600",
-                  cursor: "pointer"
+                  cursor: "pointer",
                 }}
               >
-                {deleting ? <Loader2 size={17} className="animate-spin" /> : <Trash2 size={17} />}
+                {deleting ? (
+                  <Loader2 size={17} className="animate-spin" />
+                ) : (
+                  <Trash2 size={17} />
+                )}
                 حذف السيرة الذاتية
               </button>
             </div>
