@@ -1,0 +1,684 @@
+/* =========================================================
+   CV UPLOAD PAGE
+========================================================= */
+
+.cv-upload-page {
+  position: relative;
+  min-height: calc(100vh - var(--navbar-height));
+  overflow: hidden;
+  isolation: isolate;
+  padding: 56px 0 80px;
+  background: var(--bg-main);
+}
+
+/* =========================================================
+   MOVING BACKGROUND
+========================================================= */
+
+.cv-upload-page::before {
+  content: "";
+  position: absolute;
+
+  width: 430px;
+  height: 430px;
+
+  top: -130px;
+  right: -100px;
+
+  border-radius: 50%;
+
+  background: rgba(59, 130, 246, 0.13);
+
+  filter: blur(70px);
+
+  z-index: -1;
+
+  animation: cvMoveBlue 10s ease-in-out infinite alternate;
+}
+
+.cv-upload-page::after {
+  content: "";
+  position: absolute;
+
+  width: 390px;
+  height: 390px;
+
+  left: -110px;
+  bottom: -120px;
+
+  border-radius: 50%;
+
+  background: rgba(16, 185, 129, 0.10);
+
+  filter: blur(70px);
+
+  z-index: -1;
+
+  animation: cvMoveGreen 13s ease-in-out infinite alternate;
+}
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.cv-upload-container {
+  position: relative;
+  z-index: 2;
+
+  width: min(920px, calc(100% - 40px));
+
+  margin: 0 auto;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.cv-upload-header {
+  max-width: 720px;
+
+  margin: 0 auto 38px;
+
+  text-align: center;
+
+  animation: cvFadeUp 0.7s ease both;
+}
+
+.cv-upload-header h1 {
+  margin: 0 0 14px;
+
+  color: var(--text);
+
+  font-size: clamp(30px, 4vw, 46px);
+  font-weight: 800;
+
+  line-height: 1.35;
+  letter-spacing: -0.6px;
+}
+
+.cv-upload-header p {
+  margin: 0;
+
+  color: var(--text-soft);
+
+  font-size: 15px;
+  line-height: 1.9;
+}
+
+.cv-upload-icon {
+  width: 68px;
+  height: 68px;
+
+  margin: 0 auto 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 20px;
+
+  color: var(--primary);
+
+  background: linear-gradient(
+    145deg,
+    var(--primary-50),
+    var(--white)
+  );
+
+  border: 1px solid var(--primary-100);
+
+  box-shadow:
+    0 14px 35px rgba(37, 99, 235, 0.1),
+    var(--shadow-sm);
+
+  animation: cvIconFloat 4s ease-in-out infinite;
+}
+
+/* =========================================================
+   UPLOAD DROPZONE
+========================================================= */
+
+.cv-upload-dropzone {
+  position: relative;
+
+  padding: 52px 35px;
+
+  text-align: center;
+
+  border: 2px dashed var(--border-medium);
+
+  border-radius: var(--radius-xl);
+
+  background: rgba(255, 255, 255, 0.88);
+
+  box-shadow: var(--shadow-lg);
+
+  cursor: pointer;
+
+  transition:
+    border-color var(--transition),
+    background-color var(--transition),
+    transform var(--transition),
+    box-shadow var(--transition);
+
+  animation: cvFadeUp 0.75s ease 0.1s both;
+}
+
+.cv-upload-dropzone:hover {
+  border-color: var(--primary-500);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(239, 246, 255, 0.94),
+      rgba(255, 255, 255, 0.96)
+    );
+
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 18px 42px rgba(37, 99, 235, 0.1);
+}
+
+.cv-upload-dropzone-icon {
+  width: 76px;
+  height: 76px;
+
+  margin: 0 auto 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: var(--primary);
+
+  background: var(--primary-50);
+
+  border: 1px solid var(--primary-100);
+
+  transition:
+    transform var(--transition),
+    background-color var(--transition);
+}
+
+.cv-upload-dropzone:hover .cv-upload-dropzone-icon {
+  transform: translateY(-5px) scale(1.04);
+
+  background: var(--primary-100);
+}
+
+.cv-upload-dropzone h2 {
+  margin: 0 0 9px;
+
+  color: var(--text);
+
+  font-size: 20px;
+  font-weight: 750;
+}
+
+.cv-upload-dropzone p {
+  margin: 0;
+
+  color: var(--text-soft);
+
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+/* =========================================================
+   FILE TYPES
+========================================================= */
+
+.cv-upload-types {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+
+  gap: 8px;
+
+  margin-top: 20px;
+}
+
+.cv-upload-types span {
+  padding: 6px 12px;
+
+  border-radius: var(--radius-full);
+
+  color: var(--text-secondary);
+
+  background: var(--gray-100);
+
+  font-size: 11px;
+  font-weight: 650;
+}
+
+/* =========================================================
+   SELECTED FILE
+========================================================= */
+
+.cv-selected-file {
+  display: flex;
+  align-items: center;
+
+  gap: 15px;
+
+  margin-top: 22px;
+  padding: 17px 18px;
+
+  border: 1px solid var(--primary-100);
+
+  border-radius: var(--radius-lg);
+
+  background: var(--primary-50);
+
+  animation: cvScaleIn 0.35s ease both;
+}
+
+.cv-selected-file-icon {
+  width: 44px;
+  height: 44px;
+
+  flex: 0 0 44px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  color: var(--primary);
+
+  background: var(--white);
+
+  border: 1px solid var(--primary-100);
+}
+
+.cv-selected-file-info {
+  min-width: 0;
+
+  flex: 1;
+
+  text-align: right;
+}
+
+.cv-selected-file-info strong {
+  display: block;
+
+  overflow: hidden;
+
+  color: var(--text);
+
+  font-size: 13px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+.cv-selected-file-info span {
+  display: block;
+
+  margin-top: 4px;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+}
+
+.cv-file-success {
+  color: var(--success);
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.cv-remove-file {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid var(--border-light);
+
+  border-radius: 10px;
+
+  color: var(--danger);
+
+  background: var(--white);
+
+  cursor: pointer;
+
+  transition:
+    background-color var(--transition),
+    transform var(--transition);
+}
+
+.cv-remove-file:hover {
+  background: var(--danger-light);
+
+  transform: translateY(-2px);
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.cv-upload-actions {
+  display: flex;
+  justify-content: center;
+
+  gap: 12px;
+
+  margin-top: 24px;
+}
+
+.cv-upload-submit {
+  min-width: 190px;
+  min-height: 50px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  padding: 0 24px;
+
+  border: 0;
+
+  border-radius: 13px;
+
+  color: var(--white);
+
+  background: var(--gradient-primary);
+
+  box-shadow:
+    0 12px 26px rgba(37, 99, 235, 0.18);
+
+  font-family: inherit;
+
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    opacity var(--transition);
+}
+
+.cv-upload-submit:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 16px 32px rgba(37, 99, 235, 0.24);
+}
+
+.cv-upload-submit:active {
+  transform: translateY(0);
+}
+
+.cv-upload-submit:disabled {
+  opacity: 0.55;
+
+  cursor: not-allowed;
+
+  transform: none;
+}
+
+/* =========================================================
+   STEPS
+========================================================= */
+
+.cv-upload-steps {
+  display: grid;
+
+  grid-template-columns: repeat(3, 1fr);
+
+  gap: 15px;
+
+  margin-top: 42px;
+}
+
+.cv-upload-step {
+  padding: 22px 18px;
+
+  text-align: center;
+
+  border: 1px solid var(--border-light);
+
+  border-radius: var(--radius-lg);
+
+  background: rgba(255, 255, 255, 0.84);
+
+  box-shadow: var(--shadow-sm);
+
+  animation: cvFadeUp 0.7s ease both;
+}
+
+.cv-upload-step:nth-child(2) {
+  animation-delay: 0.12s;
+}
+
+.cv-upload-step:nth-child(3) {
+  animation-delay: 0.24s;
+}
+
+.cv-upload-step-number {
+  width: 34px;
+  height: 34px;
+
+  margin: 0 auto 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: var(--primary);
+
+  background: var(--primary-50);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cv-upload-step h3 {
+  margin: 0 0 7px;
+
+  color: var(--text);
+
+  font-size: 14px;
+}
+
+.cv-upload-step p {
+  margin: 0;
+
+  color: var(--text-muted);
+
+  font-size: 11px;
+
+  line-height: 1.8;
+}
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.cv-upload-error {
+  margin-top: 16px;
+
+  padding: 12px 15px;
+
+  border: 1px solid var(--red-100);
+
+  border-radius: 12px;
+
+  color: var(--danger);
+
+  background: var(--danger-light);
+
+  font-size: 12px;
+
+  line-height: 1.7;
+}
+
+/* =========================================================
+   ANIMATIONS
+========================================================= */
+
+@keyframes cvMoveBlue {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(-120px, 80px) scale(1.2);
+  }
+
+  100% {
+    transform: translate(-40px, 160px) scale(0.95);
+  }
+}
+
+@keyframes cvMoveGreen {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+
+  50% {
+    transform: translate(100px, -80px) scale(1.18);
+  }
+
+  100% {
+    transform: translate(180px, -20px) scale(0.95);
+  }
+}
+
+@keyframes cvFadeUp {
+  from {
+    opacity: 0;
+
+    transform: translateY(22px);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: translateY(0);
+  }
+}
+
+@keyframes cvScaleIn {
+  from {
+    opacity: 0;
+
+    transform: scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+
+    transform: scale(1);
+  }
+}
+
+@keyframes cvIconFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 700px) {
+  .cv-upload-page {
+    padding: 40px 0 60px;
+  }
+
+  .cv-upload-container {
+    width: min(100% - 28px, 920px);
+  }
+
+  .cv-upload-dropzone {
+    padding: 38px 20px;
+  }
+
+  .cv-upload-steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 550px) {
+  .cv-upload-header {
+    margin-bottom: 28px;
+  }
+
+  .cv-upload-header h1 {
+    font-size: 28px;
+  }
+
+  .cv-upload-header p {
+    font-size: 13px;
+  }
+
+  .cv-upload-icon {
+    width: 58px;
+    height: 58px;
+
+    border-radius: 17px;
+  }
+
+  .cv-upload-dropzone {
+    padding: 32px 16px;
+
+    border-radius: 18px;
+  }
+
+  .cv-upload-dropzone-icon {
+    width: 64px;
+    height: 64px;
+  }
+
+  .cv-selected-file {
+    align-items: flex-start;
+  }
+
+  .cv-upload-actions {
+    flex-direction: column;
+  }
+
+  .cv-upload-submit {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-upload-page::before,
+  .cv-upload-page::after,
+  .cv-upload-icon,
+  .cv-upload-header,
+  .cv-upload-dropzone,
+  .cv-upload-step {
+    animation: none;
+  }
+
+  .cv-upload-dropzone,
+  .cv-upload-submit,
+  .cv-remove-file {
+    transition: none;
+  }
+}

@@ -1,0 +1,168 @@
+.edit-opportunity-page {
+  min-height: 100vh;
+}
+
+.edit-opportunity-header {
+  margin-bottom: 28px;
+}
+
+.edit-opportunity-header h1 {
+  margin: 0 0 8px;
+  font-size: 30px;
+}
+
+.edit-opportunity-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.edit-loading {
+  padding: 40px;
+  text-align: center;
+  color: #64748b;
+}
+
+.edit-error {
+  max-width: 900px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.edit-opportunity-form {
+  max-width: 900px;
+}
+
+.form-section {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+}
+
+.form-section h2 {
+  margin: 0 0 24px;
+  font-size: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: inherit;
+  color: #0f172a;
+  background: #fff;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.form-group textarea {
+  resize: vertical;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #64748b;
+  box-shadow:
+    0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+.form-group small {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cancel-button,
+.submit-button {
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background: #fff;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.submit-button {
+  border: none;
+  background: #0f172a;
+  color: #fff;
+}
+
+.submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-group.full {
+    grid-column: auto;
+  }
+
+  .form-section {
+    padding: 20px;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancel-button,
+  .submit-button {
+    width: 100%;
+  }
+}
