@@ -55,8 +55,8 @@ function CreateCompany() {
 
     try {
       await createCompany({
-        name: formData.name.trim(),
-        logo: formData.logo.trim() || null,
+        company_name: formData.name.trim(),
+        logo_url: formData.logo.trim() || null,
         location: formData.location.trim(),
         description: formData.description.trim(),
       });
@@ -65,7 +65,7 @@ function CreateCompany() {
     } catch (err) {
       setError(
         err?.message ||
-          "تعذر إنشاء الشركة."
+        "تعذر إنشاء الشركة."
       );
     } finally {
       setLoading(false);

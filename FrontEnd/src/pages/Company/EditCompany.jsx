@@ -41,16 +41,15 @@ function EditCompany() {
         response;
 
       setFormData({
-        name: company?.name || "",
-        logo: company?.logo || "",
+        name: company?.company_name || company?.name || "",
+        logo: company?.logo_url || company?.logo || "",
         location: company?.location || "",
-        description:
-          company?.description || "",
+        description: company?.description || "",
       });
     } catch (requestError) {
       setError(
         requestError?.message ||
-          "تعذر تحميل بيانات الشركة."
+        "تعذر تحميل بيانات الشركة."
       );
     } finally {
       setLoading(false);
@@ -89,18 +88,17 @@ function EditCompany() {
 
     try {
       await updateCompany(id, {
-        name: formData.name.trim(),
-        logo: formData.logo.trim(),
+        company_name: formData.name.trim(),
+        logo_url: formData.logo.trim(),
         location: formData.location.trim(),
-        description:
-          formData.description.trim(),
+        description: formData.description.trim(),
       });
 
       navigate("/admin/employers");
     } catch (requestError) {
       setError(
         requestError?.message ||
-          "تعذر تحديث بيانات الشركة."
+        "تعذر تحديث بيانات الشركة."
       );
     } finally {
       setSaving(false);

@@ -62,7 +62,7 @@ function CompanyPage() {
     } catch (err) {
       setError(
         err?.message ||
-          "تعذر تحميل بيانات الشركة."
+        "تعذر تحميل بيانات الشركة."
       );
     } finally {
       setLoading(false);
@@ -146,6 +146,7 @@ function CompanyPage() {
   }
 
   const companyName =
+    company?.company_name ||
     company?.name ||
     "شركة غير معروفة";
 
