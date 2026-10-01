@@ -65,6 +65,21 @@ export function AuthProvider({ children }) {
 
       const response = await registerRequest(userData);
 
+      const jwt =
+        response?.token || response?.access_token || response?.accessToken;
+
+      const registeredUser = response?.user;
+
+      if (!jwt || !registeredUser) {
+        throw new Error("بيانات إنشاء الحساب غير مكتملة.");
+      }
+
+      localStorage.setItem(TOKEN_KEY, jwt);
+      localStorage.setItem(USER_KEY, JSON.stringify(registeredUser));
+
+      setToken(jwt);
+      setUser(registeredUser);
+
       return response;
     } finally {
       setLoading(false);

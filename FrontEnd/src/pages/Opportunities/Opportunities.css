@@ -996,3 +996,30 @@
     animation: none;
   }
 }
+
+.save-details-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 16px;
+  border: 1px solid #a2b447;
+  border-radius: 10px;
+  background: transparent;
+  color: #556f30;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.save-details-link:hover {
+  background: #a2b447;
+  color: #ffffff;
+  transform: translateY(-1px);
+}

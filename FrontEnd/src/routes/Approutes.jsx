@@ -50,6 +50,9 @@ function AppRoutes() {
 
         <Route path="/opportunities/:id" element={<OpportunityDetails />} />
 
+        <Route path="/about" element={<About />} />
+        <Route path="/contact" element={<Contact />} />
+
         <Route path="/company/:id" element={<CompanyPage />} />
 
         <Route path="/login" element={<Login />} />

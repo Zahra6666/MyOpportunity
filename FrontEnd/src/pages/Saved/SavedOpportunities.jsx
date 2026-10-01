@@ -1,9 +1,4 @@
-import {
-  Bookmark,
-  Trash2,
-  Search,
-  ArrowLeft,
-} from "lucide-react";
+import { Bookmark, Trash2, Search, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 
@@ -43,10 +38,7 @@ function normalizeOpportunity(opportunity) {
   return {
     id: opportunity?.id ?? opportunity?._id,
 
-    title:
-      opportunity?.title ||
-      opportunity?.name ||
-      "فرصة",
+    title: opportunity?.title || opportunity?.name || "فرصة",
 
     company:
       opportunity?.company_name ||
@@ -61,9 +53,7 @@ function normalizeOpportunity(opportunity) {
       opportunity?.opportunity_type ||
       "فرصة",
 
-    location:
-      opportunity?.location ||
-      "—",
+    location: opportunity?.location || "—",
 
     mode:
       opportunity?.mode ||
@@ -80,17 +70,12 @@ function normalizeOpportunity(opportunity) {
 }
 
 function SavedOpportunities() {
-  const [opportunities, setOpportunities] =
-    useState([]);
-
+  const [opportunities, setOpportunities] = useState([]);
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] =
-    useState("all");
-
+  const [typeFilter, setTypeFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [removingId, setRemovingId] =
-    useState(null);
+  const [removingId, setRemovingId] = useState(null);
 
   useEffect(() => {
     loadSavedOpportunities();
@@ -101,20 +86,13 @@ function SavedOpportunities() {
     setError("");
 
     try {
-      const response =
-        await getSavedOpportunities();
+      const response = await getSavedOpportunities();
 
-      const savedList =
-        extractSavedOpportunities(response);
+      const savedList = extractSavedOpportunities(response);
 
-      setOpportunities(
-        savedList.map(normalizeOpportunity)
-      );
+      setOpportunities(savedList.map(normalizeOpportunity));
     } catch (requestError) {
-      setError(
-        requestError?.message ||
-          "تعذر تحميل الفرص المحفوظة."
-      );
+      setError(requestError?.message || "تعذر تحميل الفرص المحفوظة.");
     } finally {
       setLoading(false);
     }
@@ -129,95 +107,63 @@ function SavedOpportunities() {
     setError("");
 
     try {
-      await unsaveOpportunity(
-        opportunity.id
-      );
+      await unsaveOpportunity(opportunity.id);
 
-      setOpportunities(
-        (currentOpportunities) =>
-          currentOpportunities.filter(
-            (currentOpportunity) =>
-              currentOpportunity.id !==
-              opportunity.id
-          )
+      setOpportunities((currentOpportunities) =>
+        currentOpportunities.filter(
+          (currentOpportunity) => currentOpportunity.id !== opportunity.id,
+        ),
       );
     } catch (requestError) {
-      setError(
-        requestError?.message ||
-          "تعذر إزالة الفرصة من المحفوظات."
-      );
+      setError(requestError?.message || "تعذر إزالة الفرصة من المحفوظات.");
     } finally {
       setRemovingId(null);
     }
   }
 
   const filteredOpportunities = useMemo(() => {
-    const searchValue = search
-      .trim()
-      .toLowerCase();
+    const searchValue = search.trim().toLowerCase();
 
-    return opportunities.filter(
-      (opportunity) => {
-        const title = String(
-          opportunity.title
-        ).toLowerCase();
+    return opportunities.filter((opportunity) => {
+      const title = String(opportunity.title).toLowerCase();
+      const company = String(opportunity.company).toLowerCase();
+      const type = String(opportunity.type).toLowerCase();
 
-        const company = String(
-          opportunity.company
-        ).toLowerCase();
+      const matchesSearch =
+        !searchValue ||
+        title.includes(searchValue) ||
+        company.includes(searchValue) ||
+        type.includes(searchValue);
 
-        const type = String(
-          opportunity.type
-        ).toLowerCase();
+      const normalizedType = type.toLowerCase();
 
-        const matchesSearch =
-          !searchValue ||
-          title.includes(searchValue) ||
-          company.includes(searchValue) ||
-          type.includes(searchValue);
+      let matchesType = true;
 
-        const normalizedType =
-          type.toLowerCase();
-
-        let matchesType = true;
-
-        if (typeFilter === "job") {
-          matchesType =
-            normalizedType.includes("وظيف") ||
-            normalizedType.includes("job");
-        }
-
-        if (typeFilter === "training") {
-          matchesType =
-            normalizedType.includes("تدريب") ||
-            normalizedType.includes("training");
-        }
-
-        if (typeFilter === "scholarship") {
-          matchesType =
-            normalizedType.includes("منح") ||
-            normalizedType.includes("scholarship");
-        }
-
-        return (
-          matchesSearch &&
-          matchesType
-        );
+      if (typeFilter === "job") {
+        matchesType =
+          normalizedType.includes("وظيف") || normalizedType.includes("job");
       }
-    );
-  }, [
-    opportunities,
-    search,
-    typeFilter,
-  ]);
+
+      if (typeFilter === "training") {
+        matchesType =
+          normalizedType.includes("تدريب") ||
+          normalizedType.includes("training");
+      }
+
+      if (typeFilter === "scholarship") {
+        matchesType =
+          normalizedType.includes("منح") ||
+          normalizedType.includes("scholarship");
+      }
+
+      return matchesSearch && matchesType;
+    });
+  }, [opportunities, search, typeFilter]);
 
   return (
     <PageContainer className="saved-page">
-
       <div className="container">
-
         <div className="saved-header">
-
           <div>
             <div className="saved-breadcrumb">
               الرئيسية
@@ -225,31 +171,20 @@ function SavedOpportunities() {
               الفرص المحفوظة
             </div>
 
-            <h1>
-              الفرص المحفوظة
-            </h1>
+            <h1>الفرص المحفوظة</h1>
 
-            <p>
-              الفرص التي حفظتها حتى ترجع لها
-              وتقدم عليها لاحقاً.
-            </p>
+            <p>الفرص التي حفظتها حتى ترجع لها وتقدم عليها لاحقاً.</p>
           </div>
 
           <div className="saved-count">
             <Bookmark size={16} />
             {opportunities.length} الفرص المحفوظة
           </div>
-
         </div>
 
-        {error && (
-          <div className="saved-error">
-            {error}
-          </div>
-        )}
+        {error && <div className="saved-error">{error}</div>}
 
         <div className="saved-toolbar">
-
           <div className="saved-search">
             <Search size={16} />
 
@@ -257,159 +192,88 @@ function SavedOpportunities() {
               type="text"
               placeholder="ابحث ضمن الفرص المحفوظة..."
               value={search}
-              onChange={(event) =>
-                setSearch(
-                  event.target.value
-                )
-              }
+              onChange={(event) => setSearch(event.target.value)}
             />
           </div>
 
           <select
             value={typeFilter}
-            onChange={(event) =>
-              setTypeFilter(
-                event.target.value
-              )
-            }
+            onChange={(event) => setTypeFilter(event.target.value)}
           >
-            <option value="all">
-              جميع الفرص
-            </option>
+            <option value="all">جميع الفرص</option>
 
-            <option value="job">
-              وظائف
-            </option>
+            <option value="job">وظائف</option>
 
-            <option value="training">
-              تدريب
-            </option>
+            <option value="training">تدريب</option>
 
-            <option value="scholarship">
-              منح
-            </option>
+            <option value="scholarship">منح</option>
           </select>
-
         </div>
 
         {loading ? (
-
           <div className="saved-empty">
-
             <div>
               <Bookmark size={25} />
             </div>
 
-            <h2>
-              جارٍ تحميل الفرص المحفوظة...
-            </h2>
+            <h2>جارٍ تحميل الفرص المحفوظة...</h2>
 
-            <p>
-              يتم جلب الفرص المحفوظة من الخادم.
-            </p>
-
+            <p>يتم جلب الفرص المحفوظة من الخادم.</p>
           </div>
-
         ) : filteredOpportunities.length > 0 ? (
-
           <div className="saved-grid">
-
-            {filteredOpportunities.map(
-              (opportunity) => (
-
-                <article
-                  className="saved-card"
-                  key={opportunity.id}
-                >
-
-                  <div className="saved-card-top">
-
-                    <div className="saved-company-icon">
-                      <Bookmark size={18} />
-                    </div>
-
-                    <button
-                      type="button"
-                      className="remove-saved"
-                      aria-label="إزالة من المحفوظات"
-                      disabled={
-                        removingId ===
-                        opportunity.id
-                      }
-                      onClick={() =>
-                        handleRemove(
-                          opportunity
-                        )
-                      }
-                    >
-                      <Trash2 size={16} />
-                    </button>
-
+            {filteredOpportunities.map((opportunity) => (
+              <article className="saved-card" key={opportunity.id}>
+                <div className="saved-card-top">
+                  <div className="saved-company-icon">
+                    <Bookmark size={18} />
                   </div>
 
-                  <span className="saved-type">
-                    {opportunity.type ||
-                      "فرصة"}
-                  </span>
+                  <button
+                    type="button"
+                    className="remove-saved"
+                    aria-label="إزالة من المحفوظات"
+                    disabled={removingId === opportunity.id}
+                    onClick={() => handleRemove(opportunity)}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
 
-                  <h2>
-                    {opportunity.title}
-                  </h2>
+                <span className="saved-type">{opportunity.type || "فرصة"}</span>
 
-                  <p className="saved-company">
-                    {opportunity.company}
-                  </p>
+                <h2>{opportunity.title}</h2>
 
-                  <div className="saved-meta">
+                <p className="saved-company">{opportunity.company}</p>
 
-                    <span>
-                      {opportunity.location}
-                    </span>
+                <div className="saved-meta">
+                  <span>{opportunity.location}</span>
+                  <span>{opportunity.mode}</span>
+                </div>
 
-                    <span>
-                      {opportunity.mode}
-                    </span>
+                <div className="saved-bottom">
+                  <div className="saved-match">
+                    <strong>
+                      {opportunity.match ?? "—"}
+                      {opportunity.match !== null &&
+                      opportunity.match !== undefined
+                        ? "%"
+                        : ""}
+                    </strong>
 
+                    <span>توافق</span>
                   </div>
 
-                  <div className="saved-bottom">
-
-                    <div className="saved-match">
-                      <strong>
-                        {opportunity.match ??
-                          "—"}
-                        {opportunity.match !==
-                          null &&
-                        opportunity.match !==
-                          undefined
-                          ? "%"
-                          : ""}
-                      </strong>
-
-                      <span>
-                        توافق
-                      </span>
-                    </div>
-
-                    <Link
-                      to={`/opportunities/${opportunity.id}`}
-                    >
-                      عرض الفرصة
-                      <ArrowLeft size={15} />
-                    </Link>
-
-                  </div>
-
-                </article>
-              )
-            )}
-
+                  <Link to={`/opportunities/${opportunity.id}`}>
+                    عرض الفرصة
+                    <ArrowLeft size={15} />
+                  </Link>
+                </div>
+              </article>
+            ))}
           </div>
-
         ) : (
-
           <div className="saved-empty">
-
             <div>
               <Bookmark size={25} />
             </div>
@@ -427,17 +291,11 @@ function SavedOpportunities() {
             </p>
 
             {opportunities.length === 0 && (
-              <Link to="/opportunities">
-                استكشاف الفرص
-              </Link>
+              <Link to="/opportunities">استكشاف الفرص</Link>
             )}
-
           </div>
-
         )}
-
       </div>
-
     </PageContainer>
   );
 }

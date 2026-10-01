@@ -19,15 +19,30 @@ const register = async (fullName, email, password, phone) => {
     email,
     passwordHash,
     1,
-    phone,
+    phone || null,
+  );
+
+  const token = jwt.sign(
+    {
+      id: user.id,
+      email: user.email,
+      role: "user",
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "1h",
+    },
   );
 
   return {
-    id: user.id,
-    fullName: user.full_name,
-    email: user.email,
-    phone: user.phone,
-    role: "user",
+    token,
+    user: {
+      id: user.id,
+      fullName: user.full_name,
+      email: user.email,
+      phone: user.phone,
+      role: "user",
+    },
   };
 };
 

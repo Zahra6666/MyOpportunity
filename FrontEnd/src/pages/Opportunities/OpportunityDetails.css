@@ -1,6 +1,6 @@
 /* ========================================
-  OPPORTUNITY DETAILS PAGE - FORSATI YOUNG THEME
-  (نفس ستايل صفحة الهوم)
+   OPPORTUNITY DETAILS PAGE - FORSATI YOUNG THEME
+   (نفس ستايل صفحة الهوم)
 ======================================== */
 
 .opportunity-details-page {
@@ -15,7 +15,7 @@
 }
 
 /* =========================
-  Breadcrumb
+   Breadcrumb
 ========================= */
 
 .details-breadcrumb {
@@ -44,7 +44,7 @@
 }
 
 /* =========================
-  Layout
+   Layout
 ========================= */
 
 .opportunity-details-layout {
@@ -72,7 +72,7 @@
 }
 
 /* =========================
-  Header
+   Header
 ========================= */
 
 .details-header-card {
@@ -221,7 +221,7 @@
 }
 
 /* =========================
-  Main Cards
+   Main Cards
 ========================= */
 
 .details-card,
@@ -310,7 +310,7 @@
 }
 
 /* =========================
-  Lists
+   Lists
 ========================= */
 
 .details-list {
@@ -361,7 +361,7 @@
 }
 
 /* =========================
-  Company
+   Company
 ========================= */
 
 .view-company-link {
@@ -381,7 +381,7 @@
 }
 
 /* =========================
-  Sidebar
+   Sidebar
 ========================= */
 
 .opportunity-details-sidebar {
@@ -393,7 +393,7 @@
 }
 
 /* =========================
-  Match
+   Match
 ========================= */
 
 .match-card {
@@ -533,7 +533,7 @@
 }
 
 /* =========================
-  Apply
+   Apply
 ========================= */
 
 .apply-card {
@@ -619,8 +619,63 @@
   transform: translateY(-2px);
 }
 
+.save-details-button-active {
+  background: var(--primary-50);
+  border-color: var(--primary-500);
+  color: var(--primary-600);
+}
+
+.save-details-button-active:hover {
+  background: var(--primary-100);
+  border-color: var(--primary-600);
+  color: var(--primary-700);
+}
+
 /* =========================
-  Info
+   Saved Opportunities Link
+========================= */
+
+.view-saved-opportunities {
+  width: 100%;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  margin-top: 10px;
+  padding: 9px 14px;
+  border: 1px solid var(--primary-100);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--primary-600);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.view-saved-opportunities svg {
+  flex-shrink: 0;
+  transition: transform var(--transition-fast);
+}
+
+.view-saved-opportunities:hover {
+  background: var(--primary-50);
+  border-color: var(--primary-300);
+  color: var(--primary-700);
+  transform: translateY(-1px);
+}
+
+.view-saved-opportunities:hover svg {
+  transform: translateX(-3px);
+}
+
+/* =========================
+   Info
 ========================= */
 
 .details-info-card {
@@ -660,7 +715,7 @@
 }
 
 /* =========================
-  CV
+   CV
 ========================= */
 
 .cv-reminder {
@@ -703,7 +758,7 @@
 }
 
 /* =========================
-  Application Bottom
+   Application Bottom
 ========================= */
 
 .application-information {
@@ -766,7 +821,7 @@
 }
 
 /* =========================
-  Not Found
+   Not Found
 ========================= */
 
 .details-not-found {
@@ -819,7 +874,7 @@
 }
 
 /* =========================
-  Responsive
+   Responsive
 ========================= */
 
 @media (max-width: 900px) {

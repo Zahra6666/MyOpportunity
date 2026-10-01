@@ -1,7 +1,13 @@
-import { ArrowLeft, LockKeyhole, Mail, User, Sparkles } from "lucide-react";
+import {
+  ArrowLeft,
+  LockKeyhole,
+  Mail,
+  User,
+  Phone,
+  Sparkles,
+} from "lucide-react";
 
 import { Link, useNavigate } from "react-router-dom";
-
 import { useState } from "react";
 
 import Button from "../../components/common/Button";
@@ -15,6 +21,7 @@ function Register() {
     name: "",
     email: "",
     password: "",
+    phone: "",
   });
 
   const [error, setError] = useState("");
@@ -36,9 +43,10 @@ function Register() {
         fullName: form.name,
         email: form.email,
         password: form.password,
+        phone: form.phone || undefined,
       });
 
-      navigate("/login");
+      navigate("/dashboard");
     } catch (error) {
       setError(
         error?.message ||
@@ -62,7 +70,6 @@ function Register() {
 
           <div className="auth-heading">
             <h1>أنشئ حسابك</h1>
-
             <p>ابدأ رحلة اكتشاف الفرص المناسبة لمسارك.</p>
           </div>
 
@@ -93,6 +100,20 @@ function Register() {
                   onChange={(e) => updateField("email", e.target.value)}
                   placeholder="example@email.com"
                   required
+                />
+              </div>
+            </label>
+
+            <label>
+              رقم الهاتف (اختياري)
+              <div className="input-with-icon">
+                <Phone size={18} />
+
+                <input
+                  type="tel"
+                  value={form.phone}
+                  onChange={(e) => updateField("phone", e.target.value)}
+                  placeholder="أدخل رقم هاتفك"
                 />
               </div>
             </label>

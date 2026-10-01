@@ -16,7 +16,12 @@ import { Link } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Badge from "../../components/common/Badge";
-import { getOpportunities } from "../../services/opportunityService";
+import {
+  getOpportunities,
+  getSavedOpportunities,
+  saveOpportunity,
+  unsaveOpportunity,
+} from "../../services/opportunityService";
 
 import "./Opportunities.css";
 
@@ -29,10 +34,9 @@ function Opportunities() {
   const [sort, setSort] = useState("match");
   const [mobileFilters, setMobileFilters] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
+  const [savedIds, setSavedIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  console.log("API opportunities:", opportunities);
 
   useEffect(() => {
     const fetchOpportunities = async () => {
@@ -43,6 +47,23 @@ function Opportunities() {
         const response = await getOpportunities();
 
         setOpportunities(Array.isArray(response?.data) ? response.data : []);
+
+        try {
+          const savedResponse = await getSavedOpportunities();
+
+          const savedList = extractSavedOpportunities(savedResponse);
+
+          setSavedIds(
+            new Set(
+              savedList
+                .map((item) => item?.id ?? item?._id)
+                .filter((savedId) => savedId !== null && savedId !== undefined)
+                .map(String),
+            ),
+          );
+        } catch {
+          setSavedIds(new Set());
+        }
       } catch (error) {
         setError(error.message || "فشل تحميل الفرص.");
       } finally {
@@ -52,6 +73,20 @@ function Opportunities() {
 
     fetchOpportunities();
   }, []);
+
+  const handleSaveChange = (id, saved) => {
+    setSavedIds((current) => {
+      const next = new Set(current);
+
+      if (saved) {
+        next.add(String(id));
+      } else {
+        next.delete(String(id));
+      }
+
+      return next;
+    });
+  };
 
   const filteredOpportunities = useMemo(() => {
     let result = [...opportunities];
@@ -386,13 +421,33 @@ function Opportunities() {
               </div>
             </div>
 
-            {filteredOpportunities.length > 0 ? (
+            {loading ? (
+              <div className="opportunities-empty">
+                <div className="empty-icon">
+                  <Search size={25} />
+                </div>
+
+                <h3>جاري تحميل الفرص...</h3>
+              </div>
+            ) : error ? (
+              <div className="opportunities-empty">
+                <div className="empty-icon">
+                  <Search size={25} />
+                </div>
+
+                <h3>{error}</h3>
+              </div>
+            ) : filteredOpportunities.length > 0 ? (
               <div className="explorer-grid">
                 {filteredOpportunities.map((opportunity, index) => (
                   <ExplorerCard
                     key={opportunity.id ?? opportunity._id ?? index}
                     opportunity={opportunity}
                     index={index}
+                    isSaved={savedIds.has(
+                      String(opportunity.id ?? opportunity._id),
+                    )}
+                    onSaveChange={handleSaveChange}
                   />
                 ))}
               </div>
@@ -418,7 +473,9 @@ function Opportunities() {
   );
 }
 
-function ExplorerCard({ opportunity, index }) {
+function ExplorerCard({ opportunity, index, isSaved, onSaveChange }) {
+  const [saving, setSaving] = useState(false);
+
   const id = opportunity.id ?? opportunity._id ?? index;
 
   const title = opportunity.title || opportunity.name || "فرصة متاحة";
@@ -453,6 +510,31 @@ function ExplorerCard({ opportunity, index }) {
 
   const skills = Array.isArray(opportunity.skills) ? opportunity.skills : [];
 
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      window.location.href = "/login";
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      if (isSaved) {
+        await unsaveOpportunity(id);
+        onSaveChange(id, false);
+      } else {
+        await saveOpportunity(id);
+        onSaveChange(id, true);
+      }
+    } catch (error) {
+      console.error("SAVE OPPORTUNITY ERROR:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <article
       className="explorer-card"
@@ -478,8 +560,14 @@ function ExplorerCard({ opportunity, index }) {
           <h3>{title}</h3>
         </div>
 
-        <button type="button" className="explorer-save" aria-label="حفظ الفرصة">
-          <Bookmark size={17} />
+        <button
+          type="button"
+          className={`explorer-save ${isSaved ? "explorer-save-active" : ""}`}
+          aria-label={isSaved ? "إزالة من المحفوظات" : "حفظ الفرصة"}
+          onClick={handleSave}
+          disabled={saving}
+        >
+          <Bookmark size={17} fill={isSaved ? "currentColor" : "none"} />
         </button>
       </div>
 
@@ -542,6 +630,30 @@ function ExplorerCard({ opportunity, index }) {
       </div>
     </article>
   );
+}
+
+function extractSavedOpportunities(response) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.opportunities)) {
+    return response.opportunities;
+  }
+
+  if (Array.isArray(response?.savedOpportunities)) {
+    return response.savedOpportunities;
+  }
+
+  if (Array.isArray(response?.results)) {
+    return response.results;
+  }
+
+  return [];
 }
 
 export default Opportunities;

@@ -17,17 +17,24 @@ import {
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
-import Button from "../../components/common/Button";
-import { getOpportunityById } from "../../services/opportunityService";
+import {
+  getOpportunityById,
+  getSavedOpportunities,
+  saveOpportunity,
+  unsaveOpportunity,
+} from "../../services/opportunityService";
 
 import "./OpportunityDetails.css";
 
 function OpportunityDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
+
   const [isSaved, setIsSaved] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [opportunity, setOpportunity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -39,8 +46,24 @@ function OpportunityDetails() {
         setError("");
 
         const response = await getOpportunityById(id);
+        const opportunityData = response?.data || null;
 
-        setOpportunity(response?.data || null);
+        setOpportunity(opportunityData);
+
+        if (opportunityData) {
+          try {
+            const savedResponse = await getSavedOpportunities();
+            const savedList = extractSavedOpportunities(savedResponse);
+
+            const saved = savedList.some(
+              (item) => String(item?.id ?? item?._id) === String(id),
+            );
+
+            setIsSaved(saved);
+          } catch {
+            setIsSaved(false);
+          }
+        }
       } catch (error) {
         setError(error.message || "فشل تحميل الفرصة.");
         setOpportunity(null);
@@ -51,6 +74,32 @@ function OpportunityDetails() {
 
     fetchOpportunity();
   }, [id]);
+
+  const handleSave = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+
+      if (isSaved) {
+        await unsaveOpportunity(id);
+        setIsSaved(false);
+      } else {
+        await saveOpportunity(id);
+        setIsSaved(true);
+      }
+    } catch (error) {
+      setError(error?.message || "تعذر حفظ الفرصة. حاول مرة أخرى.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -195,6 +244,8 @@ function OpportunityDetails() {
 
           <span>{title}</span>
         </div>
+
+        {error && <div className="details-error">{error}</div>}
 
         <div className="opportunity-details-layout">
           <main className="opportunity-details-main">
@@ -477,12 +528,24 @@ function OpportunityDetails() {
                 className={`save-details-button ${
                   isSaved ? "save-details-button-active" : ""
                 }`}
-                onClick={() => setIsSaved(!isSaved)}
+                onClick={handleSave}
+                disabled={saving}
               >
                 <Bookmark size={17} fill={isSaved ? "currentColor" : "none"} />
 
-                {isSaved ? "تم حفظ الفرصة" : "حفظ الفرصة"}
+                {saving
+                  ? "جارٍ الحفظ..."
+                  : isSaved
+                    ? "تم حفظ الفرصة"
+                    : "حفظ الفرصة"}
               </button>
+
+              {isSaved && (
+                <Link to="/saved" className="view-saved-opportunities">
+                  عرض الفرص المحفوظة
+                  <ArrowLeft size={15} />
+                </Link>
+              )}
             </section>
 
             <section className="details-info-card">
@@ -544,6 +607,30 @@ function OpportunityDetails() {
       </div>
     </PageContainer>
   );
+}
+
+function extractSavedOpportunities(response) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.opportunities)) {
+    return response.opportunities;
+  }
+
+  if (Array.isArray(response?.savedOpportunities)) {
+    return response.savedOpportunities;
+  }
+
+  if (Array.isArray(response?.results)) {
+    return response.results;
+  }
+
+  return [];
 }
 
 function normalizeList(value) {
