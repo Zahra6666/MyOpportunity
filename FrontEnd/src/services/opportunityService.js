@@ -85,6 +85,15 @@ export async function getSavedOpportunities() {
   return request("/me/saved");
 }
 
+
+export async function getOpportunityMatch(id) {
+  return request(`/opportunities/${id}/match`);
+}
+
+export async function getOpportunityMatches() {
+  return request("/opportunities/matches");
+}
+
 export default {
   getOpportunities,
   getOpportunityById,
@@ -94,4 +103,6 @@ export default {
   saveOpportunity,
   unsaveOpportunity,
   getSavedOpportunities,
+  getOpportunityMatch,
+  getOpportunityMatches,
 };

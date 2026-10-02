@@ -21,6 +21,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import PageContainer from "../../components/layout/PageContainer";
 import {
   getOpportunityById,
+  getOpportunityMatch,
   getSavedOpportunities,
   saveOpportunity,
   unsaveOpportunity,
@@ -37,6 +38,12 @@ function OpportunityDetails() {
   const [opportunity, setOpportunity] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // =========================
+  // Matching state
+  // =========================
+  const [matchData, setMatchData] = useState(null);
+  const [matchLoading, setMatchLoading] = useState(false);
 
   useEffect(() => {
     const fetchOpportunity = async () => {
@@ -72,6 +79,40 @@ function OpportunityDetails() {
     };
 
     fetchOpportunity();
+  }, [id]);
+
+  // =========================
+  // Get real AI matching
+  // =========================
+  useEffect(() => {
+    const fetchMatch = async () => {
+      const token = localStorage.getItem("token");
+
+      // Matching يحتاج تسجيل دخول
+      if (!token || !id) {
+        setMatchData(null);
+        return;
+      }
+
+      try {
+        setMatchLoading(true);
+
+        const response = await getOpportunityMatch(id);
+
+        const result = response?.data || null;
+
+        setMatchData(result);
+      } catch (error) {
+        console.error("Failed to load opportunity match:", error);
+
+        // لا نخلي فشل الـMatching يكسر صفحة الفرصة
+        setMatchData(null);
+      } finally {
+        setMatchLoading(false);
+      }
+    };
+
+    fetchMatch();
   }, [id]);
 
   const handleSave = async () => {
@@ -171,19 +212,38 @@ function OpportunityDetails() {
     opportunity.details ||
     "لا يوجد وصف تفصيلي متاح لهذه الفرصة حالياً.";
 
-  const match = Number(opportunity.match ?? opportunity.match_percentage ?? 0);
+  // =========================
+  // Real matching data
+  // =========================
 
-  const matchingSkills = Array.isArray(
-    opportunity.matchingSkills || opportunity.matching_skills,
-  )
-    ? opportunity.matchingSkills || opportunity.matching_skills
-    : [];
+  const match = Number(
+    matchData?.match_percentage ??
+      opportunity.match ??
+      opportunity.match_percentage ??
+      0,
+  );
 
-  const missingSkills = Array.isArray(
-    opportunity.missingSkills || opportunity.missing_skills,
-  )
-    ? opportunity.missingSkills || opportunity.missing_skills
-    : [];
+  const matchingSkills = Array.isArray(matchData?.matched_skills)
+    ? matchData.matched_skills
+    : Array.isArray(
+          opportunity.matchingSkills || opportunity.matching_skills,
+        )
+      ? opportunity.matchingSkills || opportunity.matching_skills
+      : [];
+
+  const missingSkills = Array.isArray(matchData?.missing_skills)
+    ? matchData.missing_skills
+    : Array.isArray(
+          opportunity.missingSkills || opportunity.missing_skills,
+        )
+      ? opportunity.missingSkills || opportunity.missing_skills
+      : [];
+
+  const experienceMatch = matchData?.experience_match;
+
+  const educationMatch = matchData?.education_match;
+
+  const matchReason = matchData?.reason || "";
 
   const responsibilities = normalizeList(opportunity.responsibilities);
 
@@ -406,8 +466,14 @@ function OpportunityDetails() {
                 </div>
 
                 <div className="match-circle">
-                  <strong>{match}%</strong>
-                  <span>توافق</span>
+                  {matchLoading ? (
+                    <strong>...</strong>
+                  ) : (
+                    <>
+                      <strong>{match}%</strong>
+                      <span>توافق</span>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -419,33 +485,90 @@ function OpportunityDetails() {
                 />
               </div>
 
-              {matchingSkills.length > 0 && (
-                <div className="match-group">
-                  <div className="match-group-title">
-                    <CheckCircle2 size={15} />
-                    مهارات متوافقة
-                  </div>
+              {!matchLoading && matchData && (
+                <>
+                  {matchingSkills.length > 0 && (
+                    <div className="match-group">
+                      <div className="match-group-title">
+                        <CheckCircle2 size={15} />
+                        مهارات متوافقة
+                      </div>
 
-                  <div className="match-tags">
-                    {matchingSkills.map((skill, index) => (
-                      <span key={index}>{skill}</span>
-                    ))}
-                  </div>
-                </div>
+                      <div className="match-tags">
+                        {matchingSkills.map((skill, index) => (
+                          <span key={index}>{skill}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {missingSkills.length > 0 && (
+                    <div className="match-group">
+                      <div className="match-group-title missing">
+                        <CircleAlert size={15} />
+                        مهارات تحتاج إلى تطوير
+                      </div>
+
+                      <div className="match-tags missing-tags">
+                        {missingSkills.map((skill, index) => (
+                          <span key={index}>{skill}</span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(experienceMatch !== undefined ||
+                    educationMatch !== undefined) && (
+                    <div className="match-group">
+                      <div className="match-group-title">
+                        <CheckCircle2 size={15} />
+                        توافق الملف
+                      </div>
+
+                      <div className="match-tags">
+                        {experienceMatch === true && (
+                          <span>الخبرة متوافقة</span>
+                        )}
+
+                        {educationMatch === true && (
+                          <span>التعليم متوافق</span>
+                        )}
+
+                        {experienceMatch === false && (
+                          <span>الخبرة غير متوافقة بالكامل</span>
+                        )}
+
+                        {educationMatch === false && (
+                          <span>التعليم غير متوافق بالكامل</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {matchReason && (
+                    <div className="match-group">
+                      <div className="match-group-title">
+                        <FileText size={15} />
+                        سبب التوافق
+                      </div>
+
+                      <p className="details-description">{matchReason}</p>
+                    </div>
+                  )}
+                </>
               )}
 
-              {missingSkills.length > 0 && (
+              {!matchLoading && !matchData && (
                 <div className="match-group">
-                  <div className="match-group-title missing">
-                    <CircleAlert size={15} />
-                    مهارات تحتاج إلى تطوير
+                  <div className="match-group-title">
+                    <FileText size={15} />
+                    معلومات التوافق
                   </div>
 
-                  <div className="match-tags missing-tags">
-                    {missingSkills.map((skill, index) => (
-                      <span key={index}>{skill}</span>
-                    ))}
-                  </div>
+                  <p className="details-description">
+                    سجّل الدخول وارفع سيرتك الذاتية حتى نقدر نحسب نسبة
+                    توافقك مع هذه الفرصة.
+                  </p>
                 </div>
               )}
 
@@ -548,7 +671,9 @@ function OpportunityDetails() {
               <div>
                 <strong>حدّث سيرتك الذاتية</strong>
 
-                <p>السيرة المحدثة تساعدك على الحصول على تطابق أدق مع الفرص.</p>
+                <p>
+                  السيرة المحدثة تساعدك على الحصول على تطابق أدق مع الفرص.
+                </p>
 
                 <Link to="/cv/upload">
                   تحديث السيرة
@@ -661,7 +786,8 @@ function translateOpportunityType(value) {
 }
 
 function getOpportunityCategory(opportunity) {
-  const directCategory = opportunity.category_name || opportunity.categoryName;
+  const directCategory =
+    opportunity.category_name || opportunity.categoryName;
 
   if (directCategory) {
     return translateOpportunityCategory(directCategory);
@@ -699,14 +825,19 @@ function getOpportunityCategory(opportunity) {
       19: "المالية",
     };
 
-    return categoryTranslations[Number(opportunity.category_id)] || "غير محدد";
+    return (
+      categoryTranslations[Number(opportunity.category_id)] || "غير محدد"
+    );
   }
 
   return "غير محدد";
 }
 
 function translateOpportunityCategory(value) {
-  const normalized = String(value).trim().toLowerCase().replace(/\s+/g, " ");
+  const normalized = String(value)
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
 
   const translations = {
     technology: "التكنولوجيا",

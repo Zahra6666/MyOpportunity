@@ -3,7 +3,14 @@ const { extractCvInfo } = require("./cv-ai.service");
 
 const testCvAi = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id || req.user?.user_id;
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication required",
+      });
+    }
 
     const cv = await cvRepository.getCvByUserId(userId);
 
@@ -14,7 +21,7 @@ const testCvAi = async (req, res) => {
       });
     }
 
-    if (!cv.parsed_text) {
+    if (!cv.parsed_text || !cv.parsed_text.trim()) {
       return res.status(400).json({
         success: false,
         message: "CV text has not been extracted yet",
@@ -29,9 +36,32 @@ const testCvAi = async (req, res) => {
       data: result,
     });
   } catch (error) {
+    console.error("CV AI analysis error:", error);
+
+    if (error.code === "CV_AI_CONFIG_ERROR") {
+      return res.status(500).json({
+        success: false,
+        message: "CV AI service is not configured",
+      });
+    }
+
+    if (error.code === "EMPTY_CV_TEXT") {
+      return res.status(400).json({
+        success: false,
+        message: "CV text is empty",
+      });
+    }
+
+    if (error.code === "INVALID_CV_AI_RESPONSE") {
+      return res.status(500).json({
+        success: false,
+        message: "Invalid response from CV analysis AI",
+      });
+    }
+
     return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Failed to analyze CV",
     });
   }
 };
