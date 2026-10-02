@@ -16,33 +16,48 @@ import { Link } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
 import Badge from "../../components/common/Badge";
-import { getOpportunities } from "../../services/opportunityService";
+import {
+  getOpportunities,
+  getCategories,
+  getTypes,
+} from "../../services/opportunityService";
 
 import "./Opportunities.css";
 
 function Opportunities() {
   const [search, setSearch] = useState("");
+  // category = id التصنيف (نوع الفرصة) كنص، أو "all"
   const [category, setCategory] = useState("all");
   const [location, setLocation] = useState("all");
+  // mode = id نوع العمل كنص، أو "all"
   const [mode, setMode] = useState("all");
   const [minMatch, setMinMatch] = useState(0);
   const [sort, setSort] = useState("match");
   const [mobileFilters, setMobileFilters] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [types, setTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  console.log("API opportunities:", opportunities);
-
   useEffect(() => {
-    const fetchOpportunities = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const response = await getOpportunities();
+        const [opportunitiesResponse, categoriesResponse, typesResponse] =
+          await Promise.all([getOpportunities(), getCategories(), getTypes()]);
 
-        setOpportunities(Array.isArray(response?.data) ? response.data : []);
+        setOpportunities(
+          Array.isArray(opportunitiesResponse?.data)
+            ? opportunitiesResponse.data
+            : [],
+        );
+        setCategories(
+          Array.isArray(categoriesResponse?.data) ? categoriesResponse.data : [],
+        );
+        setTypes(Array.isArray(typesResponse?.data) ? typesResponse.data : []);
       } catch (error) {
         setError(error.message || "فشل تحميل الفرص.");
       } finally {
@@ -50,7 +65,7 @@ function Opportunities() {
       }
     };
 
-    fetchOpportunities();
+    fetchData();
   }, []);
 
   const filteredOpportunities = useMemo(() => {
@@ -62,15 +77,11 @@ function Opportunities() {
       result = result.filter((item) => {
         const searchableValues = [
           item.title,
-          item.titleEn,
-          item.company,
           item.company_name,
           item.location,
           item.description,
-          item.type,
-          item.category,
           item.category_name,
-          item.mode,
+          item.type_name,
           ...(Array.isArray(item.skills) ? item.skills : []),
         ];
 
@@ -81,11 +92,7 @@ function Opportunities() {
     }
 
     if (category !== "all") {
-      result = result.filter((item) => {
-        const value = item.type || item.category || item.category_name || "";
-
-        return String(value).toLowerCase().includes(category.toLowerCase());
-      });
+      result = result.filter((item) => String(item.category_id) === category);
     }
 
     if (location !== "all") {
@@ -97,11 +104,7 @@ function Opportunities() {
     }
 
     if (mode !== "all") {
-      result = result.filter((item) =>
-        String(item.mode || item.work_mode || item.work_type || "")
-          .toLowerCase()
-          .includes(mode.toLowerCase()),
-      );
+      result = result.filter((item) => String(item.type_id) === mode);
     }
 
     result = result.filter((item) => {
@@ -206,7 +209,7 @@ function Opportunities() {
             <button
               type="button"
               className="opportunities-search-button"
-              onClick={() => {}}
+              onClick={() => { }}
             >
               بحث
               <Search size={16} />
@@ -218,9 +221,8 @@ function Opportunities() {
       <section className="opportunities-content">
         <div className="container opportunities-layout">
           <aside
-            className={`opportunities-filters ${
-              mobileFilters ? "opportunities-filters-open" : ""
-            }`}
+            className={`opportunities-filters ${mobileFilters ? "opportunities-filters-open" : ""
+              }`}
           >
             <div className="filters-header">
               <div>
@@ -238,26 +240,21 @@ function Opportunities() {
               <label>نوع الفرصة</label>
 
               <div className="filter-options">
-                {[
-                  ["all", "جميع الفرص"],
-                  ["وظيفة", "وظائف"],
-                  ["منحة", "منح دراسية"],
-                  ["تدريب", "تدريب"],
-                  ["مسابقة", "مسابقات"],
-                  ["كورس", "كورسات"],
-                ].map(([value, label]) => (
-                  <label className="filter-radio" key={value}>
-                    <input
-                      type="radio"
-                      name="category"
-                      value={value}
-                      checked={category === value}
-                      onChange={(event) => setCategory(event.target.value)}
-                    />
+                {[{ id: "all", name: "جميع الفرص" }, ...categories].map(
+                  (item) => (
+                    <label className="filter-radio" key={item.id}>
+                      <input
+                        type="radio"
+                        name="category"
+                        value={String(item.id)}
+                        checked={category === String(item.id)}
+                        onChange={(event) => setCategory(event.target.value)}
+                      />
 
-                    <span>{label}</span>
-                  </label>
-                ))}
+                      <span>{item.name}</span>
+                    </label>
+                  ),
+                )}
               </div>
             </div>
 
@@ -292,23 +289,17 @@ function Opportunities() {
               <label>نوع العمل</label>
 
               <div className="filter-options">
-                {[
-                  ["all", "كل الأنواع"],
-                  ["دوام كامل", "دوام كامل"],
-                  ["دوام جزئي", "دوام جزئي"],
-                  ["عن بعد", "عن بعد"],
-                  ["تدريب", "تدريب"],
-                ].map(([value, label]) => (
-                  <label className="filter-radio" key={value}>
+                {[{ id: "all", name: "كل الأنواع" }, ...types].map((item) => (
+                  <label className="filter-radio" key={item.id}>
                     <input
                       type="radio"
                       name="mode"
-                      value={value}
-                      checked={mode === value}
+                      value={String(item.id)}
+                      checked={mode === String(item.id)}
                       onChange={(event) => setMode(event.target.value)}
                     />
 
-                    <span>{label}</span>
+                    <span>{item.name}</span>
                   </label>
                 ))}
               </div>
@@ -386,7 +377,17 @@ function Opportunities() {
               </div>
             </div>
 
-            {filteredOpportunities.length > 0 ? (
+            {error ? (
+              <div className="opportunities-empty">
+                <h3>صار خطأ</h3>
+
+                <p>{error}</p>
+              </div>
+            ) : loading ? (
+              <div className="opportunities-empty">
+                <p>جاري تحميل الفرص...</p>
+              </div>
+            ) : filteredOpportunities.length > 0 ? (
               <div className="explorer-grid">
                 {filteredOpportunities.map((opportunity, index) => (
                   <ExplorerCard
@@ -418,35 +419,40 @@ function Opportunities() {
   );
 }
 
+function formatDate(value) {
+  if (!value) return "غير محدد";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return date.toLocaleDateString("ar-IQ", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 function ExplorerCard({ opportunity, index }) {
   const id = opportunity.id ?? opportunity._id ?? index;
 
   const title = opportunity.title || opportunity.name || "فرصة متاحة";
 
-  const company =
-    opportunity.company ||
-    opportunity.company_name ||
-    opportunity.company?.name ||
-    "جهة ناشرة";
+  const company = opportunity.company_name || "جهة ناشرة";
 
   const location = opportunity.location || "العراق";
 
-  const type =
-    opportunity.type ||
-    opportunity.category ||
-    opportunity.category_name ||
-    "فرصة";
+  // التصنيف (نوع الفرصة) من جدول categories
+  const category = opportunity.category_name || "فرصة";
 
-  const mode =
-    opportunity.mode ||
-    opportunity.work_mode ||
-    opportunity.work_type ||
-    "غير محدد";
+  // نوع العمل من جدول types
+  const mode = opportunity.type_name || "غير محدد";
 
   const match = opportunity.match ?? opportunity.match_percentage ?? 0;
 
-  const deadline =
-    opportunity.deadline || opportunity.application_deadline || "غير محدد";
+  const deadline = formatDate(opportunity.deadline);
 
   const description =
     opportunity.description || "اكتشف تفاصيل هذه الفرصة والمتطلبات الخاصة بها.";
@@ -462,18 +468,15 @@ function ExplorerCard({ opportunity, index }) {
     >
       <div className="explorer-card-top">
         <div className="explorer-company-logo">
-          {opportunity.company_logo || opportunity.company?.logo ? (
-            <img
-              src={opportunity.company_logo || opportunity.company?.logo}
-              alt={company}
-            />
+          {opportunity.company_logo ? (
+            <img src={opportunity.company_logo} alt={company} />
           ) : (
             <Building2 size={21} />
           )}
         </div>
 
         <div className="explorer-card-title">
-          <Badge variant="type">{type}</Badge>
+          <Badge variant="type">{category}</Badge>
 
           <h3>{title}</h3>
         </div>

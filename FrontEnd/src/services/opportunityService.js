@@ -85,6 +85,15 @@ export async function getSavedOpportunities() {
   return request("/me/saved");
 }
 
+export async function getCategories() {
+  return request("/categories");
+}
+
+export async function getTypes() {
+  return request("/types");
+}
+
+
 export default {
   getOpportunities,
   getOpportunityById,
@@ -94,4 +103,6 @@ export default {
   saveOpportunity,
   unsaveOpportunity,
   getSavedOpportunities,
+  getCategories,
+  getTypes,
 };

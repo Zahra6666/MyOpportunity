@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Save } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
-import { createOpportunity } from "../../services/opportunityService";
+import {
+  createOpportunity,
+  getCategories,
+  getTypes,
+} from "../../services/opportunityService";
 
 import "./CreateOpportunity.css";
 
@@ -21,8 +25,33 @@ function CreateOpportunity() {
     status: "active",
   });
 
+  const [categories, setCategories] = useState([]);
+  const [types, setTypes] = useState([]);
+  const [optionsLoading, setOptionsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const [categoriesResponse, typesResponse] = await Promise.all([
+          getCategories(),
+          getTypes(),
+        ]);
+
+        setCategories(
+          Array.isArray(categoriesResponse?.data) ? categoriesResponse.data : [],
+        );
+        setTypes(Array.isArray(typesResponse?.data) ? typesResponse.data : []);
+      } catch (requestError) {
+        setError(requestError?.message || "تعذر تحميل التصنيفات والأنواع.");
+      } finally {
+        setOptionsLoading(false);
+      }
+    };
+
+    fetchOptions();
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -56,10 +85,12 @@ function CreateOpportunity() {
       await createOpportunity({
         title: form.title.trim(),
         description: form.description.trim(),
+        // عمود requirements نص (TEXT) بالداتابيس، فنبعثه نص، كل متطلب بسطر
         requirements: form.requirements
           .split("\n")
           .map((item) => item.trim())
-          .filter(Boolean),
+          .filter(Boolean)
+          .join("\n"),
         category_id: Number(form.category_id),
         type_id: Number(form.type_id),
         location: form.location.trim(),
@@ -69,10 +100,7 @@ function CreateOpportunity() {
 
       navigate("/admin/opportunities");
     } catch (requestError) {
-      setError(
-        requestError?.message ||
-          "تعذر إنشاء الفرصة."
-      );
+      setError(requestError?.message || "تعذر إنشاء الفرصة.");
     } finally {
       setLoading(false);
     }
@@ -81,50 +109,28 @@ function CreateOpportunity() {
   return (
     <PageContainer className="create-opportunity-page">
       <div className="container">
-
         <div className="create-opportunity-header">
           <div>
-            <Link
-              to="/admin/opportunities"
-              className="back-link"
-            >
+            <Link to="/admin/opportunities" className="back-link">
               <ArrowLeft size={16} />
               العودة إلى إدارة الفرص
             </Link>
 
-            <h1>
-              إضافة فرصة جديدة
-            </h1>
+            <h1>إضافة فرصة جديدة</h1>
 
-            <p>
-              أدخل بيانات الفرصة لإضافتها إلى المنصة.
-            </p>
+            <p>أدخل بيانات الفرصة لإضافتها إلى المنصة.</p>
           </div>
         </div>
 
-        {error && (
-          <div className="create-error">
-            {error}
-          </div>
-        )}
+        {error && <div className="create-error">{error}</div>}
 
-        <form
-          className="create-opportunity-form"
-          onSubmit={handleSubmit}
-        >
-
+        <form className="create-opportunity-form" onSubmit={handleSubmit}>
           <div className="form-section">
-
-            <h2>
-              معلومات الفرصة
-            </h2>
+            <h2>معلومات الفرصة</h2>
 
             <div className="form-grid">
-
               <div className="form-group full">
-                <label htmlFor="title">
-                  عنوان الفرصة *
-                </label>
+                <label htmlFor="title">عنوان الفرصة *</label>
 
                 <input
                   id="title"
@@ -137,9 +143,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group full">
-                <label htmlFor="description">
-                  وصف الفرصة *
-                </label>
+                <label htmlFor="description">وصف الفرصة *</label>
 
                 <textarea
                   id="description"
@@ -152,9 +156,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group full">
-                <label htmlFor="requirements">
-                  المتطلبات
-                </label>
+                <label htmlFor="requirements">المتطلبات</label>
 
                 <textarea
                   id="requirements"
@@ -165,47 +167,55 @@ function CreateOpportunity() {
                   placeholder={"اكتب كل متطلب في سطر مستقل..."}
                 />
 
-                <small>
-                  كل سطر سيتم إرساله كمتطلب مستقل.
-                </small>
+                <small>كل سطر سيتم حفظه كمتطلب مستقل.</small>
               </div>
 
               <div className="form-group">
-                <label htmlFor="category_id">
-                  معرّف التصنيف *
-                </label>
+                <label htmlFor="category_id">نوع الفرصة *</label>
 
-                <input
+                <select
                   id="category_id"
                   name="category_id"
-                  type="number"
-                  min="1"
                   value={form.category_id}
                   onChange={handleChange}
-                  placeholder="مثال: 1"
-                />
+                  disabled={optionsLoading}
+                >
+                  <option value="">
+                    {optionsLoading ? "جارٍ التحميل..." : "اختر نوع الفرصة"}
+                  </option>
+
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="type_id">
-                  معرّف النوع *
-                </label>
+                <label htmlFor="type_id">نوع العمل *</label>
 
-                <input
+                <select
                   id="type_id"
                   name="type_id"
-                  type="number"
-                  min="1"
                   value={form.type_id}
                   onChange={handleChange}
-                  placeholder="مثال: 1"
-                />
+                  disabled={optionsLoading}
+                >
+                  <option value="">
+                    {optionsLoading ? "جارٍ التحميل..." : "اختر نوع العمل"}
+                  </option>
+
+                  {types.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {type.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="location">
-                  الموقع *
-                </label>
+                <label htmlFor="location">الموقع *</label>
 
                 <input
                   id="location"
@@ -218,9 +228,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="deadline">
-                  آخر موعد للتقديم *
-                </label>
+                <label htmlFor="deadline">آخر موعد للتقديم *</label>
 
                 <input
                   id="deadline"
@@ -232,9 +240,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="status">
-                  الحالة
-                </label>
+                <label htmlFor="status">الحالة</label>
 
                 <select
                   id="status"
@@ -242,45 +248,26 @@ function CreateOpportunity() {
                   value={form.status}
                   onChange={handleChange}
                 >
-                  <option value="active">
-                    فعالة
-                  </option>
+                  <option value="active">فعالة</option>
 
-                  <option value="inactive">
-                    غير فعالة
-                  </option>
+                  <option value="inactive">غير فعالة</option>
                 </select>
               </div>
-
             </div>
-
           </div>
 
           <div className="form-actions">
-
-            <Link
-              to="/admin/opportunities"
-              className="cancel-button"
-            >
+            <Link to="/admin/opportunities" className="cancel-button">
               إلغاء
             </Link>
 
-            <button
-              type="submit"
-              className="submit-button"
-              disabled={loading}
-            >
+            <button type="submit" className="submit-button" disabled={loading}>
               <Save size={17} />
 
-              {loading
-                ? "جارٍ إنشاء الفرصة..."
-                : "إنشاء الفرصة"}
+              {loading ? "جارٍ إنشاء الفرصة..." : "إنشاء الفرصة"}
             </button>
-
           </div>
-
         </form>
-
       </div>
     </PageContainer>
   );
