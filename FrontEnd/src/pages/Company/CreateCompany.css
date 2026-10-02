@@ -1,5 +1,11 @@
 .create-company-page {
+  min-height: 100vh;
   padding: 40px 0 70px;
+  background: var(--bg-main);
+  color: var(--text-primary);
+  transition:
+    background-color 0.25s ease,
+    color 0.25s ease;
 }
 
 .create-company-header {
@@ -16,23 +22,29 @@
   gap: 8px;
   margin-bottom: 12px;
   font-size: 13px;
-  color: #7b8494;
+  color: var(--text-muted);
 }
 
 .create-company-breadcrumb a {
-  color: inherit;
+  color: var(--text-secondary);
   text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.create-company-breadcrumb a:hover {
+  color: var(--primary-600);
 }
 
 .create-company-header h1 {
   margin: 0 0 8px;
   font-size: 30px;
   font-weight: 800;
+  color: var(--text-primary);
 }
 
 .create-company-header p {
   margin: 0;
-  color: #7b8494;
+  color: var(--text-secondary);
 }
 
 .create-company-back {
@@ -40,21 +52,81 @@
   align-items: center;
   gap: 7px;
   text-decoration: none;
-  color: inherit;
+  color: var(--text-secondary);
   white-space: nowrap;
+
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.create-company-back:hover {
+  color: var(--primary-600);
+  transform: translateX(2px);
 }
 
 .create-company-card {
+  position: relative;
+
   max-width: 900px;
   margin: 0 auto;
   padding: 30px;
-  background: #fff;
-  border: 1px solid #e8ebf0;
+
+  background:
+    radial-gradient(circle at 100% 0%, var(--primary-50), transparent 32%),
+    var(--bg-card);
+
+  border: 1px solid var(--border-light);
   border-radius: 18px;
-  box-shadow: 0 12px 35px rgba(20, 30, 50, 0.06);
+
+  box-shadow: var(--shadow-md);
+
+  overflow: hidden;
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.create-company-card::before {
+  content: "";
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  right: -90px;
+  top: -100px;
+
+  border-radius: 50%;
+
+  border: 1px solid var(--primary-100);
+
+  pointer-events: none;
+}
+
+.create-company-card::after {
+  content: "";
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  left: -55px;
+  bottom: -55px;
+
+  border-radius: 50%;
+
+  background: var(--primary-50);
+
+  pointer-events: none;
 }
 
 .create-company-title {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   align-items: center;
   gap: 14px;
@@ -64,34 +136,55 @@
 .create-company-icon {
   width: 46px;
   height: 46px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  flex-shrink: 0;
+
   border-radius: 12px;
-  background: #f1f5ff;
+
+  background: var(--primary-50);
+  color: var(--primary-600);
+
+  border: 1px solid var(--primary-100);
+
+  box-shadow: var(--shadow-sm);
 }
 
 .create-company-title h2 {
   margin: 0 0 5px;
   font-size: 20px;
+  color: var(--text-primary);
 }
 
 .create-company-title p {
   margin: 0;
-  color: #7b8494;
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
 .create-company-error {
+  position: relative;
+  z-index: 1;
+
   margin-bottom: 20px;
   padding: 12px 14px;
+
   border-radius: 10px;
-  background: #fff1f1;
-  color: #c62828;
+
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.18);
+
+  color: #dc2626;
   font-size: 14px;
 }
 
 .create-company-grid {
+  position: relative;
+  z-index: 1;
+
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
@@ -108,6 +201,7 @@
 }
 
 .create-company-field label {
+  color: var(--text-primary);
   font-size: 14px;
   font-weight: 700;
 }
@@ -116,53 +210,127 @@
 .create-company-field textarea {
   width: 100%;
   box-sizing: border-box;
+
   padding: 12px 14px;
-  border: 1px solid #dfe3e9;
+
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  background: #fff;
+
+  background: var(--bg-main);
+  color: var(--text-primary);
+
   font: inherit;
   outline: none;
-  transition: border-color 0.2s ease,
-    box-shadow 0.2s ease;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+.create-company-field input::placeholder,
+.create-company-field textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.create-company-field input:hover,
+.create-company-field textarea:hover {
+  border-color: var(--border-medium);
+}
+
+.create-company-field input:focus,
+.create-company-field textarea:focus {
+  border-color: var(--primary-600);
+
+  box-shadow:
+    0 0 0 3px var(--primary-50),
+    var(--shadow-sm);
 }
 
 .create-company-field textarea {
   resize: vertical;
   min-height: 140px;
-}
-
-.create-company-field input:focus,
-.create-company-field textarea:focus {
-  border-color: #6c7cff;
-  box-shadow: 0 0 0 3px rgba(108, 124, 255, 0.1);
+  line-height: 1.7;
 }
 
 .create-company-field input:disabled,
 .create-company-field textarea:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+  background: var(--bg-soft);
 }
 
 .create-company-actions {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   justify-content: flex-end;
   align-items: center;
   gap: 12px;
+
   margin-top: 30px;
   padding-top: 22px;
-  border-top: 1px solid #edf0f4;
+
+  border-top: 1px solid var(--border-light);
 }
 
 .create-company-cancel {
   padding: 11px 18px;
-  border: 1px solid #dfe3e9;
+
+  border: 1px solid var(--border-light);
   border-radius: 10px;
-  color: inherit;
+
+  background: var(--bg-main);
+  color: var(--text-secondary);
+
   text-decoration: none;
   font-size: 14px;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
+.create-company-cancel:hover {
+  background: var(--bg-soft);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
+  transform: translateY(-1px);
+}
+
+/* Dark mode */
+
+html.dark .create-company-card {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(59, 130, 246, 0.12),
+      transparent 34%
+    ),
+    var(--bg-card);
+}
+
+html.dark .create-company-field input,
+html.dark .create-company-field textarea {
+  background: var(--bg-main);
+}
+
+html.dark .create-company-field input:focus,
+html.dark .create-company-field textarea:focus {
+  background: var(--bg-card);
+}
+
+/* Responsive */
+
 @media (max-width: 700px) {
+  .create-company-page {
+    padding: 28px 0 50px;
+  }
+
   .create-company-header {
     align-items: flex-start;
     flex-direction: column;
@@ -178,5 +346,19 @@
 
   .create-company-card {
     padding: 20px;
+    border-radius: 14px;
+  }
+
+  .create-company-title {
+    margin-bottom: 22px;
+  }
+
+  .create-company-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .create-company-cancel {
+    text-align: center;
   }
 }

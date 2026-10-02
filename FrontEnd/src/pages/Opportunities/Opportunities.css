@@ -1,5 +1,5 @@
 /* =========================================
-  OPPORTUNITIES EXPLORER
+   OPPORTUNITIES EXPLORER
 ========================================= */
 
 @keyframes oppFadeInUp {
@@ -21,7 +21,7 @@
 }
 
 /* =========================================
-  HEADER
+   HEADER
 ========================================= */
 
 .opportunities-header {
@@ -98,6 +98,10 @@
   margin-bottom: 28px;
 }
 
+.opportunities-heading-content {
+  min-width: 0;
+}
+
 .opportunities-overline {
   display: inline-block;
   padding: 4px 12px;
@@ -123,6 +127,53 @@
   color: var(--text-secondary);
   font-size: 15px;
   line-height: 1.8;
+}
+
+.opportunities-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.post-opportunity-button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 18px;
+  border: 1px solid var(--primary-600);
+  border-radius: var(--radius-md);
+  background: var(--primary-600);
+  color: var(--text-white);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 5px 14px rgba(37, 99, 235, 0.18);
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.post-opportunity-button:hover {
+  background: var(--primary-700);
+  border-color: var(--primary-700);
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.25);
+  transform: translateY(-2px);
+}
+
+.post-opportunity-button:active {
+  transform: translateY(0);
+}
+
+.post-opportunity-button:focus-visible {
+  outline: 2px solid var(--primary-500);
+  outline-offset: 3px;
 }
 
 .results-count {
@@ -151,7 +202,7 @@
 }
 
 /* =========================================
-  SEARCH
+   SEARCH
 ========================================= */
 
 .opportunities-search {
@@ -244,7 +295,7 @@
 }
 
 /* =========================================
-  CONTENT & FILTERS
+   CONTENT & FILTERS
 ========================================= */
 
 .opportunities-content {
@@ -460,7 +511,7 @@
 }
 
 /* =========================================
-  RESULTS & CARDS
+   RESULTS & CARDS
 ========================================= */
 
 .opportunities-results {
@@ -788,7 +839,7 @@
 }
 
 /* =========================================
-  EMPTY STATE
+   EMPTY STATE
 ========================================= */
 
 .opportunities-empty {
@@ -850,7 +901,46 @@
 }
 
 /* =========================================
-  RESPONSIVE
+   MOBILE FILTER
+========================================= */
+
+.mobile-filter-row {
+  display: none;
+}
+
+/* =========================================
+   SAVE DETAILS
+========================================= */
+
+.save-details-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  margin-top: 10px;
+  padding: 11px 16px;
+  border: 1px solid var(--primary-500);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--primary-600);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.save-details-link:hover {
+  background: var(--primary-600);
+  color: var(--text-white);
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   RESPONSIVE
 ========================================= */
 
 @media (max-width: 1100px) {
@@ -873,6 +963,10 @@
 
   .opportunities-heading {
     align-items: flex-start;
+  }
+
+  .opportunities-heading-actions {
+    align-items: stretch;
   }
 
   .results-count {
@@ -950,6 +1044,15 @@
     font-size: 29px;
   }
 
+  .opportunities-heading-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .post-opportunity-button {
+    width: 100%;
+  }
+
   .results-count {
     width: 100%;
     display: flex;
@@ -995,31 +1098,4 @@
   .explorer-card {
     animation: none;
   }
-}
-
-.save-details-link {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  width: 100%;
-  margin-top: 10px;
-  padding: 11px 16px;
-  border: 1px solid #a2b447;
-  border-radius: 10px;
-  background: transparent;
-  color: #556f30;
-  font-size: 14px;
-  font-weight: 600;
-  text-decoration: none;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.save-details-link:hover {
-  background: #a2b447;
-  color: #ffffff;
-  transform: translateY(-1px);
 }

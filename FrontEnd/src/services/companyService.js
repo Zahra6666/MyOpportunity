@@ -7,9 +7,7 @@ async function request(endpoint, options = {}) {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      ...(token
-        ? { Authorization: `Bearer ${token}` }
-        : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
   });
@@ -17,9 +15,7 @@ async function request(endpoint, options = {}) {
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    throw new Error(
-      data?.message || "حدث خطأ أثناء تنفيذ الطلب"
-    );
+    throw new Error(data?.message || "حدث خطأ أثناء تنفيذ الطلب");
   }
 
   return data;
@@ -27,6 +23,10 @@ async function request(endpoint, options = {}) {
 
 export async function getCompanies() {
   return request("/companies");
+}
+
+export async function getAllCompaniesForAdmin() {
+  return request("/companies/admin/all");
 }
 
 export async function getCompanyById(id) {

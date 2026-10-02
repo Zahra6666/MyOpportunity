@@ -1,12 +1,22 @@
 const pool = require("../../config/db");
 
 // GET /api/companies
-
+// Public: approved companies only
 const getCompanies = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, user_id, company_name, logo_url, location, description, status, created_at
+      `SELECT
+         id,
+         user_id,
+         company_name,
+         logo_url,
+         website_url,
+         location,
+         description,
+         status,
+         created_at
        FROM companies
+       WHERE status = 'approved'
        ORDER BY id ASC`,
     );
 
@@ -19,19 +29,75 @@ const getCompanies = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "A server error occurred while retrieving companies.",
+      message: error.message,
     });
   }
 };
+
+// GET /api/companies/admin/all
+// Admin: all companies regardless of status
+const getAllCompaniesForAdmin = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT
+         c.id,
+         c.user_id,
+         c.company_name,
+         c.logo_url,
+         c.website_url,
+         c.location,
+         c.description,
+         c.status,
+         c.created_at,
+         u.email
+       FROM companies c
+       LEFT JOIN users u
+         ON u.id = c.user_id
+       ORDER BY
+         CASE
+           WHEN c.status = 'pending' THEN 1
+           WHEN c.status = 'approved' THEN 2
+           WHEN c.status = 'rejected' THEN 3
+           ELSE 4
+         END,
+         c.id DESC`,
+    );
+
+    return res.status(200).json({
+      success: true,
+      data: result.rows,
+    });
+  } catch (error) {
+    console.error("Error fetching all companies for admin:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: error.message,
+      detail: error.detail || null,
+    });
+  }
+};
+
 // GET /api/companies/:id
+// Public: approved companies only
 const getCompanyById = async (req, res) => {
   try {
     const { id } = req.params;
 
     const result = await pool.query(
-      `SELECT id, user_id, company_name, logo_url, location, description, status, created_at
+      `SELECT
+         id,
+         user_id,
+         company_name,
+         logo_url,
+         website_url,
+         location,
+         description,
+         status,
+         created_at
        FROM companies
-       WHERE id = $1`,
+       WHERE id = $1
+       AND status = 'approved'`,
       [id],
     );
 
@@ -51,14 +117,16 @@ const getCompanyById = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "A server error occurred while retrieving the company.",
+      message: error.message,
     });
   }
 };
+
 // POST /api/companies
 const createCompany = async (req, res) => {
   try {
-    const { company_name, logo_url, location, description } = req.body;
+    const { company_name, logo_url, website_url, location, description } =
+      req.body;
 
     const user_id = req.user.id;
     const user_role = req.user.role;
@@ -77,10 +145,16 @@ const createCompany = async (req, res) => {
       });
     }
 
-    // Only non-admin users are limited to one company
+    if (user_role === "company") {
+      return res.status(403).json({
+        success: false,
+        message: "Company users cannot create another company.",
+      });
+    }
+
     if (user_role !== "admin") {
       const existingCompany = await pool.query(
-        `SELECT id
+        `SELECT id, status
          FROM companies
          WHERE user_id = $1`,
         [user_id],
@@ -96,21 +170,30 @@ const createCompany = async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO companies
-       (user_id, company_name, logo_url, location, description)
-       VALUES ($1, $2, $3, $4, $5)
+       (
+         user_id,
+         company_name,
+         logo_url,
+         website_url,
+         location,
+         description,
+         status
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, 'pending')
        RETURNING *`,
       [
         user_id,
         company_name.trim(),
-        logo_url || null,
+        logo_url?.trim() || null,
+        website_url?.trim() || null,
         location.trim(),
-        description || null,
+        description?.trim() || null,
       ],
     );
 
     return res.status(201).json({
       success: true,
-      message: "Company created successfully.",
+      message: "Company created successfully and is pending admin approval.",
       data: result.rows[0],
     });
   } catch (error) {
@@ -118,18 +201,21 @@ const createCompany = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "A server error occurred while creating the company.",
+      message: error.message,
     });
   }
 };
+
 // PUT /api/companies/:id
 const updateCompany = async (req, res) => {
   try {
     const { id } = req.params;
-    const { company_name, logo_url, location, description } = req.body;
+
+    const { company_name, logo_url, website_url, location, description } =
+      req.body;
 
     const companyResult = await pool.query(
-      `SELECT user_id
+      `SELECT user_id, status
        FROM companies
        WHERE id = $1`,
       [id],
@@ -154,6 +240,7 @@ const updateCompany = async (req, res) => {
     if (
       company_name === undefined &&
       logo_url === undefined &&
+      website_url === undefined &&
       location === undefined &&
       description === undefined
     ) {
@@ -163,19 +250,38 @@ const updateCompany = async (req, res) => {
       });
     }
 
+    if (
+      company_name !== undefined &&
+      (!company_name || company_name.trim() === "")
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Company name cannot be empty.",
+      });
+    }
+
+    if (location !== undefined && (!location || location.trim() === "")) {
+      return res.status(400).json({
+        success: false,
+        message: "Location cannot be empty.",
+      });
+    }
+
     const result = await pool.query(
       `UPDATE companies
        SET company_name = COALESCE($1, company_name),
            logo_url = COALESCE($2, logo_url),
-           location = COALESCE($3, location),
-           description = COALESCE($4, description)
-       WHERE id = $5
+           website_url = COALESCE($3, website_url),
+           location = COALESCE($4, location),
+           description = COALESCE($5, description)
+       WHERE id = $6
        RETURNING *`,
       [
-        company_name ?? null,
-        logo_url ?? null,
-        location ?? null,
-        description ?? null,
+        company_name !== undefined ? company_name.trim() : null,
+        logo_url !== undefined ? logo_url?.trim() || null : null,
+        website_url !== undefined ? website_url?.trim() || null : null,
+        location !== undefined ? location.trim() : null,
+        description !== undefined ? description?.trim() || null : null,
         id,
       ],
     );
@@ -190,10 +296,11 @@ const updateCompany = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "A server error occurred while updating the company.",
+      message: error.message,
     });
   }
 };
+
 // DELETE /api/companies/:id
 const deleteCompany = async (req, res) => {
   try {
@@ -233,7 +340,7 @@ const deleteCompany = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "A server error occurred while deleting the company.",
+      message: error.message,
     });
   }
 };
@@ -248,9 +355,10 @@ const approveCompany = async (req, res) => {
     await client.query("BEGIN");
 
     const companyResult = await client.query(
-      `SELECT user_id
+      `SELECT id, user_id, status
        FROM companies
-       WHERE id = $1`,
+       WHERE id = $1
+       FOR UPDATE`,
       [id],
     );
 
@@ -263,7 +371,18 @@ const approveCompany = async (req, res) => {
       });
     }
 
-    const userId = companyResult.rows[0].user_id;
+    const company = companyResult.rows[0];
+
+    if (company.status !== "pending") {
+      await client.query("ROLLBACK");
+
+      return res.status(400).json({
+        success: false,
+        message: `Company is already ${company.status}.`,
+      });
+    }
+
+    const userId = company.user_id;
 
     const userResult = await client.query(
       `SELECT u.id, r.name AS role
@@ -335,12 +454,13 @@ const approveCompany = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "A server error occurred while approving the company.",
+      message: error.message,
     });
   } finally {
     client.release();
   }
 };
+
 // PUT /api/companies/:id/reject
 const rejectCompany = async (req, res) => {
   const client = await pool.connect();
@@ -351,9 +471,10 @@ const rejectCompany = async (req, res) => {
     await client.query("BEGIN");
 
     const companyResult = await client.query(
-      `SELECT user_id
+      `SELECT id, user_id, status
        FROM companies
-       WHERE id = $1`,
+       WHERE id = $1
+       FOR UPDATE`,
       [id],
     );
 
@@ -366,26 +487,16 @@ const rejectCompany = async (req, res) => {
       });
     }
 
-    const userId = companyResult.rows[0].user_id;
+    const company = companyResult.rows[0];
 
-    const userResult = await client.query(
-      `SELECT u.id, r.name AS role
-       FROM users u
-       JOIN roles r ON u.role_id = r.id
-       WHERE u.id = $1`,
-      [userId],
-    );
-
-    if (userResult.rows.length === 0) {
+    if (company.status !== "pending") {
       await client.query("ROLLBACK");
 
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
-        message: "Company owner not found.",
+        message: `Company is already ${company.status}.`,
       });
     }
-
-    const currentRole = userResult.rows[0].role;
 
     const result = await client.query(
       `UPDATE companies
@@ -395,40 +506,11 @@ const rejectCompany = async (req, res) => {
       [id],
     );
 
-    if (currentRole === "company") {
-      const userRoleResult = await client.query(
-        `SELECT id
-         FROM roles
-         WHERE name = 'user'`,
-      );
-
-      if (userRoleResult.rows.length === 0) {
-        await client.query("ROLLBACK");
-
-        return res.status(500).json({
-          success: false,
-          message: "User role not found.",
-        });
-      }
-
-      const userRoleId = userRoleResult.rows[0].id;
-
-      await client.query(
-        `UPDATE users
-         SET role_id = $1
-         WHERE id = $2`,
-        [userRoleId, userId],
-      );
-    }
-
     await client.query("COMMIT");
 
     return res.status(200).json({
       success: true,
-      message:
-        currentRole === "company"
-          ? "Company rejected successfully. User role changed back to user."
-          : "Company rejected successfully.",
+      message: "Company rejected successfully.",
       data: result.rows[0],
     });
   } catch (error) {
@@ -438,7 +520,7 @@ const rejectCompany = async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "A server error occurred while rejecting the company.",
+      message: error.message,
     });
   } finally {
     client.release();
@@ -447,6 +529,7 @@ const rejectCompany = async (req, res) => {
 
 module.exports = {
   getCompanies,
+  getAllCompaniesForAdmin,
   getCompanyById,
   createCompany,
   updateCompany,

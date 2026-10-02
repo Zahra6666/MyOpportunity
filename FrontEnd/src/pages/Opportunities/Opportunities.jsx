@@ -9,6 +9,7 @@ import {
   Clock3,
   ArrowLeft,
   Building2,
+  Plus,
 } from "lucide-react";
 
 import { useEffect, useMemo, useState } from "react";
@@ -25,6 +26,45 @@ import {
 
 import "./Opportunities.css";
 
+function getCurrentUserRole() {
+  try {
+    const storedUser =
+      localStorage.getItem("user") ||
+      localStorage.getItem("currentUser") ||
+      localStorage.getItem("authUser");
+
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+
+      if (user?.role) {
+        return String(user.role).toLowerCase();
+      }
+
+      if (user?.role_name) {
+        return String(user.role_name).toLowerCase();
+      }
+    }
+  } catch {
+    // Ignore invalid stored user data.
+  }
+
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return null;
+  }
+
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+
+    return String(
+      payload?.role || payload?.role_name || payload?.user?.role || "",
+    ).toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
 function Opportunities() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
@@ -37,6 +77,9 @@ function Opportunities() {
   const [savedIds, setSavedIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const userRole = getCurrentUserRole();
+  const canPostOpportunity = userRole === "admin" || userRole === "company";
 
   useEffect(() => {
     const fetchOpportunities = async () => {
@@ -103,6 +146,7 @@ function Opportunities() {
           item.location,
           item.description,
           item.type,
+          item.type_name,
           item.category,
           item.category_name,
           item.mode,
@@ -185,12 +229,14 @@ function Opportunities() {
         <div className="container">
           <div className="opportunities-breadcrumb">
             <Link to="/">الرئيسية</Link>
+
             <span>/</span>
+
             <strong>استكشف الفرص</strong>
           </div>
 
           <div className="opportunities-heading">
-            <div>
+            <div className="opportunities-heading-content">
               <span className="opportunities-overline">فرص مهنية وتعليمية</span>
 
               <h1>استكشف الفرص المتاحة</h1>
@@ -201,10 +247,22 @@ function Opportunities() {
               </p>
             </div>
 
-            <div className="results-count">
-              <strong>{filteredOpportunities.length}</strong>
+            <div className="opportunities-heading-actions">
+              {canPostOpportunity && (
+                <Link
+                  to="/opportunities/create"
+                  className="post-opportunity-button"
+                >
+                  <Plus size={17} />
+                  نشر فرصة
+                </Link>
+              )}
 
-              <span>فرصة متاحة</span>
+              <div className="results-count">
+                <strong>{filteredOpportunities.length}</strong>
+
+                <span>فرصة متاحة</span>
+              </div>
             </div>
           </div>
 
@@ -411,6 +469,7 @@ function Opportunities() {
                   onChange={(event) => setSort(event.target.value)}
                 >
                   <option value="match">الأكثر توافقاً</option>
+
                   <option value="latest">الأحدث</option>
                 </select>
 
@@ -485,22 +544,15 @@ function ExplorerCard({ opportunity, index, isSaved, onSaveChange }) {
 
   const location = opportunity.location || "العراق";
 
-  const type =
-    opportunity.type ||
-    opportunity.category ||
-    opportunity.category_name ||
-    "فرصة";
+  const type = getOpportunityType(opportunity);
 
-  const mode =
-    opportunity.mode ||
-    opportunity.work_mode ||
-    opportunity.work_type ||
-    "غير محدد";
+  const category = getOpportunityCategory(opportunity);
 
   const match = opportunity.match ?? opportunity.match_percentage ?? 0;
 
+  // Use this opportunity's own deadline directly from the backend.
   const deadline =
-    opportunity.deadline || opportunity.application_deadline || "غير محدد";
+    opportunity.deadline || opportunity.application_deadline || "Not specified";
 
   const description =
     opportunity.description || "اكتشف تفاصيل هذه الفرصة والمتطلبات الخاصة بها.";
@@ -583,12 +635,12 @@ function ExplorerCard({ opportunity, index, isSaved, onSaveChange }) {
       <div className="explorer-details">
         <span>
           <BriefcaseBusiness size={14} />
-          {mode}
+          التصنيف: {category}
         </span>
 
         <span>
           <Clock3 size={14} />
-          آخر موعد: {deadline}
+          Due date: {formatOpportunityDate(deadline)}
         </span>
       </div>
 
@@ -627,6 +679,165 @@ function ExplorerCard({ opportunity, index, isSaved, onSaveChange }) {
       </div>
     </article>
   );
+}
+
+function getOpportunityType(opportunity) {
+  const directType =
+    opportunity.type_name ||
+    opportunity.typeName ||
+    opportunity.opportunity_type ||
+    opportunity.opportunityType;
+
+  if (directType) {
+    return translateOpportunityType(directType);
+  }
+
+  if (typeof opportunity.type === "string") {
+    return translateOpportunityType(opportunity.type);
+  }
+
+  if (opportunity.type && typeof opportunity.type === "object") {
+    const nestedType =
+      opportunity.type.name ||
+      opportunity.type.type_name ||
+      opportunity.type.label;
+
+    if (nestedType) {
+      return translateOpportunityType(nestedType);
+    }
+  }
+
+  if (opportunity.type_id !== undefined && opportunity.type_id !== null) {
+    const typeTranslations = {
+      1: "وظيفة",
+      2: "تدريب",
+      3: "دورة تدريبية",
+      4: "تدريب",
+    };
+
+    return typeTranslations[Number(opportunity.type_id)] || "غير محدد";
+  }
+
+  return "غير محدد";
+}
+
+function translateOpportunityType(value) {
+  const normalized = String(value).trim().toLowerCase();
+
+  const translations = {
+    job: "وظيفة",
+    jobs: "وظيفة",
+    internship: "تدريب",
+    internships: "تدريب",
+    course: "دورة تدريبية",
+    courses: "دورة تدريبية",
+    training: "تدريب",
+    "full-time": "وظيفة",
+    "part-time": "وظيفة",
+  };
+
+  return translations[normalized] || value;
+}
+
+function getOpportunityCategory(opportunity) {
+  const directCategory = opportunity.category_name || opportunity.categoryName;
+
+  if (directCategory) {
+    return translateOpportunityCategory(directCategory);
+  }
+
+  if (typeof opportunity.category === "string") {
+    return translateOpportunityCategory(opportunity.category);
+  }
+
+  if (opportunity.category && typeof opportunity.category === "object") {
+    const nestedCategory =
+      opportunity.category.name ||
+      opportunity.category.category_name ||
+      opportunity.category.label;
+
+    if (nestedCategory) {
+      return translateOpportunityCategory(nestedCategory);
+    }
+  }
+
+  if (
+    opportunity.category_id !== undefined &&
+    opportunity.category_id !== null
+  ) {
+    const categoryTranslations = {
+      10: "التكنولوجيا",
+      11: "الهندسة",
+      12: "الطب",
+      13: "الأعمال",
+      14: "الفنون والتصميم",
+      15: "العلوم",
+      16: "التعليم",
+      17: "الإعلام",
+      18: "القانون",
+      19: "المالية",
+    };
+
+    return categoryTranslations[Number(opportunity.category_id)] || "غير محدد";
+  }
+
+  return "غير محدد";
+}
+
+function translateOpportunityCategory(value) {
+  const normalized = String(value).trim().toLowerCase().replace(/\s+/g, " ");
+
+  const translations = {
+    technology: "التكنولوجيا",
+    engineering: "الهندسة",
+    medicine: "الطب",
+    business: "الأعمال",
+    art: "الفنون والتصميم",
+    "arts and design": "الفنون والتصميم",
+    science: "العلوم",
+    education: "التعليم",
+    media: "الإعلام",
+    law: "القانون",
+    finance: "المالية",
+  };
+
+  return translations[normalized] || value;
+}
+
+function formatOpportunityDate(value) {
+  if (!value) {
+    return "Not specified";
+  }
+
+  const stringValue = String(value).trim();
+
+  const dateOnlyMatch = stringValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      });
+    }
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return stringValue;
+  }
+
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function extractSavedOpportunities(response) {

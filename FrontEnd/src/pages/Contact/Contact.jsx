@@ -1,10 +1,4 @@
-import {
-  Mail,
-  MapPin,
-  MessageSquare,
-  Phone,
-  Send,
-} from "lucide-react";
+import { Mail, MapPin, MessageSquare, Phone, Send } from "lucide-react";
 import { useState } from "react";
 import "./Contact.css";
 
@@ -42,8 +36,8 @@ function Contact() {
           </h1>
 
           <p>
-            إذا عندك استفسار أو اقتراح أو تحتاج مساعدة باستخدام منصة فرصتي،
-            تقدر تتواصل ويانا من خلال النموذج أو معلومات التواصل.
+            إذا عندك استفسار أو اقتراح أو تحتاج مساعدة باستخدام منصة فرصتي، تقدر
+            تتواصل ويانا من خلال النموذج أو معلومات التواصل.
           </p>
         </div>
       </section>
@@ -57,8 +51,8 @@ function Contact() {
               <h2>خلينا نسمع منك</h2>
 
               <p>
-                ملاحظاتك وأسئلتك تساعدنا على تحسين تجربة فرصتي وتقديم خدمة
-                أفضل للمستخدمين.
+                ملاحظاتك وأسئلتك تساعدنا على تحسين تجربة فرصتي وتقديم خدمة أفضل
+                للمستخدمين.
               </p>
             </div>
 
@@ -70,9 +64,7 @@ function Contact() {
 
                 <div>
                   <span>البريد الإلكتروني</span>
-                  <a href="mailto:info@forsati.com">
-                    info@forsati.com
-                  </a>
+                  <a href="mailto:info@forsati.com">info@forsati.com</a>
                 </div>
               </div>
 
@@ -83,9 +75,7 @@ function Contact() {
 
                 <div>
                   <span>الهاتف</span>
-                  <a href="tel:+9640000000000">
-                    +964 000 000 0000
-                  </a>
+                  <a href="tel:+9640000000000">+964 000 000 0000</a>
                 </div>
               </div>
 

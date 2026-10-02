@@ -36,6 +36,8 @@ function Navbar() {
   const userName = user?.fullName || user?.name || "حسابي";
   const avatarLetter = userName.charAt(0) || "م";
 
+  const isDark = theme === "dark";
+
   return (
     <header className="navbar">
       <div className="container navbar-inner">
@@ -50,6 +52,10 @@ function Navbar() {
 
           <Link to="/opportunities" onClick={closeMobile}>
             استكشف الفرص
+          </Link>
+
+          <Link to="/companies" onClick={closeMobile}>
+            الشركات
           </Link>
 
           <Link to="/about" onClick={closeMobile}>
@@ -71,13 +77,60 @@ function Navbar() {
             <span>حلّل سيرتك بالذكاء الاصطناعي</span>
           </Link>
 
+          {/* Theme Toggle */}
           <button
             type="button"
             onClick={toggleTheme}
             className="theme-toggle-btn"
-            aria-label="تبديل المظهر"
+            aria-label={isDark ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الداكن"}
+            title={isDark ? "الوضع الفاتح" : "الوضع الداكن"}
+            style={{
+              width: "42px",
+              height: "42px",
+              minWidth: "42px",
+              padding: "0",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "12px",
+              border: isDark
+                ? "1px solid rgba(148, 163, 184, 0.3)"
+                : "1px solid rgba(37, 99, 235, 0.15)",
+              background: isDark
+                ? "rgba(255, 255, 255, 0.07)"
+                : "rgba(37, 99, 235, 0.06)",
+              color: isDark ? "#fbbf24" : "#334155",
+              cursor: "pointer",
+              boxShadow: isDark
+                ? "0 4px 12px rgba(0, 0, 0, 0.18)"
+                : "0 3px 10px rgba(37, 99, 235, 0.08)",
+              transition:
+                "background 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease",
+            }}
+            onMouseEnter={(event) => {
+              event.currentTarget.style.transform = "translateY(-1px)";
+              event.currentTarget.style.background = isDark
+                ? "rgba(255, 255, 255, 0.12)"
+                : "rgba(37, 99, 235, 0.1)";
+              event.currentTarget.style.boxShadow = isDark
+                ? "0 6px 16px rgba(0, 0, 0, 0.25)"
+                : "0 5px 14px rgba(37, 99, 235, 0.12)";
+            }}
+            onMouseLeave={(event) => {
+              event.currentTarget.style.transform = "translateY(0)";
+              event.currentTarget.style.background = isDark
+                ? "rgba(255, 255, 255, 0.07)"
+                : "rgba(37, 99, 235, 0.06)";
+              event.currentTarget.style.boxShadow = isDark
+                ? "0 4px 12px rgba(0, 0, 0, 0.18)"
+                : "0 3px 10px rgba(37, 99, 235, 0.08)";
+            }}
           >
-            {theme === "dark" ? <Sun size={22} /> : <Moon size={22} />}
+            {isDark ? (
+              <Sun size={20} strokeWidth={2.2} />
+            ) : (
+              <Moon size={20} strokeWidth={2.2} />
+            )}
           </button>
 
           <NotificationBell />
@@ -143,11 +196,11 @@ function Navbar() {
                     right: 0,
                     width: "220px",
                     padding: "7px",
-                    background: theme === "dark" ? "#23361A" : "#ffffff",
-                    border:
-                      theme === "dark"
-                        ? "1px solid rgba(255,255,255,0.1)"
-                        : "1px solid rgba(0,0,0,0.08)",
+                    background: isDark ? "#1e293b" : "#ffffff",
+                    color: isDark ? "#f8fafc" : "#1e293b",
+                    border: isDark
+                      ? "1px solid rgba(148, 163, 184, 0.25)"
+                      : "1px solid rgba(0, 0, 0, 0.08)",
                     borderRadius: "14px",
                     boxShadow: "0 12px 30px rgba(0, 0, 0, 0.15)",
                     zIndex: 1000,
@@ -177,10 +230,9 @@ function Navbar() {
                     style={{
                       height: "1px",
                       margin: "5px 4px",
-                      background:
-                        theme === "dark"
-                          ? "rgba(255,255,255,0.1)"
-                          : "rgba(0,0,0,0.08)",
+                      background: isDark
+                        ? "rgba(255,255,255,0.1)"
+                        : "rgba(0,0,0,0.08)",
                     }}
                   />
 

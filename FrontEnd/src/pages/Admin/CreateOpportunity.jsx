@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, Save } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -6,6 +6,36 @@ import PageContainer from "../../components/layout/PageContainer";
 import { createOpportunity } from "../../services/opportunityService";
 
 import "./CreateOpportunity.css";
+
+const categoryTranslations = {
+  technology: "التكنولوجيا",
+  engineering: "الهندسة",
+  medicine: "الطب",
+  business: "الأعمال",
+  art: "الفنون والتصميم",
+  science: "العلوم",
+  education: "التعليم",
+  media: "الإعلام",
+  law: "القانون",
+  finance: "المالية",
+};
+
+const typeTranslations = {
+  job: "وظيفة",
+  internship: "منحة",
+  course: "دورة تدريبية",
+  training: "تدريب",
+};
+
+const getTranslatedName = (name, translations) => {
+  if (!name) {
+    return "";
+  }
+
+  const normalizedName = name.trim().toLowerCase().replace(/\s+/g, " ");
+
+  return translations[normalizedName] || name;
+};
 
 function CreateOpportunity() {
   const navigate = useNavigate();
@@ -21,8 +51,63 @@ function CreateOpportunity() {
     status: "active",
   });
 
+  const [categories, setCategories] = useState([]);
+  const [types, setTypes] = useState([]);
+
   const [loading, setLoading] = useState(false);
+  const [loadingOptions, setLoadingOptions] = useState(true);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        setLoadingOptions(true);
+        setError("");
+
+        const token = localStorage.getItem("token");
+        const API_URL = import.meta.env.VITE_API_URL || "/api";
+
+        const headers = {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        };
+
+        const [categoriesResponse, typesResponse] = await Promise.all([
+          fetch(`${API_URL}/categories`, {
+            headers,
+          }),
+          fetch(`${API_URL}/types`, {
+            headers,
+          }),
+        ]);
+
+        const categoriesData = await categoriesResponse
+          .json()
+          .catch(() => null);
+
+        const typesData = await typesResponse.json().catch(() => null);
+
+        if (!categoriesResponse.ok) {
+          throw new Error(categoriesData?.message || "تعذر تحميل التصنيفات.");
+        }
+
+        if (!typesResponse.ok) {
+          throw new Error(typesData?.message || "تعذر تحميل أنواع الفرص.");
+        }
+
+        setCategories(categoriesData?.data || []);
+        setTypes(typesData?.data || []);
+      } catch (requestError) {
+        setError(
+          requestError?.message || "تعذر تحميل بيانات التصنيفات والأنواع.",
+        );
+      } finally {
+        setLoadingOptions(false);
+      }
+    };
+
+    fetchOptions();
+  }, []);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -67,12 +152,9 @@ function CreateOpportunity() {
         status: form.status,
       });
 
-      navigate("/admin/opportunities");
+      navigate("/opportunities");
     } catch (requestError) {
-      setError(
-        requestError?.message ||
-          "تعذر إنشاء الفرصة."
-      );
+      setError(requestError?.message || "تعذر إنشاء الفرصة.");
     } finally {
       setLoading(false);
     }
@@ -81,50 +163,28 @@ function CreateOpportunity() {
   return (
     <PageContainer className="create-opportunity-page">
       <div className="container">
-
         <div className="create-opportunity-header">
           <div>
-            <Link
-              to="/admin/opportunities"
-              className="back-link"
-            >
+            <Link to="/opportunities" className="back-link">
               <ArrowLeft size={16} />
-              العودة إلى إدارة الفرص
+              العودة إلى الفرص
             </Link>
 
-            <h1>
-              إضافة فرصة جديدة
-            </h1>
+            <h1>إضافة فرصة جديدة</h1>
 
-            <p>
-              أدخل بيانات الفرصة لإضافتها إلى المنصة.
-            </p>
+            <p>أدخل بيانات الفرصة لإضافتها إلى المنصة.</p>
           </div>
         </div>
 
-        {error && (
-          <div className="create-error">
-            {error}
-          </div>
-        )}
+        {error && <div className="create-error">{error}</div>}
 
-        <form
-          className="create-opportunity-form"
-          onSubmit={handleSubmit}
-        >
-
+        <form className="create-opportunity-form" onSubmit={handleSubmit}>
           <div className="form-section">
-
-            <h2>
-              معلومات الفرصة
-            </h2>
+            <h2>معلومات الفرصة</h2>
 
             <div className="form-grid">
-
               <div className="form-group full">
-                <label htmlFor="title">
-                  عنوان الفرصة *
-                </label>
+                <label htmlFor="title">عنوان الفرصة *</label>
 
                 <input
                   id="title"
@@ -137,9 +197,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group full">
-                <label htmlFor="description">
-                  وصف الفرصة *
-                </label>
+                <label htmlFor="description">وصف الفرصة *</label>
 
                 <textarea
                   id="description"
@@ -152,9 +210,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group full">
-                <label htmlFor="requirements">
-                  المتطلبات
-                </label>
+                <label htmlFor="requirements">المتطلبات</label>
 
                 <textarea
                   id="requirements"
@@ -162,50 +218,62 @@ function CreateOpportunity() {
                   rows="6"
                   value={form.requirements}
                   onChange={handleChange}
-                  placeholder={"اكتب كل متطلب في سطر مستقل..."}
+                  placeholder="اكتب كل متطلب في سطر مستقل..."
                 />
 
-                <small>
-                  كل سطر سيتم إرساله كمتطلب مستقل.
-                </small>
+                <small>كل سطر سيتم إرساله كمتطلب مستقل.</small>
               </div>
 
               <div className="form-group">
-                <label htmlFor="category_id">
-                  معرّف التصنيف *
-                </label>
+                <label htmlFor="category_id">التصنيف *</label>
 
-                <input
+                <select
                   id="category_id"
                   name="category_id"
-                  type="number"
-                  min="1"
                   value={form.category_id}
                   onChange={handleChange}
-                  placeholder="مثال: 1"
-                />
+                  disabled={loadingOptions}
+                >
+                  <option value="">
+                    {loadingOptions
+                      ? "جارٍ تحميل التصنيفات..."
+                      : "اختر التصنيف"}
+                  </option>
+
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {getTranslatedName(category.name, categoryTranslations)}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="type_id">
-                  معرّف النوع *
-                </label>
+                <label htmlFor="type_id">نوع الفرصة *</label>
 
-                <input
+                <select
                   id="type_id"
                   name="type_id"
-                  type="number"
-                  min="1"
                   value={form.type_id}
                   onChange={handleChange}
-                  placeholder="مثال: 1"
-                />
+                  disabled={loadingOptions}
+                >
+                  <option value="">
+                    {loadingOptions
+                      ? "جارٍ تحميل الأنواع..."
+                      : "اختر نوع الفرصة"}
+                  </option>
+
+                  {types.map((type) => (
+                    <option key={type.id} value={type.id}>
+                      {getTranslatedName(type.name, typeTranslations)}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="form-group">
-                <label htmlFor="location">
-                  الموقع *
-                </label>
+                <label htmlFor="location">الموقع *</label>
 
                 <input
                   id="location"
@@ -218,9 +286,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="deadline">
-                  آخر موعد للتقديم *
-                </label>
+                <label htmlFor="deadline">آخر موعد للتقديم *</label>
 
                 <input
                   id="deadline"
@@ -232,9 +298,7 @@ function CreateOpportunity() {
               </div>
 
               <div className="form-group">
-                <label htmlFor="status">
-                  الحالة
-                </label>
+                <label htmlFor="status">الحالة</label>
 
                 <select
                   id="status"
@@ -242,45 +306,29 @@ function CreateOpportunity() {
                   value={form.status}
                   onChange={handleChange}
                 >
-                  <option value="active">
-                    فعالة
-                  </option>
-
-                  <option value="inactive">
-                    غير فعالة
-                  </option>
+                  <option value="active">فعالة</option>
+                  <option value="inactive">غير فعالة</option>
                 </select>
               </div>
-
             </div>
-
           </div>
 
           <div className="form-actions">
-
-            <Link
-              to="/admin/opportunities"
-              className="cancel-button"
-            >
+            <Link to="/opportunities" className="cancel-button">
               إلغاء
             </Link>
 
             <button
               type="submit"
               className="submit-button"
-              disabled={loading}
+              disabled={loading || loadingOptions}
             >
               <Save size={17} />
 
-              {loading
-                ? "جارٍ إنشاء الفرصة..."
-                : "إنشاء الفرصة"}
+              {loading ? "جارٍ إنشاء الفرصة..." : "إنشاء الفرصة"}
             </button>
-
           </div>
-
         </form>
-
       </div>
     </PageContainer>
   );

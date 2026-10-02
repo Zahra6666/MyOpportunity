@@ -32,6 +32,7 @@ import SavedOpportunities from "../pages/Saved/SavedOpportunities";
 import CompanyPage from "../pages/Company/CompanyPage";
 import CreateCompany from "../pages/Company/CreateCompany";
 import EditCompany from "../pages/Company/EditCompany";
+import Companies from "../pages/Company/Companies";
 
 import ChatbotButton from "../components/Chatbot/ChatbotButton";
 import NotFound from "../pages/NotFound";
@@ -55,7 +56,11 @@ function AppRoutes() {
 
         <Route path="/contact" element={<Contact />} />
 
-        <Route path="/company/:id" element={<CompanyPage />} />
+        <Route path="/companies" element={<Companies />} />
+
+        <Route path="/companies/:id" element={<CompanyPage />} />
+
+        <Route path="/companies/create" element={<CreateCompany />} />
 
         <Route path="/login" element={<Login />} />
 
@@ -72,6 +77,11 @@ function AppRoutes() {
           <Route path="/cv/upload" element={<CVUploadPage />} />
 
           <Route path="/cv/analysis" element={<CVAnalysisPage />} />
+        </Route>
+
+        {/* Admin + Company */}
+        <Route element={<RoleRoute allowedRoles={["admin", "company"]} />}>
+          <Route path="/opportunities/create" element={<CreateOpportunity />} />
         </Route>
 
         {/* Admin */}

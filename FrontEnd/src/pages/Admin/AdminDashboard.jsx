@@ -9,7 +9,7 @@ import {
   UserCheck,
   UserPlus,
   TrendingUp,
-  Loader2
+  Loader2,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
@@ -31,7 +31,7 @@ const stats = [
     icon: BriefcaseBusiness,
   },
   {
-    title: "الشركات المسجلة",
+    title: "الشركات المعتمدة",
     value: "452",
     change: "+5.7%",
     icon: Building2,
@@ -72,7 +72,11 @@ function AdminDashboard() {
       try {
         setLoading(true);
         const res = await getOpportunities({ limit: 5 });
-        const list = Array.isArray(res?.data) ? res.data : (Array.isArray(res) ? res : []);
+        const list = Array.isArray(res?.data)
+          ? res.data
+          : Array.isArray(res)
+            ? res
+            : [];
         setOpportunities(list);
       } catch (err) {
         console.error("فشل جلب بيانات الأدمن:", err);
@@ -95,16 +99,12 @@ function AdminDashboard() {
             <h1>مرحباً بك في لوحة التحكم</h1>
 
             <p>
-              تابع أداء منصة فرصتي وأدر المستخدمين والفرص والشركات
-              من مكان واحد.
+              تابع أداء منصة فرصتي وأدر المستخدمين والفرص والشركات من مكان واحد.
             </p>
           </div>
 
           <div className="admin-header-actions">
-            <Link
-              to="/admin/opportunities"
-              className="admin-primary-button"
-            >
+            <Link to="/admin/opportunities" className="admin-primary-button">
               <BriefcaseBusiness size={18} />
               إدارة الفرص
             </Link>
@@ -129,13 +129,9 @@ function AdminDashboard() {
                   </span>
                 </div>
 
-                <div className="admin-stat-value">
-                  {stat.value}
-                </div>
+                <div className="admin-stat-value">{stat.value}</div>
 
-                <div className="admin-stat-title">
-                  {stat.title}
-                </div>
+                <div className="admin-stat-title">{stat.title}</div>
               </article>
             );
           })}
@@ -159,7 +155,13 @@ function AdminDashboard() {
 
             <div className="admin-table-wrapper">
               {loading ? (
-                <div style={{ display: "flex", justifyContent: "center", padding: "2rem" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    padding: "2rem",
+                  }}
+                >
                   <Loader2 size={24} className="animate-spin" />
                 </div>
               ) : (
@@ -175,24 +177,27 @@ function AdminDashboard() {
                   </thead>
 
                   <tbody>
-                    {(opportunities.length > 0 ? opportunities : [
-                      {
-                        id: 1,
-                        title: "Software Engineer",
-                        company: "شركة تقنية العراق",
-                        type: "وظيفة",
-                        status: "منشورة",
-                        applicants: 126,
-                      },
-                      {
-                        id: 2,
-                        title: "منحة دراسية للماجستير",
-                        company: "برنامج المنح الدولي",
-                        type: "منحة",
-                        status: "منشورة",
-                        applicants: 84,
-                      }
-                    ]).map((opportunity) => (
+                    {(opportunities.length > 0
+                      ? opportunities
+                      : [
+                          {
+                            id: 1,
+                            title: "Software Engineer",
+                            company: "شركة تقنية العراق",
+                            type: "وظيفة",
+                            status: "منشورة",
+                            applicants: 126,
+                          },
+                          {
+                            id: 2,
+                            title: "منحة دراسية للماجستير",
+                            company: "برنامج المنح الدولي",
+                            type: "منحة",
+                            status: "منشورة",
+                            applicants: 84,
+                          },
+                        ]
+                    ).map((opportunity) => (
                       <tr key={opportunity.id}>
                         <td>
                           <div className="admin-opportunity-name">
@@ -201,15 +206,23 @@ function AdminDashboard() {
                             </div>
 
                             <div>
-                              <strong>{opportunity.title || opportunity.titleAr}</strong>
-                              <span>{opportunity.company_name || opportunity.company || "شركة تقنية"}</span>
+                              <strong>
+                                {opportunity.title || opportunity.titleAr}
+                              </strong>
+                              <span>
+                                {opportunity.company_name ||
+                                  opportunity.company ||
+                                  "شركة تقنية"}
+                              </span>
                             </div>
                           </div>
                         </td>
 
                         <td>
                           <span className="admin-type">
-                            {opportunity.type_name || opportunity.type || "وظيفة"}
+                            {opportunity.type_name ||
+                              opportunity.type ||
+                              "وظيفة"}
                           </span>
                         </td>
 
@@ -228,7 +241,9 @@ function AdminDashboard() {
                         <td>
                           <span className="admin-applicants">
                             <Users size={15} />
-                            {opportunity.applicants_count || opportunity.applicants || 0}
+                            {opportunity.applicants_count ||
+                              opportunity.applicants ||
+                              0}
                           </span>
                         </td>
 
@@ -265,10 +280,7 @@ function AdminDashboard() {
 
             <div className="admin-company-list">
               {pendingCompanies.map((company) => (
-                <div
-                  className="admin-company-request"
-                  key={company.email}
-                >
+                <div className="admin-company-request" key={company.email}>
                   <div className="admin-request-icon">
                     <Building2 size={18} />
                   </div>
@@ -282,10 +294,7 @@ function AdminDashboard() {
                     </small>
                   </div>
 
-                  <button
-                    type="button"
-                    className="admin-review-button"
-                  >
+                  <button type="button" className="admin-review-button">
                     مراجعة
                   </button>
                 </div>
@@ -304,10 +313,7 @@ function AdminDashboard() {
           </div>
 
           <div className="admin-quick-grid">
-            <Link
-              to="/admin/users"
-              className="admin-quick-card"
-            >
+            <Link to="/admin/users" className="admin-quick-card">
               <div className="admin-quick-icon">
                 <Users size={21} />
               </div>
@@ -320,10 +326,7 @@ function AdminDashboard() {
               <ChevronLeft size={18} />
             </Link>
 
-            <Link
-              to="/admin/employers"
-              className="admin-quick-card"
-            >
+            <Link to="/admin/employers" className="admin-quick-card">
               <div className="admin-quick-icon">
                 <Building2 size={21} />
               </div>
@@ -336,10 +339,7 @@ function AdminDashboard() {
               <ChevronLeft size={18} />
             </Link>
 
-            <Link
-              to="/admin/opportunities"
-              className="admin-quick-card"
-            >
+            <Link to="/admin/opportunities" className="admin-quick-card">
               <div className="admin-quick-icon">
                 <BriefcaseBusiness size={21} />
               </div>
@@ -352,10 +352,7 @@ function AdminDashboard() {
               <ChevronLeft size={18} />
             </Link>
 
-            <Link
-              to="/admin/users"
-              className="admin-quick-card"
-            >
+            <Link to="/admin/users" className="admin-quick-card">
               <div className="admin-quick-icon">
                 <UserCheck size={21} />
               </div>

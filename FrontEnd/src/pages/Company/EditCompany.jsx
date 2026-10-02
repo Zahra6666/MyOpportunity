@@ -2,10 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
-import {
-  getCompanyById,
-  updateCompany,
-} from "../../services/companyService";
+import { getCompanyById, updateCompany } from "../../services/companyService";
 
 import "./EditCompany.css";
 
@@ -16,6 +13,7 @@ function EditCompany() {
   const [formData, setFormData] = useState({
     name: "",
     logo: "",
+    website: "",
     location: "",
     description: "",
   });
@@ -35,22 +33,17 @@ function EditCompany() {
     try {
       const response = await getCompanyById(id);
 
-      const company =
-        response?.company ||
-        response?.data ||
-        response;
+      const company = response?.company || response?.data || response;
 
       setFormData({
         name: company?.company_name || company?.name || "",
         logo: company?.logo_url || company?.logo || "",
+        website: company?.website_url || company?.website || "",
         location: company?.location || "",
         description: company?.description || "",
       });
     } catch (requestError) {
-      setError(
-        requestError?.message ||
-        "تعذر تحميل بيانات الشركة."
-      );
+      setError(requestError?.message || "تعذر تحميل بيانات الشركة.");
     } finally {
       setLoading(false);
     }
@@ -89,17 +82,15 @@ function EditCompany() {
     try {
       await updateCompany(id, {
         company_name: formData.name.trim(),
-        logo_url: formData.logo.trim(),
+        logo_url: formData.logo.trim() || null,
+        website_url: formData.website.trim() || null,
         location: formData.location.trim(),
         description: formData.description.trim(),
       });
 
       navigate("/admin/employers");
     } catch (requestError) {
-      setError(
-        requestError?.message ||
-        "تعذر تحديث بيانات الشركة."
-      );
+      setError(requestError?.message || "تعذر تحديث بيانات الشركة.");
     } finally {
       setSaving(false);
     }
@@ -110,13 +101,9 @@ function EditCompany() {
       <PageContainer>
         <div className="edit-company-page">
           <div className="edit-company-loading">
-            <h2>
-              جارٍ تحميل بيانات الشركة...
-            </h2>
+            <h2>جارٍ تحميل بيانات الشركة...</h2>
 
-            <p>
-              يتم جلب بيانات الشركة من الخادم.
-            </p>
+            <p>يتم جلب بيانات الشركة من الخادم.</p>
           </div>
         </div>
       </PageContainer>
@@ -126,37 +113,19 @@ function EditCompany() {
   return (
     <PageContainer>
       <div className="edit-company-page">
-
         <div className="edit-company-header">
-          <span className="edit-company-eyebrow">
-            إدارة الشركات
-          </span>
+          <span className="edit-company-eyebrow">إدارة الشركات</span>
 
-          <h1>
-            تعديل بيانات الشركة
-          </h1>
+          <h1>تعديل بيانات الشركة</h1>
 
-          <p>
-            يمكنك تعديل بيانات الشركة ثم حفظ
-            التغييرات.
-          </p>
+          <p>يمكنك تعديل بيانات الشركة ثم حفظ التغييرات.</p>
         </div>
 
-        {error && (
-          <div className="edit-company-error">
-            {error}
-          </div>
-        )}
+        {error && <div className="edit-company-error">{error}</div>}
 
-        <form
-          className="edit-company-form"
-          onSubmit={handleSubmit}
-        >
-
+        <form className="edit-company-form" onSubmit={handleSubmit}>
           <div className="edit-company-field">
-            <label htmlFor="name">
-              اسم الشركة
-            </label>
+            <label htmlFor="name">اسم الشركة</label>
 
             <input
               id="name"
@@ -165,13 +134,12 @@ function EditCompany() {
               value={formData.name}
               onChange={handleChange}
               placeholder="أدخل اسم الشركة"
+              disabled={saving}
             />
           </div>
 
           <div className="edit-company-field">
-            <label htmlFor="logo">
-              رابط شعار الشركة
-            </label>
+            <label htmlFor="logo">رابط شعار الشركة</label>
 
             <input
               id="logo"
@@ -180,13 +148,26 @@ function EditCompany() {
               value={formData.logo}
               onChange={handleChange}
               placeholder="https://example.com/logo.png"
+              disabled={saving}
             />
           </div>
 
           <div className="edit-company-field">
-            <label htmlFor="location">
-              الموقع
-            </label>
+            <label htmlFor="website">الموقع الإلكتروني</label>
+
+            <input
+              id="website"
+              name="website"
+              type="url"
+              value={formData.website}
+              onChange={handleChange}
+              placeholder="https://example.com"
+              disabled={saving}
+            />
+          </div>
+
+          <div className="edit-company-field">
+            <label htmlFor="location">الموقع</label>
 
             <input
               id="location"
@@ -195,13 +176,12 @@ function EditCompany() {
               value={formData.location}
               onChange={handleChange}
               placeholder="أدخل موقع الشركة"
+              disabled={saving}
             />
           </div>
 
           <div className="edit-company-field">
-            <label htmlFor="description">
-              وصف الشركة
-            </label>
+            <label htmlFor="description">وصف الشركة</label>
 
             <textarea
               id="description"
@@ -210,17 +190,15 @@ function EditCompany() {
               value={formData.description}
               onChange={handleChange}
               placeholder="أدخل وصف الشركة"
+              disabled={saving}
             />
           </div>
 
           <div className="edit-company-actions">
-
             <button
               type="button"
               className="edit-company-cancel"
-              onClick={() =>
-                navigate("/admin/employers")
-              }
+              onClick={() => navigate("/admin/employers")}
               disabled={saving}
             >
               إلغاء
@@ -231,15 +209,10 @@ function EditCompany() {
               className="edit-company-submit"
               disabled={saving}
             >
-              {saving
-                ? "جارٍ الحفظ..."
-                : "حفظ التعديلات"}
+              {saving ? "جارٍ الحفظ..." : "حفظ التعديلات"}
             </button>
-
           </div>
-
         </form>
-
       </div>
     </PageContainer>
   );

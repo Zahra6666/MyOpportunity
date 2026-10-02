@@ -10,14 +10,14 @@ router.put(
   "/:id/approve",
   authMiddleware,
   allowRoles("admin"),
-  companiesController.approveCompany
+  companiesController.approveCompany,
 );
 
 router.put(
   "/:id/reject",
   authMiddleware,
   allowRoles("admin"),
-  companiesController.rejectCompany
+  companiesController.rejectCompany,
 );
 
 module.exports = router;

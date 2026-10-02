@@ -2,6 +2,8 @@
   max-width: 900px;
   margin: 0 auto;
   padding: 48px 20px 80px;
+
+  color: var(--text-primary);
 }
 
 .edit-company-header {
@@ -11,21 +13,27 @@
 .edit-company-eyebrow {
   display: inline-block;
   margin-bottom: 10px;
+
   font-size: 14px;
   font-weight: 700;
-  color: #6b7280;
+
+  color: var(--text-muted);
 }
 
 .edit-company-header h1 {
   margin: 0 0 10px;
+
   font-size: 32px;
   font-weight: 800;
-  color: #111827;
+
+  color: var(--text-primary);
 }
 
 .edit-company-header p {
   margin: 0;
-  color: #6b7280;
+
+  color: var(--text-secondary);
+
   line-height: 1.8;
   font-size: 15px;
 }
@@ -33,50 +41,122 @@
 .edit-company-error {
   margin-bottom: 20px;
   padding: 14px 16px;
-  border: 1px solid #fecaca;
+
+  border: 1px solid rgba(220, 38, 38, 0.2);
   border-radius: 12px;
-  background: #fef2f2;
-  color: #b91c1c;
+
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+
   font-size: 14px;
   line-height: 1.7;
 }
 
 .edit-company-form {
+  position: relative;
+
   padding: 30px;
-  border: 1px solid #e5e7eb;
+
+  border: 1px solid var(--border-light);
   border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 10px 35px rgba(15, 23, 42, 0.06);
+
+  background:
+    radial-gradient(circle at 100% 0%, var(--primary-50), transparent 32%),
+    var(--bg-card);
+
+  box-shadow: var(--shadow-md);
+
+  overflow: hidden;
+
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.edit-company-form::before {
+  content: "";
+
+  position: absolute;
+
+  width: 180px;
+  height: 180px;
+
+  right: -90px;
+  top: -100px;
+
+  border-radius: 50%;
+
+  border: 1px solid var(--primary-100);
+
+  pointer-events: none;
+}
+
+.edit-company-form::after {
+  content: "";
+
+  position: absolute;
+
+  width: 100px;
+  height: 100px;
+
+  left: -55px;
+  bottom: -55px;
+
+  border-radius: 50%;
+
+  background: var(--primary-50);
+
+  pointer-events: none;
 }
 
 .edit-company-field {
+  position: relative;
+  z-index: 1;
+
   margin-bottom: 22px;
 }
 
 .edit-company-field label {
   display: block;
+
   margin-bottom: 8px;
+
   font-size: 14px;
   font-weight: 700;
-  color: #1f2937;
+
+  color: var(--text-primary);
 }
 
 .edit-company-field input,
 .edit-company-field textarea {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #d1d5db;
+
+  border: 1px solid var(--border-light);
   border-radius: 12px;
+
   padding: 13px 14px;
-  background: #ffffff;
-  color: #111827;
+
+  background: var(--bg-main);
+  color: var(--text-primary);
+
   font-family: inherit;
   font-size: 15px;
+
   outline: none;
+
   transition:
+    background-color 0.2s ease,
     border-color 0.2s ease,
     box-shadow 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease;
+}
+
+.edit-company-field input:hover,
+.edit-company-field textarea:hover {
+  border-color: var(--border-medium);
 }
 
 .edit-company-field input {
@@ -91,42 +171,58 @@
 
 .edit-company-field input:focus,
 .edit-company-field textarea:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+  border-color: var(--primary-600);
+
+  box-shadow:
+    0 0 0 4px var(--primary-50),
+    var(--shadow-sm);
+
+  transform: translateY(-1px);
 }
 
 .edit-company-field input::placeholder,
 .edit-company-field textarea::placeholder {
-  color: #9ca3af;
+  color: var(--text-muted);
 }
 
 .edit-company-actions {
+  position: relative;
+  z-index: 1;
+
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+
   margin-top: 30px;
   padding-top: 22px;
-  border-top: 1px solid #f0f0f0;
+
+  border-top: 1px solid var(--border-light);
 }
 
 .edit-company-actions button {
   min-width: 130px;
   min-height: 46px;
+
   padding: 0 20px;
+
   border-radius: 11px;
   border: none;
+
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
+
   cursor: pointer;
+
   transition:
     transform 0.2s ease,
     box-shadow 0.2s ease,
-    opacity 0.2s ease;
+    opacity 0.2s ease,
+    background-color 0.2s ease;
 }
 
 .edit-company-actions button:hover:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .edit-company-actions button:disabled {
@@ -135,45 +231,82 @@
 }
 
 .edit-company-cancel {
-  border: 1px solid #d1d5db !important;
-  background: #ffffff;
-  color: #374151;
+  border: 1px solid var(--border-light) !important;
+
+  background: var(--bg-main);
+  color: var(--text-secondary);
 }
 
 .edit-company-cancel:hover:not(:disabled) {
-  box-shadow: 0 5px 15px rgba(15, 23, 42, 0.06);
+  background: var(--bg-soft);
+  color: var(--text-primary);
+
+  box-shadow: var(--shadow-sm);
 }
 
 .edit-company-submit {
-  background: #2563eb;
+  background: var(--primary-600);
   color: #ffffff;
+
   box-shadow: 0 6px 18px rgba(37, 99, 235, 0.2);
 }
 
 .edit-company-submit:hover:not(:disabled) {
+  background: var(--primary-700);
+
   box-shadow: 0 9px 24px rgba(37, 99, 235, 0.28);
 }
 
 .edit-company-loading {
   min-height: 350px;
+
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+
   text-align: center;
 }
 
 .edit-company-loading h2 {
   margin: 0 0 8px;
+
   font-size: 22px;
-  color: #111827;
+
+  color: var(--text-primary);
 }
 
 .edit-company-loading p {
   margin: 0;
-  color: #6b7280;
+
+  color: var(--text-secondary);
+
   font-size: 14px;
 }
+
+/* Dark mode */
+
+html.dark .edit-company-form {
+  background:
+    radial-gradient(
+      circle at 100% 0%,
+      rgba(59, 130, 246, 0.12),
+      transparent 34%
+    ),
+    var(--bg-card);
+}
+
+html.dark .edit-company-field input,
+html.dark .edit-company-field textarea {
+  background: var(--bg-main);
+}
+
+html.dark .edit-company-field input:focus,
+html.dark .edit-company-field textarea:focus {
+  background: var(--bg-card);
+}
+
+/* Responsive */
 
 @media (max-width: 700px) {
   .edit-company-page {

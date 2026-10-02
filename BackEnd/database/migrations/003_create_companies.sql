@@ -13,3 +13,6 @@ CREATE TABLE IF NOT EXISTS companies (
 
 ALTER TABLE companies
 DROP CONSTRAINT companies_user_id_key;
+
+ALTER TABLE companies
+ADD COLUMN IF NOT EXISTS website_url VARCHAR(500);

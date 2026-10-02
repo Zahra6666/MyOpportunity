@@ -1,5 +1,6 @@
 .create-opportunity-page {
   min-height: 100vh;
+  background: var(--bg-main);
 }
 
 .create-opportunity-header {
@@ -11,29 +12,31 @@
   align-items: center;
   gap: 7px;
   margin-bottom: 14px;
-  color: #64748b;
+  color: var(--text-muted);
   text-decoration: none;
   font-size: 14px;
+  transition: color 0.2s ease;
 }
 
 .back-link:hover {
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .create-opportunity-header h1 {
   margin: 0 0 8px;
   font-size: 30px;
+  color: var(--text-primary);
 }
 
 .create-opportunity-header p {
   margin: 0;
-  color: #64748b;
+  color: var(--text-secondary);
 }
 
 .create-error {
   margin-bottom: 20px;
   padding: 14px 16px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: #fef2f2;
   color: #b91c1c;
   border: 1px solid #fecaca;
@@ -44,16 +47,17 @@
 }
 
 .form-section {
-  background: #fff;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
   padding: 28px;
-  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.05);
+  box-shadow: var(--shadow-md);
 }
 
 .form-section h2 {
   margin: 0 0 24px;
   font-size: 20px;
+  color: var(--text-primary);
 }
 
 .form-grid {
@@ -75,7 +79,7 @@
 .form-group label {
   font-size: 14px;
   font-weight: 600;
-  color: #334155;
+  color: var(--text-primary);
 }
 
 .form-group input,
@@ -83,14 +87,22 @@
 .form-group select {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
   padding: 12px 14px;
   font: inherit;
-  color: #0f172a;
-  background: #fff;
+  color: var(--text-primary);
+  background: var(--bg-main);
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: var(--text-muted);
 }
 
 .form-group textarea {
@@ -101,13 +113,18 @@
 .form-group input:focus,
 .form-group textarea:focus,
 .form-group select:focus {
-  border-color: #64748b;
-  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+  border-color: var(--primary-500);
+  box-shadow: 0 0 0 3px var(--primary-50);
 }
 
 .form-group small {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 12px;
+}
+
+.form-group select option {
+  color: var(--text-primary);
+  background: var(--bg-card);
 }
 
 .form-actions {
@@ -121,7 +138,7 @@
 .submit-button {
   min-height: 44px;
   padding: 0 20px;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -130,23 +147,94 @@
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    opacity 0.2s ease,
+    transform 0.2s ease;
 }
 
 .cancel-button {
-  background: #fff;
-  color: #475569;
-  border: 1px solid #cbd5e1;
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
+}
+
+.cancel-button:hover {
+  background: var(--bg-soft);
+  color: var(--text-primary);
+  border-color: var(--border-dark);
 }
 
 .submit-button {
-  border: none;
-  background: #0f172a;
-  color: #fff;
+  border: 1px solid var(--primary-600);
+  background: var(--primary-600);
+  color: var(--text-white);
+}
+
+.submit-button:hover:not(:disabled) {
+  background: var(--primary-700);
+  border-color: var(--primary-700);
+  transform: translateY(-1px);
 }
 
 .submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
+}
+
+/* Dark mode */
+
+html.dark .create-opportunity-page,
+.dark .create-opportunity-page {
+  background: var(--bg-main);
+}
+
+html.dark .form-section,
+.dark .form-section {
+  background: var(--bg-card);
+  border-color: var(--border-light);
+  box-shadow: var(--shadow-md);
+}
+
+html.dark .form-group input,
+html.dark .form-group textarea,
+html.dark .form-group select,
+.dark .form-group input,
+.dark .form-group textarea,
+.dark .form-group select {
+  background: var(--bg-main);
+  color: var(--text-primary);
+  border-color: var(--border-medium);
+}
+
+html.dark .form-group input::placeholder,
+html.dark .form-group textarea::placeholder,
+.dark .form-group input::placeholder,
+.dark .form-group textarea::placeholder {
+  color: var(--text-muted);
+}
+
+html.dark .form-group select option,
+.dark .form-group select option {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+html.dark .cancel-button,
+.dark .cancel-button {
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  border-color: var(--border-medium);
+}
+
+html.dark .cancel-button:hover,
+.dark .cancel-button:hover {
+  background: var(--bg-soft);
+  color: var(--text-primary);
+  border-color: var(--border-dark);
 }
 
 @media (max-width: 700px) {
@@ -160,6 +248,10 @@
 
   .form-section {
     padding: 20px;
+  }
+
+  .create-opportunity-header h1 {
+    font-size: 26px;
   }
 
   .form-actions {

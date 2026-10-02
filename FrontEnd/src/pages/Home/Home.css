@@ -1,13 +1,8 @@
-/* =========================================
-   FORSATI HOME - YOUNG & VIBRANT THEME
-========================================= */
-/* Container padding fix */
 .container {
   width: 100%;
   max-width: var(--container-width);
   margin-inline: auto;
   padding-inline: 24px;
-  /* مسافة أمان ممتازة من اليمين واليسار */
 }
 
 @media (max-width: 640px) {
@@ -18,44 +13,36 @@
 
 .home-page {
   background: var(--bg-main);
+  color: var(--text-primary);
   overflow: hidden;
 }
 
 /* =========================================
-   HERO SECTION
-========================================= */
-
-/* =========================================
-   HERO SECTION - CLEAR PATTERN BACKGROUND
+   HERO
 ========================================= */
 
 .forsati-hero {
   position: relative;
   background-color: var(--bg-main);
-  /* خلفية شبكية واضحة مع تدرج شعاعي أزرق وأصفر ناعم */
-  background-image: 
-    radial-gradient(circle at 85% 20%, rgba(37, 99, 235, 0.12), transparent 40%),
-    radial-gradient(circle at 15% 80%, rgba(250, 204, 17, 0.20), transparent 40%),
+  background-image:
+    radial-gradient(
+      circle at 85% 20%,
+      rgba(37, 99, 235, 0.12),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 15% 80%,
+      rgba(250, 204, 17, 0.14),
+      transparent 40%
+    ),
     linear-gradient(to right, rgba(37, 99, 235, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+  background-size:
+    100% 100%,
+    100% 100%,
+    32px 32px,
+    32px 32px;
   border-bottom: 1px solid var(--border-light);
-}
-
-/* =========================================
-   REVEAL ON SCROLL ANIMATION
-========================================= */
-
-.reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(35px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
-
-.reveal-on-scroll.reveal-visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .forsati-hero-inner {
@@ -68,16 +55,10 @@
   padding-bottom: 80px;
 }
 
-/* =========================================
-   HERO TEXT & BADGE
-========================================= */
-
 .hero-copy {
   direction: rtl;
+  animation: fadeInUp 0.8s ease-out both;
 }
-/* =========================================
-   SMOOTH BLUE ROTATING BORDER
-========================================= */
 
 .hero-mini-label {
   position: relative;
@@ -86,54 +67,50 @@
   gap: 8px;
   padding: 8px 18px;
   border-radius: var(--radius-full);
-  background: var(--white);
+  background: var(--bg-card);
   color: var(--primary-600);
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 20px;
   box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
   overflow: hidden;
   z-index: 1;
 }
 
-/* الشريط الأزرق الصافي الدوّار */
 .hero-mini-label::before {
   content: "";
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  inset: -50%;
   background: conic-gradient(
     from 0deg,
     transparent 0%,
     transparent 70%,
     #2563eb 100%
   );
-  /* سرعة 1.8 ثانية مع خط حركة سلس جداً (linear) */
   animation: rotateBorderSmooth 2s linear infinite;
   z-index: -2;
 }
 
-/* الطبقة الداخلية البيضاء */
 .hero-mini-label::after {
   content: "";
   position: absolute;
-  inset: 2px; /* سمك الخط الأزرق */
-  background: var(--white);
+  inset: 2px;
+  background: var(--bg-card);
   border-radius: var(--radius-full);
   z-index: -1;
 }
 
-/* حركة الدوران المستمرة والناعمة */
 @keyframes rotateBorderSmooth {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
 }
+
 .hero-copy h1 {
   max-width: 640px;
   color: var(--text-primary);
@@ -147,12 +124,16 @@
 .hero-copy h1 span {
   display: inline-block;
   color: var(--primary-600);
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-500) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-600) 0%,
+    var(--primary-500) 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.hero-copy>p {
+.hero-copy > p {
   max-width: 620px;
   color: var(--text-secondary);
   font-size: 16px;
@@ -171,7 +152,6 @@
   margin-bottom: 28px;
 }
 
-/* Button override for Home Hero */
 .hero-buttons .btn {
   min-height: 48px;
   padding-inline: 22px;
@@ -198,10 +178,10 @@
 }
 
 .hero-outline-button {
-  background: var(--white);
+  background: var(--bg-card);
   color: var(--text-primary);
   border: 1px solid var(--border-medium);
-  box-shadow: var(--shadow-xs);
+  box-shadow: var(--shadow-sm);
 }
 
 .hero-outline-button:hover {
@@ -223,7 +203,7 @@
   padding: 8px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  background: var(--white);
+  background: var(--bg-card);
   box-shadow: var(--shadow-md);
 }
 
@@ -235,7 +215,7 @@
   gap: 10px;
   padding: 0 14px;
   color: var(--text-muted);
-  background: var(--gray-50);
+  background: var(--bg-soft);
   border-radius: var(--radius-md);
 }
 
@@ -251,7 +231,7 @@
 }
 
 .hero-search-input input::placeholder {
-  color: var(--text-light);
+  color: var(--text-muted);
 }
 
 .hero-search-location select {
@@ -280,7 +260,7 @@
 }
 
 /* =========================================
-   HERO OPPORTUNITY PREVIEW CARD
+   HERO OPPORTUNITY PREVIEW
 ========================================= */
 
 .hero-opportunity-preview {
@@ -290,6 +270,7 @@
   align-items: center;
   justify-content: center;
   direction: rtl;
+  animation: popIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 .preview-card {
@@ -297,18 +278,17 @@
   padding: 22px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
-  background: var(--white);
-  /* ظل بارز ثلاثي الأبعاد يعطي عمق رائع بالهيرو */
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.10), 0 4px 12px rgba(37, 99, 235, 0.05);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  transition:
+    transform var(--transition-normal),
+    box-shadow var(--transition-normal);
 }
 
 .preview-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--shadow-lg);
 }
-
-/* Card Top */
 
 .preview-top {
   display: flex;
@@ -332,6 +312,7 @@
 
 .preview-title {
   flex: 1;
+  min-width: 0;
 }
 
 .preview-title span {
@@ -350,6 +331,7 @@
   font-size: 16px;
   font-weight: 700;
   margin: 0 0 2px;
+  line-height: 1.5;
 }
 
 .preview-title p {
@@ -361,24 +343,15 @@
 .preview-bookmark {
   width: 36px;
   height: 36px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-md);
-  background: var(--white);
+  background: var(--bg-soft);
   color: var(--text-muted);
-  cursor: pointer;
-  transition: all var(--transition-fast);
 }
-
-.preview-bookmark:hover {
-  background: var(--accent-yellow-50);
-  color: var(--accent-yellow-600);
-  border-color: var(--accent-yellow-500);
-}
-
-/* Card Meta Tags */
 
 .preview-meta {
   display: flex;
@@ -393,13 +366,11 @@
   gap: 5px;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
-  background: var(--gray-50);
+  background: var(--bg-soft);
   color: var(--text-secondary);
   font-size: 11px;
   font-weight: 500;
 }
-
-/* Match Section */
 
 .preview-match {
   display: flex;
@@ -421,7 +392,7 @@
   justify-content: center;
   border: 4px solid var(--accent-green-500);
   border-radius: 50%;
-  background: var(--white);
+  background: var(--bg-card);
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
 }
 
@@ -440,7 +411,7 @@
   flex: 1;
 }
 
-.match-content>strong {
+.match-content > strong {
   display: block;
   color: var(--text-primary);
   font-size: 13px;
@@ -464,13 +435,11 @@
 
 .match-progress span {
   display: block;
-  width: 92%;
+  width: 70%;
   height: 100%;
   border-radius: inherit;
   background: var(--accent-green-500);
 }
-
-/* Skills */
 
 .preview-skills {
   display: flex;
@@ -483,18 +452,17 @@
   padding: 5px 10px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-sm);
-  background: var(--white);
+  background: var(--bg-soft);
   color: var(--text-secondary);
   font-size: 10px;
   font-weight: 500;
 }
 
-/* Card Footer */
-
 .preview-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding-top: 14px;
   border-top: 1px solid var(--border-light);
   color: var(--text-muted);
@@ -509,14 +477,47 @@
   font-weight: 700;
   font-size: 11px;
   text-decoration: none;
-  transition: color var(--transition-fast);
+  white-space: nowrap;
 }
 
 .preview-footer a:hover {
   color: var(--primary-700);
 }
 
-/* Floating Card */
+.preview-loading-card {
+  min-height: 250px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.preview-loading-content {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.preview-loading-content strong {
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.preview-loading-content span {
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.preview-loading-content a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+  color: var(--primary-600);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
 
 .preview-floating-card {
   position: absolute;
@@ -528,11 +529,11 @@
   padding: 12px 16px;
   border: 1px solid var(--accent-green-100);
   border-radius: var(--radius-md);
-  background: var(--white);
+  background: var(--bg-card);
   box-shadow: var(--shadow-md);
 }
 
-.preview-floating-card>svg {
+.preview-floating-card > svg {
   color: var(--accent-green-500);
 }
 
@@ -567,7 +568,7 @@
 }
 
 /* =========================================
-   STATS SECTION (Updated Vibrant Blue)
+   STATS
 ========================================= */
 
 .forsati-stats {
@@ -608,25 +609,26 @@
 
 .stat-box strong {
   display: block;
-  font-size: 24px;
+  color: var(--white);
+  font-size: 22px;
   font-weight: 800;
   line-height: 1.2;
 }
 
 .stat-box span {
   display: block;
-  color: var(--primary-100);
-  font-size: 12px;
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 11px;
+  margin-top: 3px;
 }
 
 /* =========================================
-   COMMON SECTION STYLING
+   COMMON SECTIONS
 ========================================= */
 
 .home-section {
   padding: 80px 0;
-  background: var(--white);
+  background: var(--bg-main);
 }
 
 .section-heading {
@@ -686,7 +688,7 @@
 }
 
 /* =========================================
-   CATEGORIES SECTION
+   CATEGORIES
 ========================================= */
 
 .categories-section {
@@ -698,6 +700,7 @@
   grid-template-columns: repeat(5, 1fr);
   gap: 14px;
 }
+
 .category-card {
   min-height: 220px;
   display: flex;
@@ -705,18 +708,16 @@
   padding: 20px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  background: var(--white);
+  background: var(--bg-card);
   text-decoration: none;
-  /* ظل ناعم وواضح لفصل الكارد عن الخلفية */
-   box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
 }
 
 .category-card:hover {
   transform: translateY(-6px);
   border-color: var(--primary-500);
-  /* ظل أعمق عند التفاعل */
-  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+  box-shadow: var(--shadow-md);
 }
 
 .category-icon {
@@ -768,11 +769,11 @@
 }
 
 /* =========================================
-   HOW IT WORKS SECTION
+   HOW IT WORKS
 ========================================= */
 
 .matching-section {
-  background: var(--white);
+  background: var(--bg-card);
 }
 
 .steps-grid {
@@ -780,29 +781,24 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
+
 .step-card {
   position: relative;
   min-height: 230px;
   padding: 28px;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  background: var(--white); /* غيرناها إلى أبيض صريح ليبرز فوق خلفية الهوم */
+  background: var(--bg-main);
   text-align: right;
-  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05);
+  box-shadow: var(--shadow-sm);
   transition: all var(--transition-normal);
 }
 
 .step-card:hover {
   transform: translateY(-5px);
   border-color: var(--primary-400);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.09);
+  box-shadow: var(--shadow-md);
 }
-
-/* .step-card:hover {
-  transform: translateY(-4px);
-  background: var(--white);
-  box-shadow: var(--shadow-sm);
-} */
 
 .step-card-number {
   position: absolute;
@@ -821,8 +817,8 @@
   justify-content: center;
   border-radius: var(--radius-md);
   color: var(--primary-600);
-  background: var(--white);
-  box-shadow: var(--shadow-xs);
+  background: var(--primary-50);
+  border: 1px solid var(--border-light);
   margin-bottom: 20px;
 }
 
@@ -849,7 +845,7 @@
 }
 
 /* =========================================
-   FEATURED SECTION
+   FEATURED OPPORTUNITIES
 ========================================= */
 
 .featured-section {
@@ -857,16 +853,33 @@
 }
 
 .home-empty {
-  padding: 50px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px;
   border: 2px dashed var(--border-medium);
   border-radius: var(--radius-lg);
+  background: var(--bg-card);
   text-align: center;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 14px;
 }
 
+.home-empty a {
+  color: var(--primary-600);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.home-error {
+  color: var(--text-secondary);
+}
+
 /* =========================================
-   FINAL CTA SECTION (Updated Vibrant Accent)
+   FINAL CTA
 ========================================= */
 
 .home-final-cta {
@@ -875,47 +888,78 @@
 }
 
 .final-cta-box {
+  position: relative;
+  overflow: hidden;
   min-height: 220px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 35px;
-  padding: 40px 48px;
+  padding: 44px 48px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-xl);
-  background: linear-gradient(135deg, var(--primary-700) 0%, var(--primary-600) 100%);
+  background:
+    radial-gradient(
+      circle at 10% 100%,
+      rgba(250, 204, 17, 0.18),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 90% 0%,
+      rgba(96, 165, 250, 0.25),
+      transparent 35%
+    ),
+    linear-gradient(135deg, var(--primary-700) 0%, var(--primary-600) 100%);
   color: var(--white);
   box-shadow: var(--shadow-lg);
 }
 
-.final-cta-box>div:first-child {
+.final-cta-box::after {
+  content: "";
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  left: -80px;
+  bottom: -130px;
+}
+
+.final-cta-content {
+  position: relative;
+  z-index: 1;
   max-width: 650px;
 }
 
-.final-cta-box span {
+.final-cta-label {
   display: inline-block;
   color: var(--gray-900);
   background: var(--accent-yellow-500);
   font-size: 11px;
   font-weight: 700;
-  padding: 4px 12px;
+  padding: 5px 13px;
   border-radius: var(--radius-full);
   margin-bottom: 10px;
 }
 
 .final-cta-box h2 {
+  color: var(--white);
   font-size: 28px;
   font-weight: 800;
-  line-height: 1.35;
+  line-height: 1.4;
   margin: 8px 0;
 }
 
 .final-cta-box p {
-  color: var(--primary-100);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 13px;
-  line-height: 1.7;
+  line-height: 1.8;
+  margin: 0;
 }
 
 .final-cta-buttons {
+  position: relative;
+  z-index: 1;
   display: flex;
   gap: 12px;
   flex-shrink: 0;
@@ -926,7 +970,7 @@
   color: var(--gray-900) !important;
   border: none !important;
   font-weight: 700 !important;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .final-primary-button:hover {
@@ -936,17 +980,76 @@
 
 .final-secondary-button {
   color: var(--white) !important;
-  background: rgba(255, 255, 255, 0.15) !important;
-  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
 }
 
 .final-secondary-button:hover {
-  background: rgba(255, 255, 255, 0.25) !important;
+  background: rgba(255, 255, 255, 0.2) !important;
   transform: translateY(-2px);
 }
 
 /* =========================================
-   RESPONSIVE DESIGN
+   ANIMATIONS
+========================================= */
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(35px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal-on-scroll.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.category-card,
+.step-card,
+.preview-card,
+.stat-box {
+  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-timeline: view();
+  animation-range: entry 10% cover 30%;
+}
+
+.hero-opportunity-preview {
+  animation: popIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.home-cta-early {
+  padding: 56px 0 0;
+}
+
+/* =========================================
+   RESPONSIVE
 ========================================= */
 
 @media (max-width: 1100px) {
@@ -970,7 +1073,7 @@
     text-align: center;
   }
 
-  .hero-copy>p {
+  .hero-copy > p {
     margin-inline: auto;
   }
 
@@ -1095,192 +1198,8 @@
   .stat-box:last-child {
     border-bottom: none;
   }
-}
 
-/* =========================================
-   SCROLL REVEAL ANIMATIONS
-========================================= */
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(28px);
+  .preview-floating-card {
+    display: none;
   }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    transform: scale(0.92);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* تطبيق الأنيميشن مع خاصية animation-timeline للأنيميشن أثناء السكرول */
-.category-card,
-.step-card,
-.preview-card,
-.stat-box {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-timeline: view();
-  animation-range: entry 10% cover 30%;
-}
-
-.hero-copy {
-  animation: fadeInUp 0.8s ease-out both;
-}
-
-.hero-opportunity-preview {
-  animation: popIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.home-cta-early {
-  padding: 56px 0 0;
-}
-
-/* =========================================
-   DARK MODE - HOME PAGE
-   Keep Home readable when the old white
-   surfaces are replaced by the dark palette.
-========================================= */
-
-html.dark .home-page .forsati-hero,
-html.dark .home-page .categories-section,
-html.dark .home-page .featured-section,
-html.dark .home-page .home-final-cta {
-  background-color: var(--bg-main);
-  color: var(--text-primary);
-}
-
-html.dark .home-page .hero-mini-label,
-html.dark .home-page .hero-mini-label::after,
-html.dark .home-page .hero-outline-button,
-html.dark .home-page .hero-search-box,
-html.dark .home-page .preview-card,
-html.dark .home-page .preview-bookmark,
-html.dark .home-page .preview-floating-card,
-html.dark .home-page .home-section,
-html.dark .home-page .category-card,
-html.dark .home-page .matching-section,
-html.dark .home-page .step-card,
-html.dark .home-page .step-card-icon {
-  background: var(--bg-card);
-  border-color: var(--border-light);
-}
-
-html.dark .home-page .hero-search-input,
-html.dark .home-page .hero-search-location,
-html.dark .home-page .preview-meta span {
-  background: var(--bg-soft);
-  color: var(--text-secondary);
-}
-
-html.dark .home-page .match-ring,
-html.dark .home-page .preview-skills span {
-  background: var(--bg-card);
-  border-color: var(--border-light);
-}
-
-html.dark .home-page .hero-copy h1,
-html.dark .home-page .section-heading h2,
-html.dark .home-page .category-card h3,
-html.dark .home-page .step-card h3,
-html.dark .home-page .preview-title h3,
-html.dark .home-page .match-content > strong {
-  color: var(--text-primary);
-}
-
-html.dark .home-page .hero-copy > p,
-html.dark .home-page .section-heading p,
-html.dark .home-page .category-card p,
-html.dark .home-page .step-card p,
-html.dark .home-page .preview-title p,
-html.dark .home-page .match-content p,
-html.dark .home-page .preview-footer,
-html.dark .home-page .preview-floating-card span,
-html.dark .home-page .hero-scroll-indicator {
-  color: var(--text-secondary);
-}
-
-html.dark .home-page .hero-copy h1 span {
-  color: #93c5fd;
-  background: none;
-  -webkit-text-fill-color: #93c5fd;
-}
-
-html.dark .home-page .home-empty {
-  background: var(--bg-card);
-  border-color: var(--border-medium);
-  color: var(--text-secondary);
-}
-
-html.dark .home-page .category-bottom,
-html.dark .home-page .section-link,
-html.dark .home-page .preview-footer a {
-  color: #93c5fd;
-}
-
-html.dark .home-page .preview-match {
-  background: rgba(16, 185, 129, 0.14);
-  border-color: rgba(52, 211, 153, 0.35);
-}
-
-/* Featured opportunity cards - Dark Mode */
-
-html.dark .home-page .opportunity-card {
-  background: var(--bg-card);
-  border-color: var(--border-light);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-html.dark .home-page .opportunity-card:hover {
-  border-color: var(--primary-500);
-  box-shadow: var(--shadow-md);
-}
-
-html.dark .home-page .opportunity-title-row h3,
-html.dark .home-page .opportunity-meta strong {
-  color: var(--text-primary);
-}
-
-html.dark .home-page .opportunity-company,
-html.dark .home-page .opportunity-description,
-html.dark .home-page .opportunity-meta,
-html.dark .home-page .opportunity-en-title {
-  color: var(--text-secondary);
-}
-
-html.dark .home-page .opportunity-skills span {
-  background: var(--bg-soft);
-  color: var(--text-secondary);
-}
-
-html.dark .home-page .opportunity-divider {
-  background: var(--border-light);
-}
-
-html.dark .home-page .match-score {
-  background: rgba(16, 185, 129, 0.14);
-}
-
-html.dark .home-page .save-opportunity {
-  background: var(--bg-soft);
-  border-color: var(--border-medium);
-  color: var(--text-secondary);
-}
-
-html.dark .home-page .save-opportunity:hover {
-  background: var(--primary-50);
-  border-color: var(--primary-500);
-  color: var(--primary-400);
 }

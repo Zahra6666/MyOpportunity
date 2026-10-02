@@ -13,7 +13,6 @@ import {
   Users,
   BriefcaseBusiness,
   CircleAlert,
-  Send,
 } from "lucide-react";
 
 import { useEffect, useState } from "react";
@@ -141,9 +140,10 @@ function OpportunityDetails() {
   const titleEn = opportunity.titleEn || opportunity.title_en || "";
 
   const companyName =
-    opportunity.company ||
     opportunity.company_name ||
-    opportunity.company?.name ||
+    (typeof opportunity.company === "string"
+      ? opportunity.company
+      : opportunity.company?.name) ||
     "الجهة الناشرة";
 
   const companyId =
@@ -152,23 +152,16 @@ function OpportunityDetails() {
     opportunity.company?.id ||
     "";
 
-  const type =
-    opportunity.type ||
-    opportunity.type_name ||
-    opportunity.opportunity_type ||
-    opportunity.category ||
-    "فرصة";
+  const type = getOpportunityType(opportunity);
+
+  const category = getOpportunityCategory(opportunity);
 
   const location = opportunity.location || "العراق";
 
-  const mode =
-    opportunity.mode ||
-    opportunity.work_mode ||
-    opportunity.work_type ||
-    "غير محدد";
+  const rawDeadline =
+    opportunity.deadline || opportunity.application_deadline || "";
 
-  const deadline =
-    opportunity.deadline || opportunity.application_deadline || "غير محدد";
+  const deadline = formatOpportunityDate(rawDeadline);
 
   const posted =
     opportunity.posted || opportunity.posted_at || opportunity.created_at || "";
@@ -206,29 +199,6 @@ function OpportunityDetails() {
     opportunity.company_description ||
     opportunity.company?.description ||
     "";
-
-  const applyUrl =
-    opportunity.applyUrl ||
-    opportunity.apply_url ||
-    opportunity.application_url ||
-    opportunity.link ||
-    "";
-
-  const handleApply = () => {
-    if (applyUrl) {
-      window.open(applyUrl, "_blank", "noopener,noreferrer");
-      return;
-    }
-
-    const message = document.getElementById("application-message");
-
-    if (message) {
-      message.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  };
 
   return (
     <PageContainer className="opportunity-details-page">
@@ -300,7 +270,7 @@ function OpportunityDetails() {
 
                   <span>
                     <BriefcaseBusiness size={15} />
-                    {mode}
+                    {category}
                   </span>
 
                   <span>
@@ -425,31 +395,6 @@ function OpportunityDetails() {
                 </Link>
               )}
             </section>
-
-            <section
-              id="application-message"
-              className="application-information"
-            >
-              <div className="application-information-icon">
-                <Send size={20} />
-              </div>
-
-              <div>
-                <h2>جاهز للتقديم؟</h2>
-
-                <p>
-                  راجع متطلبات الفرصة وتأكد من تحديث سيرتك الذاتية قبل التقديم.
-                </p>
-              </div>
-
-              <Link
-                to={`/opportunities/${opportunity.id}/apply`}
-                className="application-bottom-button"
-              >
-                <Send size={18} />
-                التقديم على الفرصة
-              </Link>
-            </section>
           </main>
 
           <aside className="opportunity-details-sidebar">
@@ -563,10 +508,19 @@ function OpportunityDetails() {
               <div className="details-info-row">
                 <span>
                   <BriefcaseBusiness size={15} />
-                  نوع العمل
+                  التصنيف
                 </span>
 
-                <strong>{mode}</strong>
+                <strong>{category}</strong>
+              </div>
+
+              <div className="details-info-row">
+                <span>
+                  <GraduationCap size={15} />
+                  النوع
+                </span>
+
+                <strong>{type}</strong>
               </div>
 
               <div className="details-info-row">
@@ -646,6 +600,165 @@ function normalizeList(value) {
   }
 
   return [];
+}
+
+function getOpportunityType(opportunity) {
+  const directType =
+    opportunity.type_name ||
+    opportunity.typeName ||
+    opportunity.opportunity_type ||
+    opportunity.opportunityType;
+
+  if (directType) {
+    return translateOpportunityType(directType);
+  }
+
+  if (typeof opportunity.type === "string") {
+    return translateOpportunityType(opportunity.type);
+  }
+
+  if (opportunity.type && typeof opportunity.type === "object") {
+    const nestedType =
+      opportunity.type.name ||
+      opportunity.type.type_name ||
+      opportunity.type.label;
+
+    if (nestedType) {
+      return translateOpportunityType(nestedType);
+    }
+  }
+
+  if (opportunity.type_id !== undefined && opportunity.type_id !== null) {
+    const typeTranslations = {
+      1: "وظيفة",
+      2: "تدريب",
+      3: "دورة تدريبية",
+      4: "تدريب",
+    };
+
+    return typeTranslations[Number(opportunity.type_id)] || "غير محدد";
+  }
+
+  return "غير محدد";
+}
+
+function translateOpportunityType(value) {
+  const normalized = String(value).trim().toLowerCase();
+
+  const translations = {
+    job: "وظيفة",
+    jobs: "وظيفة",
+    internship: "تدريب",
+    internships: "تدريب",
+    course: "دورة تدريبية",
+    courses: "دورة تدريبية",
+    training: "تدريب",
+    "full-time": "وظيفة",
+    "part-time": "وظيفة",
+  };
+
+  return translations[normalized] || value;
+}
+
+function getOpportunityCategory(opportunity) {
+  const directCategory = opportunity.category_name || opportunity.categoryName;
+
+  if (directCategory) {
+    return translateOpportunityCategory(directCategory);
+  }
+
+  if (typeof opportunity.category === "string") {
+    return translateOpportunityCategory(opportunity.category);
+  }
+
+  if (opportunity.category && typeof opportunity.category === "object") {
+    const nestedCategory =
+      opportunity.category.name ||
+      opportunity.category.category_name ||
+      opportunity.category.label;
+
+    if (nestedCategory) {
+      return translateOpportunityCategory(nestedCategory);
+    }
+  }
+
+  if (
+    opportunity.category_id !== undefined &&
+    opportunity.category_id !== null
+  ) {
+    const categoryTranslations = {
+      10: "التكنولوجيا",
+      11: "الهندسة",
+      12: "الطب",
+      13: "الأعمال",
+      14: "الفنون والتصميم",
+      15: "العلوم",
+      16: "التعليم",
+      17: "الإعلام",
+      18: "القانون",
+      19: "المالية",
+    };
+
+    return categoryTranslations[Number(opportunity.category_id)] || "غير محدد";
+  }
+
+  return "غير محدد";
+}
+
+function translateOpportunityCategory(value) {
+  const normalized = String(value).trim().toLowerCase().replace(/\s+/g, " ");
+
+  const translations = {
+    technology: "التكنولوجيا",
+    engineering: "الهندسة",
+    medicine: "الطب",
+    business: "الأعمال",
+    art: "الفنون والتصميم",
+    "arts and design": "الفنون والتصميم",
+    science: "العلوم",
+    education: "التعليم",
+    media: "الإعلام",
+    law: "القانون",
+    finance: "المالية",
+  };
+
+  return translations[normalized] || value;
+}
+
+function formatOpportunityDate(value) {
+  if (!value) {
+    return "غير محدد";
+  }
+
+  const stringValue = String(value).trim();
+
+  const dateOnlyMatch = stringValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (dateOnlyMatch) {
+    const [, year, month, day] = dateOnlyMatch;
+
+    const date = new Date(Number(year), Number(month) - 1, Number(day));
+
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString("ar-IQ", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    }
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return stringValue;
+  }
+
+  return date.toLocaleDateString("ar-IQ", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 function formatPostedDate(value) {

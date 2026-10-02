@@ -15,6 +15,7 @@ function CreateCompany() {
   const [formData, setFormData] = useState({
     name: "",
     logo: "",
+    website: "",
     location: "",
     description: "",
   });
@@ -57,16 +58,14 @@ function CreateCompany() {
       await createCompany({
         company_name: formData.name.trim(),
         logo_url: formData.logo.trim() || null,
+        website_url: formData.website.trim() || null,
         location: formData.location.trim(),
         description: formData.description.trim(),
       });
 
       navigate("/admin/employers");
     } catch (err) {
-      setError(
-        err?.message ||
-        "تعذر إنشاء الشركة."
-      );
+      setError(err?.message || "تعذر إنشاء الشركة.");
     } finally {
       setLoading(false);
     }
@@ -75,79 +74,46 @@ function CreateCompany() {
   return (
     <PageContainer className="create-company-page">
       <div className="container">
-
         <div className="create-company-header">
-
           <div>
             <div className="create-company-breadcrumb">
-              <Link to="/admin/employers">
-                إدارة الشركات
-              </Link>
+              <Link to="/admin/employers">إدارة الشركات</Link>
 
               <span>/</span>
 
-              <span>
-                إضافة شركة
-              </span>
+              <span>إضافة شركة</span>
             </div>
 
-            <h1>
-              إضافة شركة
-            </h1>
+            <h1>إضافة شركة</h1>
 
-            <p>
-              أدخل معلومات الشركة لإرسال طلب إنشاء الشركة.
-            </p>
+            <p>أدخل معلومات الشركة لإرسال طلب إنشاء الشركة.</p>
           </div>
 
-          <Link
-            to="/admin/employers"
-            className="create-company-back"
-          >
+          <Link to="/admin/employers" className="create-company-back">
             العودة
             <ArrowRight size={16} />
           </Link>
-
         </div>
 
-
         <section className="create-company-card">
-
           <div className="create-company-title">
-
             <div className="create-company-icon">
               <Building2 size={22} />
             </div>
 
             <div>
-              <h2>
-                معلومات الشركة
-              </h2>
+              <h2>معلومات الشركة</h2>
 
-              <p>
-                أدخل البيانات الأساسية للشركة.
-              </p>
+              <p>أدخل البيانات الأساسية للشركة.</p>
             </div>
-
           </div>
 
-
-          {error && (
-            <div className="create-company-error">
-              {error}
-            </div>
-          )}
-
+          {error && <div className="create-company-error">{error}</div>}
 
           <form onSubmit={handleSubmit}>
-
             <div className="create-company-grid">
-
               <div className="create-company-field">
-
-                <label htmlFor="name">
-                  اسم الشركة
-                </label>
+                <label htmlFor="name">اسم الشركة</label>
 
                 <input
                   id="name"
@@ -158,15 +124,10 @@ function CreateCompany() {
                   placeholder="أدخل اسم الشركة"
                   disabled={loading}
                 />
-
               </div>
 
-
               <div className="create-company-field">
-
-                <label htmlFor="location">
-                  الموقع
-                </label>
+                <label htmlFor="location">الموقع</label>
 
                 <input
                   id="location"
@@ -177,15 +138,10 @@ function CreateCompany() {
                   placeholder="مثال: بغداد، العراق"
                   disabled={loading}
                 />
-
               </div>
 
-
               <div className="create-company-field">
-
-                <label htmlFor="logo">
-                  رابط الشعار
-                </label>
+                <label htmlFor="logo">رابط الشعار</label>
 
                 <input
                   id="logo"
@@ -196,15 +152,24 @@ function CreateCompany() {
                   placeholder="https://example.com/logo.png"
                   disabled={loading}
                 />
-
               </div>
 
+              <div className="create-company-field">
+                <label htmlFor="website">الموقع الإلكتروني</label>
+
+                <input
+                  id="website"
+                  name="website"
+                  type="url"
+                  value={formData.website}
+                  onChange={handleChange}
+                  placeholder="https://example.com"
+                  disabled={loading}
+                />
+              </div>
 
               <div className="create-company-field create-company-field-full">
-
-                <label htmlFor="description">
-                  وصف الشركة
-                </label>
+                <label htmlFor="description">وصف الشركة</label>
 
                 <textarea
                   id="description"
@@ -215,40 +180,23 @@ function CreateCompany() {
                   rows={6}
                   disabled={loading}
                 />
-
               </div>
-
             </div>
 
-
             <div className="create-company-actions">
-
-              <Link
-                to="/admin/employers"
-                className="create-company-cancel"
-              >
+              <Link to="/admin/employers" className="create-company-cancel">
                 إلغاء
               </Link>
 
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={loading}
-              >
-                {loading
-                  ? "جارٍ إنشاء الشركة..."
-                  : "إنشاء الشركة"}
+              <Button variant="primary" type="submit" disabled={loading}>
+                {loading ? "جارٍ إنشاء الشركة..." : "إنشاء الشركة"}
               </Button>
-
             </div>
-
           </form>
-
         </section>
-
       </div>
     </PageContainer>
   );
 }
 
-export default CreateCompany; 
+export default CreateCompany;
