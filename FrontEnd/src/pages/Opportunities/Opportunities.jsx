@@ -458,9 +458,7 @@ function Opportunities() {
 
     if (location !== "all") {
       result = result.filter((item) =>
-        String(item.location || "")
-          .toLowerCase()
-          .includes(location.toLowerCase()),
+        normalizeLocation(item.location).includes(normalizeLocation(location)),
       );
     }
 
@@ -600,9 +598,8 @@ function Opportunities() {
       <section className="opportunities-content">
         <div className="container opportunities-layout">
           <aside
-            className={`opportunities-filters ${
-              mobileFilters ? "opportunities-filters-open" : ""
-            }`}
+            className={`opportunities-filters ${mobileFilters ? "opportunities-filters-open" : ""
+              }`}
           >
             <div className="filters-header">
               <div>
@@ -929,14 +926,7 @@ function ExplorerCard({ opportunity, index, isSaved, onSaveChange }) {
     >
       <div className="explorer-card-top">
         <div className="explorer-company-logo">
-          {opportunity.company_logo || opportunity.company?.logo ? (
-            <img
-              src={opportunity.company_logo || opportunity.company?.logo}
-              alt={company}
-            />
-          ) : (
-            <Building2 size={21} />
-          )}
+          <Building2 size={21} />
         </div>
 
         <div className="explorer-card-title">
@@ -1066,9 +1056,9 @@ function translateOpportunityType(value) {
     jobs: "وظيفة",
     internship: "تدريب",
     internships: "تدريب",
-    course: "دورة تدريبية",
-    courses: "دورة تدريبية",
-    training: "تدريب",
+    course: "كورس",
+    courses: "كورس",
+    training: "برنامج تدريبي",
     "full-time": "وظيفة",
     "part-time": "وظيفة",
   };
@@ -1213,3 +1203,25 @@ function extractSavedOpportunities(response) {
 }
 
 export default Opportunities;
+
+
+
+function normalizeLocation(value) {
+  const names = {
+    baghdad: "بغداد",
+    basra: "البصرة",
+    basrah: "البصرة",
+    erbil: "أربيل",
+    najaf: "النجف",
+    sulaymaniyah: "السليمانية",
+    sulaimani: "السليمانية",
+  };
+
+  let result = String(value || "").toLowerCase();
+
+  Object.entries(names).forEach(([english, arabic]) => {
+    result = result.replaceAll(english, arabic);
+  });
+
+  return result;
+}

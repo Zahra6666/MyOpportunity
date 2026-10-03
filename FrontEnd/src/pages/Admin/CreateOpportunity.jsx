@@ -30,9 +30,9 @@ const typeTranslations = {
   jobs: "وظيفة",
   internship: "تدريب",
   internships: "تدريب",
-  course: "دورة تدريبية",
-  courses: "دورة تدريبية",
-  training: "تدريب",
+  course: "كورس ",
+  courses: "كورس ",
+  training: "برنامج تدريبي",
 };
 
 const getTranslatedName = (name, translations) => {

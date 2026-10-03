@@ -138,7 +138,7 @@ function EditCompany() {
             />
           </div>
 
-          <div className="edit-company-field">
+          {/* <div className="edit-company-field">
             <label htmlFor="logo">رابط شعار الشركة</label>
 
             <input
@@ -150,7 +150,7 @@ function EditCompany() {
               placeholder="https://example.com/logo.png"
               disabled={saving}
             />
-          </div>
+          </div> */}
 
           <div className="edit-company-field">
             <label htmlFor="website">الموقع الإلكتروني</label>

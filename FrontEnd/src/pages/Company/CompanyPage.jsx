@@ -132,8 +132,7 @@ function CompanyPage() {
 
   const companyStatus = company?.status || "";
 
-  const companyLogo =
-    company?.logo_url || company?.logo || company?.logoUrl || null;
+  const companyLogo = null;
 
   const companyWebsite =
     company?.website_url || company?.website || company?.websiteUrl || null;

@@ -1,4 +1,7 @@
-const { Pool } = require("pg");
+const { Pool, types } = require("pg");
+
+// نرجّع التواريخ (DATE) كنص مثل 2026-12-31 حتى ما ينقص يوم بسبب فرق التوقيت
+types.setTypeParser(1082, (value) => value);
 
 const pool = new Pool({
   host: process.env.DB_HOST,

@@ -218,24 +218,24 @@ function OpportunityDetails() {
 
   const match = Number(
     matchData?.match_percentage ??
-      opportunity.match ??
-      opportunity.match_percentage ??
-      0,
+    opportunity.match ??
+    opportunity.match_percentage ??
+    0,
   );
 
   const matchingSkills = Array.isArray(matchData?.matched_skills)
     ? matchData.matched_skills
     : Array.isArray(
-          opportunity.matchingSkills || opportunity.matching_skills,
-        )
+      opportunity.matchingSkills || opportunity.matching_skills,
+    )
       ? opportunity.matchingSkills || opportunity.matching_skills
       : [];
 
   const missingSkills = Array.isArray(matchData?.missing_skills)
     ? matchData.missing_skills
     : Array.isArray(
-          opportunity.missingSkills || opportunity.missing_skills,
-        )
+      opportunity.missingSkills || opportunity.missing_skills,
+    )
       ? opportunity.missingSkills || opportunity.missing_skills
       : [];
 
@@ -281,14 +281,7 @@ function OpportunityDetails() {
           <main className="opportunity-details-main">
             <section className="details-header-card">
               <div className="details-company-logo">
-                {opportunity.company_logo || opportunity.company?.logo ? (
-                  <img
-                    src={opportunity.company_logo || opportunity.company?.logo}
-                    alt={companyName}
-                  />
-                ) : (
-                  <Building2 size={31} />
-                )}
+                <Building2 size={31} />
               </div>
 
               <div className="details-header-content">
@@ -519,31 +512,31 @@ function OpportunityDetails() {
 
                   {(experienceMatch !== undefined ||
                     educationMatch !== undefined) && (
-                    <div className="match-group">
-                      <div className="match-group-title">
-                        <CheckCircle2 size={15} />
-                        توافق الملف
+                      <div className="match-group">
+                        <div className="match-group-title">
+                          <CheckCircle2 size={15} />
+                          توافق الملف
+                        </div>
+
+                        <div className="match-tags">
+                          {experienceMatch === true && (
+                            <span>الخبرة متوافقة</span>
+                          )}
+
+                          {educationMatch === true && (
+                            <span>التعليم متوافق</span>
+                          )}
+
+                          {experienceMatch === false && (
+                            <span>الخبرة غير متوافقة بالكامل</span>
+                          )}
+
+                          {educationMatch === false && (
+                            <span>التعليم غير متوافق بالكامل</span>
+                          )}
+                        </div>
                       </div>
-
-                      <div className="match-tags">
-                        {experienceMatch === true && (
-                          <span>الخبرة متوافقة</span>
-                        )}
-
-                        {educationMatch === true && (
-                          <span>التعليم متوافق</span>
-                        )}
-
-                        {experienceMatch === false && (
-                          <span>الخبرة غير متوافقة بالكامل</span>
-                        )}
-
-                        {educationMatch === false && (
-                          <span>التعليم غير متوافق بالكامل</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
+                    )}
 
                   {matchReason && (
                     <div className="match-group">
@@ -593,9 +586,8 @@ function OpportunityDetails() {
 
               <button
                 type="button"
-                className={`save-details-button ${
-                  isSaved ? "save-details-button-active" : ""
-                }`}
+                className={`save-details-button ${isSaved ? "save-details-button-active" : ""
+                  }`}
                 onClick={handleSave}
                 disabled={saving}
               >
@@ -775,9 +767,9 @@ function translateOpportunityType(value) {
     jobs: "وظيفة",
     internship: "تدريب",
     internships: "تدريب",
-    course: "دورة تدريبية",
-    courses: "دورة تدريبية",
-    training: "تدريب",
+    course: "كورس ",
+    courses: "كورس ",
+    training: "برنامج تدريبي",
     "full-time": "وظيفة",
     "part-time": "وظيفة",
   };

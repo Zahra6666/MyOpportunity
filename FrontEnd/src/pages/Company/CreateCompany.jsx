@@ -140,7 +140,7 @@ function CreateCompany() {
                 />
               </div>
 
-              <div className="create-company-field">
+              {/* <div className="create-company-field">
                 <label htmlFor="logo">رابط الشعار</label>
 
                 <input
@@ -152,7 +152,7 @@ function CreateCompany() {
                   placeholder="https://example.com/logo.png"
                   disabled={loading}
                 />
-              </div>
+              </div> */}
 
               <div className="create-company-field">
                 <label htmlFor="website">الموقع الإلكتروني</label>

@@ -172,7 +172,7 @@ function Companies() {
                 const companyName =
                   company.company_name || company.name || "شركة بدون اسم";
 
-                const logo = company.logo_url || company.logo;
+                const logo = null;
                 const location = company.location || "الموقع غير متوفر";
 
                 return (
