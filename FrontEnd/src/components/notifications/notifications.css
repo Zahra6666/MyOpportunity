@@ -34,15 +34,15 @@
   background: #ef4444;
 }
 
-/* Panel - تم تصغير العرض وضبط المحاذاة للداخل */
+/* Panel */
 
 .notification-panel {
   position: absolute;
   z-index: 1000;
   top: calc(100% + 8px);
-  left: 0; /* تحويل اتجاه فتح القائمة لداخل الشاشة */
+  left: 0;
   right: auto;
-  width: 310px; /* تصغير العرض حتى تكون ناعمة وما تأخذ مساحة كبيرة */
+  width: 310px;
   overflow: hidden;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
@@ -235,6 +235,151 @@
 
 .notification-panel-footer a:hover {
   color: #1d4ed8;
+}
+
+/* Dark Mode */
+
+html.dark .notification-button,
+body.dark .notification-button,
+[data-theme="dark"] .notification-button {
+  color: #cbd5e1;
+}
+
+html.dark .notification-button:hover,
+html.dark .notification-button-active,
+body.dark .notification-button:hover,
+body.dark .notification-button-active,
+[data-theme="dark"] .notification-button:hover,
+[data-theme="dark"] .notification-button-active {
+  background: #1e293b;
+  border-color: #334155;
+  color: #60a5fa;
+}
+
+html.dark .notification-dot,
+body.dark .notification-dot,
+[data-theme="dark"] .notification-dot {
+  border-color: #0f172a;
+}
+
+html.dark .notification-panel,
+body.dark .notification-panel,
+[data-theme="dark"] .notification-panel {
+  border-color: #334155;
+  background: #0f172a;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .notification-panel-header,
+body.dark .notification-panel-header,
+[data-theme="dark"] .notification-panel-header {
+  border-bottom-color: #1e293b;
+  background: #0f172a;
+}
+
+html.dark .notification-panel-header h3,
+body.dark .notification-panel-header h3,
+[data-theme="dark"] .notification-panel-header h3 {
+  color: #f1f5f9;
+}
+
+html.dark .notification-panel-header span,
+body.dark .notification-panel-header span,
+[data-theme="dark"] .notification-panel-header span {
+  color: #94a3b8;
+}
+
+html.dark .notification-close,
+body.dark .notification-close,
+[data-theme="dark"] .notification-close {
+  color: #94a3b8;
+}
+
+html.dark .notification-close:hover,
+body.dark .notification-close:hover,
+[data-theme="dark"] .notification-close:hover {
+  background: #1e293b;
+  color: #e2e8f0;
+}
+
+html.dark .notification-actions,
+body.dark .notification-actions,
+[data-theme="dark"] .notification-actions {
+  background: #111827;
+  border-bottom-color: #1e293b;
+}
+
+html.dark .notification-actions button,
+html.dark .notification-actions a,
+body.dark .notification-actions button,
+body.dark .notification-actions a,
+[data-theme="dark"] .notification-actions button,
+[data-theme="dark"] .notification-actions a {
+  color: #60a5fa;
+}
+
+html.dark .notification-actions button:hover,
+html.dark .notification-actions a:hover,
+body.dark .notification-actions button:hover,
+body.dark .notification-actions a:hover,
+[data-theme="dark"] .notification-actions button:hover,
+[data-theme="dark"] .notification-actions a:hover {
+  color: #93c5fd;
+}
+
+html.dark .notification-item,
+body.dark .notification-item,
+[data-theme="dark"] .notification-item {
+  border-bottom-color: #1e293b;
+  background: #0f172a;
+}
+
+html.dark .notification-item:hover,
+body.dark .notification-item:hover,
+[data-theme="dark"] .notification-item:hover {
+  background: #1e293b;
+}
+
+html.dark .notification-item-unread,
+body.dark .notification-item-unread,
+[data-theme="dark"] .notification-item-unread {
+  background: #172554;
+}
+
+html.dark .notification-content strong,
+body.dark .notification-content strong,
+[data-theme="dark"] .notification-content strong {
+  color: #e2e8f0;
+}
+
+html.dark .notification-content > span,
+body.dark .notification-content > span,
+[data-theme="dark"] .notification-content > span {
+  color: #94a3b8;
+}
+
+html.dark .notification-content small,
+body.dark .notification-content small,
+[data-theme="dark"] .notification-content small {
+  color: #64748b;
+}
+
+html.dark .notification-panel-footer,
+body.dark .notification-panel-footer,
+[data-theme="dark"] .notification-panel-footer {
+  border-top-color: #1e293b;
+}
+
+html.dark .notification-panel-footer a,
+body.dark .notification-panel-footer a,
+[data-theme="dark"] .notification-panel-footer a {
+  color: #60a5fa;
+}
+
+html.dark .notification-panel-footer a:hover,
+body.dark .notification-panel-footer a:hover,
+[data-theme="dark"] .notification-panel-footer a:hover {
+  color: #93c5fd;
 }
 
 /* Mobile */

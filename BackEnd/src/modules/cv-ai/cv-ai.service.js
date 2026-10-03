@@ -2,8 +2,7 @@ const { GoogleGenAI } = require("@google/genai");
 
 const cvRepository = require("../cvs/cv.repository");
 
-const GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -106,9 +105,7 @@ ${String(parsedText).trim()}
   });
 
   const rawText =
-    typeof response.text === "function"
-      ? response.text()
-      : response.text;
+    typeof response.text === "function" ? response.text() : response.text;
 
   const cvInfo = parseCvJson(rawText);
 
@@ -121,7 +118,7 @@ ${String(parsedText).trim()}
     normalizedCvInfo.phone,
     normalizedCvInfo.skills,
     normalizedCvInfo.experience_years,
-    normalizedCvInfo.education
+    normalizedCvInfo.education,
   );
 
   return normalizedCvInfo;
@@ -149,9 +146,7 @@ function parseCvJson(text) {
   } catch (error) {
     console.error("Invalid CV AI JSON response:", cleaned);
 
-    const parseError = new Error(
-      "Invalid JSON returned by CV analysis AI"
-    );
+    const parseError = new Error("Invalid JSON returned by CV analysis AI");
 
     parseError.code = "INVALID_CV_AI_RESPONSE";
 
@@ -175,9 +170,7 @@ function normalizeCvInfo(data) {
     skills: normalizeSkills(data?.skills),
 
     experience_years:
-      Number.isFinite(experience) && experience >= 0
-        ? experience
-        : 0,
+      Number.isFinite(experience) && experience >= 0 ? experience : 0,
 
     education: normalizeText(data?.education),
   };

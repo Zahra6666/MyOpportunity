@@ -3,8 +3,7 @@ const { GoogleGenAI } = require("@google/genai");
 const opportunityRepository = require("../opportunities/opportunity.repository");
 const cvRepository = require("../cvs/cv.repository");
 
-const GEMINI_MODEL =
-  process.env.GEMINI_MODEL || "gemini-2.5-flash-lite";
+const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
 
 const apiKey = process.env.GEMINI_API_KEY;
 
@@ -31,8 +30,7 @@ async function matchCvWithOpportunity(userId, opportunityId) {
     throw error;
   }
 
-  const opportunity =
-    await opportunityRepository.findById(opportunityId);
+  const opportunity = await opportunityRepository.findById(opportunityId);
 
   if (!opportunity) {
     const error = new Error("Opportunity not found");
@@ -52,13 +50,9 @@ async function matchCvWithAllOpportunities(userId) {
     throw error;
   }
 
-  const opportunities =
-    await opportunityRepository.findAll();
+  const opportunities = await opportunityRepository.findAll();
 
-  if (
-    !Array.isArray(opportunities) ||
-    opportunities.length === 0
-  ) {
+  if (!Array.isArray(opportunities) || opportunities.length === 0) {
     return [];
   }
 
@@ -86,10 +80,7 @@ async function matchCvWithAllOpportunities(userId) {
     });
   }
 
-  results.sort(
-    (a, b) =>
-      b.match_percentage - a.match_percentage
-  );
+  results.sort((a, b) => b.match_percentage - a.match_percentage);
 
   return results;
 }
@@ -100,31 +91,23 @@ async function generateMatch(cv, opportunity) {
   const candidateData = {
     skills: normalizeArray(cv.skills),
 
-    experience_years:
-      normalizeNumber(cv.experience_years),
+    experience_years: normalizeNumber(cv.experience_years),
 
-    education:
-      normalizeText(cv.education),
+    education: normalizeText(cv.education),
   };
 
   const opportunityData = {
-    title:
-      normalizeText(opportunity.title),
+    title: normalizeText(opportunity.title),
 
-    description:
-      normalizeText(opportunity.description),
+    description: normalizeText(opportunity.description),
 
-    requirements:
-      normalizeText(opportunity.requirements),
+    requirements: normalizeText(opportunity.requirements),
 
-    category:
-      normalizeText(opportunity.category_name),
+    category: normalizeText(opportunity.category_name),
 
-    type:
-      normalizeText(opportunity.type_name),
+    type: normalizeText(opportunity.type_name),
 
-    location:
-      normalizeText(opportunity.location),
+    location: normalizeText(opportunity.location),
   };
 
   const prompt = `
@@ -164,6 +147,8 @@ RULES:
 - matched_skills must contain skills supported by the candidate.
 - missing_skills must contain important required skills not supported
   by the candidate.
+- Keep matched_skills and missing_skills in their original skill
+  names/language. Do NOT translate them.
 
 3. Experience:
 - Compare candidate experience with the opportunity requirements.
@@ -174,16 +159,29 @@ RULES:
 4. Education:
 - Consider related educational fields when appropriate.
 - Do not invent education.
+- Keep education information in its original language.
 
 5. Reason:
-- Give a short explanation.
+- Write ONLY the reason in Arabic.
+- The reason must be a short, clear explanation suitable for an
+  Arabic-language website user.
 - Mention important matching skills when possible.
+- Keep technical skill names such as JavaScript, React, Node.js,
+  Python, SQL, etc. in English inside the Arabic sentence.
+- Do not translate skill names.
 - Do not invent information.
+- Do not write the reason in English.
 
 6. Never invent skills, education, experience, certifications,
 or opportunity requirements.
 
 7. Return JSON only.
+
+8. Important language rule:
+- matched_skills: keep the original skill names.
+- missing_skills: keep the original skill names.
+- reason: Arabic only.
+- Do not translate or change any other extracted information.
 `;
 
   const response = await ai.models.generateContent({
@@ -198,9 +196,7 @@ or opportunity requirements.
   });
 
   const rawText =
-    typeof response.text === "function"
-      ? response.text()
-      : response.text;
+    typeof response.text === "function" ? response.text() : response.text;
 
   const parsed = parseGeminiJson(rawText);
 
@@ -209,9 +205,7 @@ or opportunity requirements.
 
 function parseGeminiJson(text) {
   if (!text) {
-    throw new Error(
-      "Gemini returned an empty response"
-    );
+    throw new Error("Gemini returned an empty response");
   }
 
   let cleaned = String(text).trim();
@@ -225,58 +219,37 @@ function parseGeminiJson(text) {
   try {
     return JSON.parse(cleaned);
   } catch (error) {
-    console.error(
-      "Invalid Gemini JSON response:",
-      cleaned
-    );
+    console.error("Invalid Gemini JSON response:", cleaned);
 
-    throw new Error(
-      "Invalid JSON returned by matching AI"
-    );
+    throw new Error("Invalid JSON returned by matching AI");
   }
 }
 
 function normalizeMatchResult(result) {
-  const percentage =
-    Number(result?.match_percentage);
+  const percentage = Number(result?.match_percentage);
 
-  const matchPercentage =
-    Number.isFinite(percentage)
-      ? Math.max(
-          0,
-          Math.min(
-            100,
-            Math.round(percentage)
-          )
-        )
-      : 0;
+  const matchPercentage = Number.isFinite(percentage)
+    ? Math.max(0, Math.min(100, Math.round(percentage)))
+    : 0;
 
   return {
     match_percentage: matchPercentage,
 
-    matched_skills:
-      normalizeArray(result?.matched_skills),
+    matched_skills: normalizeArray(result?.matched_skills),
 
-    missing_skills:
-      normalizeArray(result?.missing_skills),
+    missing_skills: normalizeArray(result?.missing_skills),
 
-    experience_match:
-      result?.experience_match === true,
+    experience_match: result?.experience_match === true,
 
-    education_match:
-      result?.education_match === true,
+    education_match: result?.education_match === true,
 
-    reason:
-      normalizeText(result?.reason) ||
-      "No matching reason was generated.",
+    reason: normalizeText(result?.reason) || "لم يتم إنشاء سبب للتوافق.",
   };
 }
 
 function normalizeArray(value) {
   if (Array.isArray(value)) {
-    return value
-      .map((item) => String(item).trim())
-      .filter(Boolean);
+    return value.map((item) => String(item).trim()).filter(Boolean);
   }
 
   if (typeof value === "string") {
@@ -291,9 +264,7 @@ function normalizeArray(value) {
       const parsed = JSON.parse(trimmed);
 
       if (Array.isArray(parsed)) {
-        return parsed
-          .map((item) => String(item).trim())
-          .filter(Boolean);
+        return parsed.map((item) => String(item).trim()).filter(Boolean);
       }
     } catch (error) {
       // Normal string, not JSON
@@ -306,10 +277,7 @@ function normalizeArray(value) {
 }
 
 function normalizeText(value) {
-  if (
-    value === null ||
-    value === undefined
-  ) {
+  if (value === null || value === undefined) {
     return "";
   }
 

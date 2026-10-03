@@ -63,15 +63,7 @@ function CVAnalysisPage() {
   if (loading) {
     return (
       <PageContainer className="cv-analysis-page">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "300px",
-            gap: "0.5rem",
-          }}
-        >
+        <div className="cv-analysis-loading">
           <Loader2 size={24} className="animate-spin" />
           <span>جاري تحميل بيانات السيرة الذاتية...</span>
         </div>
@@ -83,17 +75,11 @@ function CVAnalysisPage() {
     return (
       <PageContainer className="cv-analysis-page">
         <div className="container cv-analysis-container">
-          <div
-            className="cv-analysis-success"
-            style={{
-              borderColor: "#fca5a5",
-              backgroundColor: "#fef2f2",
-            }}
-          >
-            <AlertCircle size={21} style={{ color: "#ef4444" }} />
-            <div>
-              <strong style={{ color: "#991b1b" }}>تنبيه</strong>
-              <span style={{ color: "#b91c1c" }}>{error}</span>
+          <div className="cv-analysis-error">
+            <AlertCircle size={21} />
+            <div className="cv-analysis-error-content">
+              <strong>تنبيه</strong>
+              <span>{error}</span>
             </div>
           </div>
         </div>
@@ -141,9 +127,11 @@ function CVAnalysisPage() {
     <PageContainer className="cv-analysis-page">
       <div className="container cv-analysis-container">
         <section className="cv-analysis-header">
-          <div>
+          <div className="cv-analysis-heading">
             <span className="cv-eyebrow">تحليل السيرة الذاتية</span>
+
             <h1>لنراجع ملفك المهني</h1>
+
             <p>
               هذه المعلومات المستخرجة من سيرتك الذاتية، ويمكن تعديلها من ملفك
               الشخصي.
@@ -156,19 +144,22 @@ function CVAnalysisPage() {
           </Link>
         </section>
 
+        {/* SUCCESS MESSAGE */}
         <div className="cv-analysis-success">
           <div className="cv-success-icon">
             <CheckCircle2 size={21} />
           </div>
 
-          <div>
+          <div className="cv-success-content">
             <strong>تم تحليل السيرة الذاتية بنجاح</strong>
             <span>تم استخراج المعلومات الأساسية والمهارات من الملف.</span>
           </div>
         </div>
 
+        {/* MAIN CONTENT */}
         <div className="cv-analysis-grid">
-          <main>
+          <main className="cv-analysis-main">
+            {/* PERSONAL INFORMATION */}
             <section className="cv-card">
               <div className="cv-card-heading">
                 <div>
@@ -177,7 +168,8 @@ function CVAnalysisPage() {
                 </div>
 
                 <span className="verified-label">
-                  <CheckCircle2 size={14} /> مستخرجة
+                  <CheckCircle2 size={14} />
+                  مستخرجة
                 </span>
               </div>
 
@@ -230,6 +222,7 @@ function CVAnalysisPage() {
               </div>
             </section>
 
+            {/* EXPERIENCE */}
             <section className="cv-card">
               <div className="cv-card-heading">
                 <div>
@@ -250,6 +243,7 @@ function CVAnalysisPage() {
               </div>
             </section>
 
+            {/* SKILLS */}
             <section className="cv-card">
               <div className="cv-card-heading">
                 <div>
@@ -267,15 +261,16 @@ function CVAnalysisPage() {
                     </span>
                   ))
                 ) : (
-                  <p style={{ color: "#6b7280" }}>
+                  <p className="cv-no-skills">
                     لم يتم التعرف على مهارات جديدة.
                   </p>
                 )}
               </div>
             </section>
 
+            {/* EXTRACTED TEXT */}
             {parsedText && (
-              <section className="cv-card">
+              <section className="cv-card cv-extracted-card">
                 <div className="cv-card-heading">
                   <div>
                     <h2>النص المستخرج من السيرة</h2>
@@ -283,24 +278,14 @@ function CVAnalysisPage() {
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    backgroundColor: "#f9fafb",
-                    padding: "1rem",
-                    borderRadius: "8px",
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                    fontSize: "0.875rem",
-                    whiteSpace: "pre-wrap",
-                    color: "#374151",
-                  }}
-                >
+                <div className="cv-extracted-text" dir="auto">
                   {parsedText}
                 </div>
               </section>
             )}
           </main>
 
+          {/* SIDEBAR */}
           <aside className="cv-analysis-sidebar">
             <section className="cv-file-card">
               <div className="cv-file-icon">
@@ -311,25 +296,15 @@ function CVAnalysisPage() {
                 <strong>
                   {cvData?.original_filename || "ملف السيرة الذاتية"}
                 </strong>
+
                 <span>تم تحليل الملف</span>
               </div>
 
               <CheckCircle2 className="cv-file-check" size={19} />
             </section>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-                marginTop: "1rem",
-              }}
-            >
-              <Link
-                to="/cv/upload"
-                className="cv-reupload-link"
-                style={{ textAlign: "center" }}
-              >
+            <div className="cv-sidebar-actions">
+              <Link to="/cv/upload" className="cv-reupload-link">
                 رفع نسخة جديدة من السيرة
               </Link>
 
@@ -337,19 +312,7 @@ function CVAnalysisPage() {
                 type="button"
                 onClick={handleDeleteCV}
                 disabled={deleting}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.5rem",
-                  padding: "0.75rem",
-                  borderRadius: "8px",
-                  border: "1px solid #fca5a5",
-                  backgroundColor: "#fff5f5",
-                  color: "#e53e3e",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                }}
+                className="cv-delete-button"
               >
                 {deleting ? (
                   <Loader2 size={17} className="animate-spin" />

@@ -19,11 +19,15 @@ import PageContainer from "../../components/layout/PageContainer";
 import Badge from "../../components/common/Badge";
 import {
   getOpportunities,
-  getOpportunityMatches,
   getSavedOpportunities,
   saveOpportunity,
   unsaveOpportunity,
+  getOpportunityMatch,
+  getOpportunityMatches,
+  getCategories,
+  getTypes,
 } from "../../services/opportunityService";
+import { getMyCV } from "../../services/cvService";
 
 import "./Opportunities.css";
 
@@ -69,14 +73,19 @@ function getCurrentUserRole() {
 function Opportunities() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
+  const [type, setType] = useState("all");
   const [location, setLocation] = useState("all");
-  const [mode, setMode] = useState("all");
   const [minMatch, setMinMatch] = useState(0);
   const [sort, setSort] = useState("match");
   const [mobileFilters, setMobileFilters] = useState(false);
 
   const [opportunities, setOpportunities] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [types, setTypes] = useState([]);
   const [savedIds, setSavedIds] = useState(new Set());
+
+  const [cvStatus, setCvStatus] = useState("loading");
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -89,39 +98,143 @@ function Opportunities() {
         setLoading(true);
         setError("");
 
-        // Get normal opportunities first.
-        const response = await getOpportunities();
+        const opportunitiesResponse = await getOpportunities();
 
-        const opportunitiesData = Array.isArray(response?.data)
-          ? response.data
+        const opportunitiesData = Array.isArray(opportunitiesResponse?.data)
+          ? opportunitiesResponse.data
           : [];
 
-        // Keep the normal opportunities even if matching fails.
-        let mergedOpportunities = opportunitiesData;
+        setOpportunities(opportunitiesData);
 
-        // =========================
-        // Get real AI matching
-        // =========================
+        try {
+          const [categoriesResponse, typesResponse] = await Promise.all([
+            getCategories(),
+            getTypes(),
+          ]);
+
+          setCategories(
+            Array.isArray(categoriesResponse?.data)
+              ? categoriesResponse.data
+              : [],
+          );
+
+          setTypes(
+            Array.isArray(typesResponse?.data) ? typesResponse.data : [],
+          );
+        } catch (filterError) {
+          console.error("Failed to load categories or types:", filterError);
+
+          setCategories([]);
+          setTypes([]);
+        }
+
         const token = localStorage.getItem("token");
 
         if (token) {
           try {
-            const matchesResponse = await getOpportunityMatches();
+            const cvResponse = await getMyCV();
 
-            const matches = Array.isArray(matchesResponse?.data)
-              ? matchesResponse.data
-              : [];
+            const cvData =
+              cvResponse?.data ??
+              cvResponse?.cv ??
+              cvResponse?.userCv ??
+              cvResponse;
 
-            const matchesMap = new Map(
-              matches.map((match) => [
-                String(match.opportunity_id),
-                match,
-              ]),
+            const hasCV =
+              cvData &&
+              typeof cvData === "object" &&
+              Object.keys(cvData).length > 0;
+
+            setCvStatus(hasCV ? "has-cv" : "missing");
+          } catch (cvError) {
+            console.error("Failed to check user's CV:", cvError);
+
+            setCvStatus("error");
+          }
+        } else {
+          setCvStatus("missing");
+        }
+
+        if (token && opportunitiesData.length > 0) {
+          try {
+            let matches = [];
+
+            try {
+              const matchesResponse = await getOpportunityMatches();
+
+              if (Array.isArray(matchesResponse?.data)) {
+                matches = matchesResponse.data;
+              }
+            } catch (allMatchesError) {
+              console.error(
+                "Failed to load all opportunity matches:",
+                allMatchesError,
+              );
+            }
+
+            const existingMatchIds = new Set(
+              matches
+                .map(
+                  (match) =>
+                    match?.opportunity_id ?? match?.opportunityId ?? match?.id,
+                )
+                .filter((id) => id !== undefined && id !== null)
+                .map(String),
             );
 
-            mergedOpportunities = opportunitiesData.map((opportunity) => {
+            const missingMatchOpportunities = opportunitiesData.filter(
+              (opportunity) => {
+                const opportunityId = opportunity.id ?? opportunity._id;
+
+                return (
+                  opportunityId !== undefined &&
+                  opportunityId !== null &&
+                  !existingMatchIds.has(String(opportunityId))
+                );
+              },
+            );
+
+            if (missingMatchOpportunities.length > 0) {
+              const individualMatchResults = await Promise.allSettled(
+                missingMatchOpportunities.map(async (opportunity) => {
+                  const opportunityId = opportunity.id ?? opportunity._id;
+
+                  const response = await getOpportunityMatch(opportunityId);
+
+                  if (!response?.data) {
+                    return null;
+                  }
+
+                  return {
+                    opportunity_id: opportunityId,
+                    ...response.data,
+                  };
+                }),
+              );
+
+              const individualMatches = individualMatchResults
+                .filter(
+                  (result) =>
+                    result.status === "fulfilled" && result.value !== null,
+                )
+                .map((result) => result.value);
+
+              matches = [...matches, ...individualMatches];
+            }
+
+            const matchesMap = new Map();
+
+            matches.forEach((match) => {
               const opportunityId =
-                opportunity.id ?? opportunity._id;
+                match?.opportunity_id ?? match?.opportunityId ?? match?.id;
+
+              if (opportunityId !== undefined && opportunityId !== null) {
+                matchesMap.set(String(opportunityId), match);
+              }
+            });
+
+            const mergedOpportunities = opportunitiesData.map((opportunity) => {
+              const opportunityId = opportunity.id ?? opportunity._id;
 
               const match = matchesMap.get(String(opportunityId));
 
@@ -129,72 +242,106 @@ function Opportunities() {
                 return opportunity;
               }
 
+              const rawMatchPercentage =
+                match.match_percentage ?? match.matchPercentage ?? match.match;
+
+              const matchPercentage = Number(rawMatchPercentage);
+
               return {
                 ...opportunity,
 
-                // Real matching data
-                match_percentage: match.match_percentage,
-                match: match.match_percentage,
+                match_percentage: Number.isFinite(matchPercentage)
+                  ? matchPercentage
+                  : null,
 
-                matching_skills: match.matched_skills || [],
-                matchingSkills: match.matched_skills || [],
+                match: Number.isFinite(matchPercentage)
+                  ? matchPercentage
+                  : null,
+
+                matching_skills:
+                  match.matched_skills || match.matching_skills || [],
+
+                matchingSkills:
+                  match.matched_skills || match.matching_skills || [],
 
                 missing_skills: match.missing_skills || [],
+
                 missingSkills: match.missing_skills || [],
 
                 experience_match: match.experience_match,
+
                 education_match: match.education_match,
 
-                match_reason: match.reason || "",
-                matchReason: match.reason || "",
+                match_reason: match.reason || match.match_reason || "",
+
+                matchReason: match.reason || match.match_reason || "",
               };
             });
 
-            // Make sure matching results are available even if
-            // the normal opportunities response uses a different
-            // structure.
             const missingOpportunities = matches
-              .filter(
-                (match) =>
+              .filter((match) => {
+                const matchId =
+                  match?.opportunity_id ?? match?.opportunityId ?? match?.id;
+
+                return (
+                  matchId !== undefined &&
+                  matchId !== null &&
                   !opportunitiesData.some(
                     (opportunity) =>
                       String(opportunity.id ?? opportunity._id) ===
-                      String(match.opportunity_id),
-                  ),
-              )
-              .map((match) => ({
-                id: match.opportunity_id,
-                title: match.title || "فرصة متاحة",
-                company_name: match.company_name || "جهة ناشرة",
-                match_percentage: match.match_percentage,
-                match: match.match_percentage,
-                matching_skills: match.matched_skills || [],
-                missing_skills: match.missing_skills || [],
-                experience_match: match.experience_match,
-                education_match: match.education_match,
-                match_reason: match.reason || "",
-              }));
+                      String(matchId),
+                  )
+                );
+              })
+              .map((match) => {
+                const rawMatchPercentage =
+                  match.match_percentage ??
+                  match.matchPercentage ??
+                  match.match;
+
+                const matchPercentage = Number(rawMatchPercentage);
+
+                return {
+                  id: match.opportunity_id ?? match.opportunityId ?? match.id,
+
+                  title: match.title || "فرصة متاحة",
+
+                  company_name:
+                    match.company_name || match.companyName || "جهة ناشرة",
+
+                  match_percentage: Number.isFinite(matchPercentage)
+                    ? matchPercentage
+                    : null,
+
+                  match: Number.isFinite(matchPercentage)
+                    ? matchPercentage
+                    : null,
+
+                  matching_skills:
+                    match.matched_skills || match.matching_skills || [],
+
+                  missing_skills: match.missing_skills || [],
+
+                  experience_match: match.experience_match,
+
+                  education_match: match.education_match,
+
+                  match_reason: match.reason || match.match_reason || "",
+
+                  matchReason: match.reason || match.match_reason || "",
+                };
+              });
 
             if (missingOpportunities.length > 0) {
-              mergedOpportunities = [
-                ...mergedOpportunities,
-                ...missingOpportunities,
-              ];
+              mergedOpportunities.push(...missingOpportunities);
             }
+
+            setOpportunities(mergedOpportunities);
           } catch (matchError) {
-            // Matching should never prevent opportunities from loading.
-            console.error(
-              "Failed to load opportunity matches:",
-              matchError,
-            );
+            console.error("Failed to load opportunity matches:", matchError);
           }
         }
 
-        setOpportunities(mergedOpportunities);
-
-        // =========================
-        // Saved opportunities
-        // =========================
         try {
           const savedResponse = await getSavedOpportunities();
 
@@ -204,10 +351,7 @@ function Opportunities() {
             new Set(
               savedList
                 .map((item) => item?.id ?? item?._id)
-                .filter(
-                  (savedId) =>
-                    savedId !== null && savedId !== undefined,
-                )
+                .filter((savedId) => savedId !== null && savedId !== undefined)
                 .map(String),
             ),
           );
@@ -223,6 +367,30 @@ function Opportunities() {
 
     fetchOpportunities();
   }, []);
+
+  const lowestMatch = useMemo(() => {
+    const validMatches = opportunities
+      .map((item) => {
+        const value = Number(item.match ?? item.match_percentage);
+
+        return Number.isFinite(value) && value >= 0 && value <= 100
+          ? value
+          : null;
+      })
+      .filter((value) => value !== null);
+
+    if (validMatches.length === 0) {
+      return 0;
+    }
+
+    return Math.min(...validMatches);
+  }, [opportunities]);
+
+  useEffect(() => {
+    if (minMatch < lowestMatch) {
+      setMinMatch(lowestMatch);
+    }
+  }, [lowestMatch, minMatch]);
 
   const handleSaveChange = (id, saved) => {
     setSavedIds((current) => {
@@ -256,29 +424,35 @@ function Opportunities() {
           item.type_name,
           item.category,
           item.category_name,
-          item.mode,
           ...(Array.isArray(item.skills) ? item.skills : []),
         ];
 
         return searchableValues
           .filter(Boolean)
-          .some((value) =>
-            String(value).toLowerCase().includes(query),
-          );
+          .some((value) => String(value).toLowerCase().includes(query));
+      });
+    }
+
+    if (type !== "all") {
+      result = result.filter((item) => {
+        const value =
+          item.type_name ||
+          item.typeName ||
+          item.type ||
+          item.opportunity_type ||
+          item.opportunityType ||
+          "";
+
+        return String(value).toLowerCase().includes(type.toLowerCase());
       });
     }
 
     if (category !== "all") {
       result = result.filter((item) => {
         const value =
-          item.type ||
-          item.category ||
-          item.category_name ||
-          "";
+          item.category_name || item.categoryName || item.category || "";
 
-        return String(value)
-          .toLowerCase()
-          .includes(category.toLowerCase());
+        return String(value).toLowerCase().includes(category.toLowerCase());
       });
     }
 
@@ -290,60 +464,54 @@ function Opportunities() {
       );
     }
 
-    if (mode !== "all") {
-      result = result.filter((item) =>
-        String(
-          item.mode ||
-            item.work_mode ||
-            item.work_type ||
-            "",
-        )
-          .toLowerCase()
-          .includes(mode.toLowerCase()),
-      );
-    }
-
-    // Real AI match percentage
     result = result.filter((item) => {
-      const match = Number(
-        item.match_percentage ??
-          item.match ??
-          0,
-      );
+      const rawMatch = item.match ?? item.match_percentage;
+
+      const match = Number(rawMatch);
+
+      if (!Number.isFinite(match)) {
+        return minMatch <= 0;
+      }
 
       return match >= minMatch;
     });
 
     if (sort === "match") {
-      result.sort(
-        (a, b) =>
-          Number(
-            b.match_percentage ??
-              b.match ??
-              0,
-          ) -
-          Number(
-            a.match_percentage ??
-              a.match ??
-              0,
-          ),
-      );
+      result.sort((a, b) => {
+        const matchA = Number(a.match ?? a.match_percentage);
+
+        const matchB = Number(b.match ?? b.match_percentage);
+
+        const safeA = Number.isFinite(matchA) ? matchA : -1;
+
+        const safeB = Number.isFinite(matchB) ? matchB : -1;
+
+        return safeB - safeA;
+      });
+    }
+
+    if (sort === "lowest-match") {
+      result.sort((a, b) => {
+        const matchA = Number(a.match ?? a.match_percentage);
+
+        const matchB = Number(b.match ?? b.match_percentage);
+
+        const safeA = Number.isFinite(matchA) ? matchA : 101;
+
+        const safeB = Number.isFinite(matchB) ? matchB : 101;
+
+        return safeA - safeB;
+      });
     }
 
     if (sort === "latest") {
       result.sort((a, b) => {
         const dateA = new Date(
-          a.posted_at ||
-            a.posted ||
-            a.created_at ||
-            0,
+          a.posted_at || a.posted || a.created_at || 0,
         ).getTime();
 
         const dateB = new Date(
-          b.posted_at ||
-            b.posted ||
-            b.created_at ||
-            0,
+          b.posted_at || b.posted || b.created_at || 0,
         ).getTime();
 
         return dateB - dateA;
@@ -351,22 +519,14 @@ function Opportunities() {
     }
 
     return result;
-  }, [
-    opportunities,
-    search,
-    category,
-    location,
-    mode,
-    minMatch,
-    sort,
-  ]);
+  }, [opportunities, search, category, type, location, minMatch, sort]);
 
   const resetFilters = () => {
     setSearch("");
     setCategory("all");
+    setType("all");
     setLocation("all");
-    setMode("all");
-    setMinMatch(0);
+    setMinMatch(lowestMatch);
     setSort("match");
   };
 
@@ -384,9 +544,7 @@ function Opportunities() {
 
           <div className="opportunities-heading">
             <div className="opportunities-heading-content">
-              <span className="opportunities-overline">
-                فرص مهنية وتعليمية
-              </span>
+              <span className="opportunities-overline">فرص مهنية وتعليمية</span>
 
               <h1>استكشف الفرص المتاحة</h1>
 
@@ -415,49 +573,26 @@ function Opportunities() {
             </div>
           </div>
 
-          <div className="opportunities-search">
-            <div className="main-search">
-              <Search size={19} />
+          <div className="main-search">
+            <Search size={19} />
 
-              <input
-                value={search}
-                onChange={(event) =>
-                  setSearch(event.target.value)
-                }
-                placeholder="ابحث عن فرصة، شركة، مهارة..."
-              />
-            </div>
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="ابحث عن فرصة، شركة، مهارة..."
+              aria-label="البحث عن فرصة"
+            />
 
-            <div className="search-location">
-              <MapPin size={17} />
-
-              <select
-                value={location}
-                onChange={(event) =>
-                  setLocation(event.target.value)
-                }
+            {search && (
+              <button
+                type="button"
+                className="search-clear"
+                onClick={() => setSearch("")}
+                aria-label="مسح البحث"
               >
-                <option value="all">كل المحافظات</option>
-                <option value="بغداد">بغداد</option>
-                <option value="البصرة">البصرة</option>
-                <option value="أربيل">أربيل</option>
-                <option value="النجف">النجف</option>
-                <option value="السليمانية">
-                  السليمانية
-                </option>
-              </select>
-
-              <ChevronDown size={14} />
-            </div>
-
-            <button
-              type="button"
-              className="opportunities-search-button"
-              onClick={() => {}}
-            >
-              بحث
-              <Search size={16} />
-            </button>
+                ×
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -466,9 +601,7 @@ function Opportunities() {
         <div className="container opportunities-layout">
           <aside
             className={`opportunities-filters ${
-              mobileFilters
-                ? "opportunities-filters-open"
-                : ""
+              mobileFilters ? "opportunities-filters-open" : ""
             }`}
           >
             <div className="filters-header">
@@ -477,10 +610,7 @@ function Opportunities() {
                 <h2>تصفية النتائج</h2>
               </div>
 
-              <button
-                type="button"
-                onClick={resetFilters}
-              >
+              <button type="button" onClick={resetFilters}>
                 <RotateCcw size={14} />
                 إعادة ضبط
               </button>
@@ -490,31 +620,85 @@ function Opportunities() {
               <label>نوع الفرصة</label>
 
               <div className="filter-options">
-                {[
-                  ["all", "جميع الفرص"],
-                  ["وظيفة", "وظائف"],
-                  ["منحة", "منح دراسية"],
-                  ["تدريب", "تدريب"],
-                  ["مسابقة", "مسابقات"],
-                  ["كورس", "كورسات"],
-                ].map(([value, label]) => (
-                  <label
-                    className="filter-radio"
-                    key={value}
-                  >
-                    <input
-                      type="radio"
-                      name="category"
-                      value={value}
-                      checked={category === value}
-                      onChange={(event) =>
-                        setCategory(event.target.value)
-                      }
-                    />
+                <label className="filter-radio">
+                  <input
+                    type="radio"
+                    name="type"
+                    value="all"
+                    checked={type === "all"}
+                    onChange={(event) => setType(event.target.value)}
+                  />
 
-                    <span>{label}</span>
-                  </label>
-                ))}
+                  <span>جميع الفرص</span>
+                </label>
+
+                {types.map((item) => {
+                  const value = item.id ?? item.name ?? item.type_name;
+
+                  const label = item.name ?? item.type_name ?? item.label;
+
+                  if (value === undefined || value === null || !label) {
+                    return null;
+                  }
+
+                  return (
+                    <label className="filter-radio" key={String(value)}>
+                      <input
+                        type="radio"
+                        name="type"
+                        value={String(label)}
+                        checked={type === String(label)}
+                        onChange={(event) => setType(event.target.value)}
+                      />
+
+                      <span>{translateOpportunityType(label)}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="filter-divider" />
+
+            <div className="filter-section">
+              <label>التصنيف</label>
+
+              <div className="filter-options">
+                <label className="filter-radio">
+                  <input
+                    type="radio"
+                    name="category"
+                    value="all"
+                    checked={category === "all"}
+                    onChange={(event) => setCategory(event.target.value)}
+                  />
+
+                  <span>جميع التصنيفات</span>
+                </label>
+
+                {categories.map((item) => {
+                  const value = item.id ?? item.name ?? item.category_name;
+
+                  const label = item.name ?? item.category_name ?? item.label;
+
+                  if (value === undefined || value === null || !label) {
+                    return null;
+                  }
+
+                  return (
+                    <label className="filter-radio" key={String(value)}>
+                      <input
+                        type="radio"
+                        name="category"
+                        value={String(label)}
+                        checked={category === String(label)}
+                        onChange={(event) => setCategory(event.target.value)}
+                      />
+
+                      <span>{translateOpportunityCategory(label)}</span>
+                    </label>
+                  );
+                })}
               </div>
             </div>
 
@@ -528,20 +712,19 @@ function Opportunities() {
 
                 <select
                   value={location}
-                  onChange={(event) =>
-                    setLocation(event.target.value)
-                  }
+                  onChange={(event) => setLocation(event.target.value)}
                 >
-                  <option value="all">
-                    كل المحافظات
-                  </option>
+                  <option value="all">كل المحافظات</option>
+
                   <option value="بغداد">بغداد</option>
+
                   <option value="البصرة">البصرة</option>
+
                   <option value="أربيل">أربيل</option>
+
                   <option value="النجف">النجف</option>
-                  <option value="السليمانية">
-                    السليمانية
-                  </option>
+
+                  <option value="السليمانية">السليمانية</option>
                 </select>
 
                 <ChevronDown size={14} />
@@ -551,106 +734,62 @@ function Opportunities() {
             <div className="filter-divider" />
 
             <div className="filter-section">
-              <label>نوع العمل</label>
-
-              <div className="filter-options">
-                {[
-                  ["all", "كل الأنواع"],
-                  ["دوام كامل", "دوام كامل"],
-                  ["دوام جزئي", "دوام جزئي"],
-                  ["عن بعد", "عن بعد"],
-                  ["تدريب", "تدريب"],
-                ].map(([value, label]) => (
-                  <label
-                    className="filter-radio"
-                    key={value}
-                  >
-                    <input
-                      type="radio"
-                      name="mode"
-                      value={value}
-                      checked={mode === value}
-                      onChange={(event) =>
-                        setMode(event.target.value)
-                      }
-                    />
-
-                    <span>{label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-
-            <div className="filter-divider" />
-
-            <div className="filter-section">
               <label>الحد الأدنى للتوافق</label>
 
-              <div className="match-filter-value">
-                {minMatch}%
-              </div>
+              <div className="match-filter-value">{minMatch}%</div>
 
               <input
                 className="match-range"
                 type="range"
-                min="0"
+                min={lowestMatch}
                 max="100"
                 step="5"
-                value={minMatch}
+                value={Math.max(minMatch, lowestMatch)}
                 onChange={(event) =>
-                  setMinMatch(
-                    Number(event.target.value),
-                  )
+                  setMinMatch(Math.max(Number(event.target.value), lowestMatch))
                 }
               />
 
               <div className="range-labels">
-                <span>0%</span>
+                <span>{lowestMatch}%</span>
+
                 <span>100%</span>
               </div>
             </div>
 
-            <div className="filter-profile-box">
-              <BriefcaseBusiness size={18} />
+            {cvStatus === "missing" && (
+              <div className="filter-profile-box">
+                <BriefcaseBusiness size={18} />
 
-              <div>
-                <strong>حسّن نتائجك</strong>
+                <div>
+                  <strong>حسّن نتائجك</strong>
 
-                <p>
-                  أضف سيرتك الذاتية للحصول على نتائج أكثر ملاءمة لملفك.
-                </p>
+                  <p>أضف سيرتك الذاتية للحصول على نتائج أكثر ملاءمة لملفك.</p>
 
-                <Link to="/cv/upload">
-                  إضافة السيرة الذاتية
-                </Link>
+                  <Link to="/cv/upload">إضافة السيرة الذاتية</Link>
+                </div>
               </div>
-            </div>
+            )}
           </aside>
 
           <div className="opportunities-results">
             <div className="mobile-filter-row">
               <button
                 type="button"
-                onClick={() =>
-                  setMobileFilters(!mobileFilters)
-                }
+                onClick={() => setMobileFilters(!mobileFilters)}
               >
                 <SlidersHorizontal size={16} />
                 الفلاتر
               </button>
 
-              <span>
-                {filteredOpportunities.length} نتائج
-              </span>
+              <span>{filteredOpportunities.length} نتائج</span>
             </div>
 
             <div className="results-toolbar">
               <div>
                 <strong>الفرص المتاحة</strong>
 
-                <span>
-                  {filteredOpportunities.length} فرصة
-                </span>
+                <span>{filteredOpportunities.length} فرصة</span>
               </div>
 
               <div className="sort-select">
@@ -658,17 +797,13 @@ function Opportunities() {
 
                 <select
                   value={sort}
-                  onChange={(event) =>
-                    setSort(event.target.value)
-                  }
+                  onChange={(event) => setSort(event.target.value)}
                 >
-                  <option value="match">
-                    الأكثر توافقاً
-                  </option>
+                  <option value="match">الأكثر توافقاً</option>
 
-                  <option value="latest">
-                    الأحدث
-                  </option>
+                  <option value="lowest-match">الأقل توافقاً</option>
+
+                  <option value="latest">الأحدث</option>
                 </select>
 
                 <ChevronDown size={14} />
@@ -681,9 +816,7 @@ function Opportunities() {
                   <Search size={25} />
                 </div>
 
-                <h3>
-                  جاري تحميل الفرص...
-                </h3>
+                <h3>جاري تحميل الفرص...</h3>
               </div>
             ) : error ? (
               <div className="opportunities-empty">
@@ -695,28 +828,17 @@ function Opportunities() {
               </div>
             ) : filteredOpportunities.length > 0 ? (
               <div className="explorer-grid">
-                {filteredOpportunities.map(
-                  (opportunity, index) => (
-                    <ExplorerCard
-                      key={
-                        opportunity.id ??
-                        opportunity._id ??
-                        index
-                      }
-                      opportunity={opportunity}
-                      index={index}
-                      isSaved={savedIds.has(
-                        String(
-                          opportunity.id ??
-                            opportunity._id,
-                        ),
-                      )}
-                      onSaveChange={
-                        handleSaveChange
-                      }
-                    />
-                  ),
-                )}
+                {filteredOpportunities.map((opportunity, index) => (
+                  <ExplorerCard
+                    key={opportunity.id ?? opportunity._id ?? index}
+                    opportunity={opportunity}
+                    index={index}
+                    isSaved={savedIds.has(
+                      String(opportunity.id ?? opportunity._id),
+                    )}
+                    onSaveChange={handleSaveChange}
+                  />
+                ))}
               </div>
             ) : (
               <div className="opportunities-empty">
@@ -724,18 +846,11 @@ function Opportunities() {
                   <Search size={25} />
                 </div>
 
-                <h3>
-                  لم نعثر على فرص مطابقة
-                </h3>
+                <h3>لم نعثر على فرص مطابقة</h3>
 
-                <p>
-                  جرّب تغيير البحث أو إزالة بعض الفلاتر.
-                </p>
+                <p>جرّب تغيير البحث أو إزالة بعض الفلاتر.</p>
 
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                >
+                <button type="button" onClick={resetFilters}>
                   إعادة ضبط الفلاتر
                 </button>
               </div>
@@ -747,23 +862,12 @@ function Opportunities() {
   );
 }
 
-function ExplorerCard({
-  opportunity,
-  index,
-  isSaved,
-  onSaveChange,
-}) {
+function ExplorerCard({ opportunity, index, isSaved, onSaveChange }) {
   const [saving, setSaving] = useState(false);
 
-  const id =
-    opportunity.id ??
-    opportunity._id ??
-    index;
+  const id = opportunity.id ?? opportunity._id ?? index;
 
-  const title =
-    opportunity.title ||
-    opportunity.name ||
-    "فرصة متاحة";
+  const title = opportunity.title || opportunity.name || "فرصة متاحة";
 
   const company =
     opportunity.company ||
@@ -771,46 +875,28 @@ function ExplorerCard({
     opportunity.company?.name ||
     "جهة ناشرة";
 
-  const location =
-    opportunity.location ||
-    "العراق";
+  const location = opportunity.location || "العراق";
 
-  const type =
-    getOpportunityType(opportunity);
+  const type = getOpportunityType(opportunity);
 
-  const category =
-    getOpportunityCategory(opportunity);
+  const category = getOpportunityCategory(opportunity);
 
-  const match = Number(
-    opportunity.match_percentage ??
-      opportunity.match ??
-      0,
-  );
+  const rawMatch = opportunity.match ?? opportunity.match_percentage;
+
+  const match = Number(rawMatch);
+
+  const hasMatch = Number.isFinite(match);
 
   const deadline =
-    opportunity.deadline ||
-    opportunity.application_deadline ||
-    "Not specified";
+    opportunity.deadline || opportunity.application_deadline || "Not specified";
 
   const description =
-    opportunity.description ||
-    "اكتشف تفاصيل هذه الفرصة والمتطلبات الخاصة بها.";
+    opportunity.description || "اكتشف تفاصيل هذه الفرصة والمتطلبات الخاصة بها.";
 
-  const skills = Array.isArray(
-    opportunity.skills,
-  )
-    ? opportunity.skills
-    : [];
-
-  const matchedSkills = Array.isArray(
-    opportunity.matching_skills,
-  )
-    ? opportunity.matching_skills
-    : [];
+  const skills = Array.isArray(opportunity.skills) ? opportunity.skills : [];
 
   const handleSave = async () => {
-    const token =
-      localStorage.getItem("token");
+    const token = localStorage.getItem("token");
 
     if (!token) {
       window.location.href = "/login";
@@ -828,10 +914,7 @@ function ExplorerCard({
         onSaveChange(id, true);
       }
     } catch (error) {
-      console.error(
-        "SAVE OPPORTUNITY ERROR:",
-        error,
-      );
+      console.error("SAVE OPPORTUNITY ERROR:", error);
     } finally {
       setSaving(false);
     }
@@ -846,13 +929,9 @@ function ExplorerCard({
     >
       <div className="explorer-card-top">
         <div className="explorer-company-logo">
-          {opportunity.company_logo ||
-          opportunity.company?.logo ? (
+          {opportunity.company_logo || opportunity.company?.logo ? (
             <img
-              src={
-                opportunity.company_logo ||
-                opportunity.company?.logo
-              }
+              src={opportunity.company_logo || opportunity.company?.logo}
               alt={company}
             />
           ) : (
@@ -861,36 +940,19 @@ function ExplorerCard({
         </div>
 
         <div className="explorer-card-title">
-          <Badge variant="type">
-            {type}
-          </Badge>
+          <Badge variant="type">{type}</Badge>
 
           <h3>{title}</h3>
         </div>
 
         <button
           type="button"
-          className={`explorer-save ${
-            isSaved
-              ? "explorer-save-active"
-              : ""
-          }`}
-          aria-label={
-            isSaved
-              ? "إزالة من المحفوظات"
-              : "حفظ الفرصة"
-          }
+          className={`explorer-save ${isSaved ? "explorer-save-active" : ""}`}
+          aria-label={isSaved ? "إزالة من المحفوظات" : "حفظ الفرصة"}
           onClick={handleSave}
           disabled={saving}
         >
-          <Bookmark
-            size={17}
-            fill={
-              isSaved
-                ? "currentColor"
-                : "none"
-            }
-          />
+          <Bookmark size={17} fill={isSaved ? "currentColor" : "none"} />
         </button>
       </div>
 
@@ -914,75 +976,40 @@ function ExplorerCard({
 
         <span>
           <Clock3 size={14} />
-          Due date:{" "}
-          {formatOpportunityDate(
-            deadline,
-          )}
+          Due date: {formatOpportunityDate(deadline)}
         </span>
       </div>
 
-      <p className="explorer-description">
-        {description}
-      </p>
+      <p className="explorer-description">{description}</p>
 
       {skills.length > 0 && (
         <div className="explorer-skills">
-          {skills
-            .slice(0, 4)
-            .map((skill, skillIndex) => (
-              <span
-                key={`${skill}-${skillIndex}`}
-              >
-                {skill}
-              </span>
-            ))}
-        </div>
-      )}
-
-      {matchedSkills.length > 0 && (
-        <div className="explorer-skills">
-          {matchedSkills
-            .slice(0, 3)
-            .map(
-              (skill, skillIndex) => (
-                <span
-                  key={`matched-${skill}-${skillIndex}`}
-                >
-                  {skill}
-                </span>
-              ),
-            )}
+          {skills.slice(0, 4).map((skill, skillIndex) => (
+            <span key={`${skill}-${skillIndex}`}>{skill}</span>
+          ))}
         </div>
       )}
 
       <div className="explorer-match">
         <div>
-          <strong>{match}%</strong>
+          <strong>{hasMatch ? `${match}%` : "—"}</strong>
+
           <span>نسبة التوافق</span>
         </div>
 
         <div className="explorer-match-bar">
           <span
             style={{
-              width: `${Math.min(
-                Math.max(match, 0),
-                100,
-              )}%`,
+              width: hasMatch ? `${Math.min(Math.max(match, 0), 100)}%` : "0%",
             }}
           />
         </div>
       </div>
 
       <div className="explorer-footer">
-        <span className="explorer-opportunity-label">
-          {match > 0
-            ? "فرصة مناسبة لك"
-            : "فرصة متاحة"}
-        </span>
+        <span className="explorer-opportunity-label">فرصة مناسبة لك</span>
 
-        <Link
-          to={`/opportunities/${id}`}
-        >
+        <Link to={`/opportunities/${id}`}>
           عرض التفاصيل
           <ArrowLeft size={16} />
         </Link>
@@ -991,9 +1018,7 @@ function ExplorerCard({
   );
 }
 
-function getOpportunityType(
-  opportunity,
-) {
+function getOpportunityType(opportunity) {
   const directType =
     opportunity.type_name ||
     opportunity.typeName ||
@@ -1001,67 +1026,40 @@ function getOpportunityType(
     opportunity.opportunityType;
 
   if (directType) {
-    return translateOpportunityType(
-      directType,
-    );
+    return translateOpportunityType(directType);
   }
 
-  if (
-    typeof opportunity.type ===
-    "string"
-  ) {
-    return translateOpportunityType(
-      opportunity.type,
-    );
+  if (typeof opportunity.type === "string") {
+    return translateOpportunityType(opportunity.type);
   }
 
-  if (
-    opportunity.type &&
-    typeof opportunity.type ===
-      "object"
-  ) {
+  if (opportunity.type && typeof opportunity.type === "object") {
     const nestedType =
       opportunity.type.name ||
       opportunity.type.type_name ||
       opportunity.type.label;
 
     if (nestedType) {
-      return translateOpportunityType(
-        nestedType,
-      );
+      return translateOpportunityType(nestedType);
     }
   }
 
-  if (
-    opportunity.type_id !==
-      undefined &&
-    opportunity.type_id !== null
-  ) {
+  if (opportunity.type_id !== undefined && opportunity.type_id !== null) {
     const typeTranslations = {
       1: "وظيفة",
-      2: "تدريب",
+      2: "منحة",
       3: "دورة تدريبية",
       4: "تدريب",
     };
 
-    return (
-      typeTranslations[
-        Number(
-          opportunity.type_id,
-        )
-      ] || "غير محدد"
-    );
+    return typeTranslations[Number(opportunity.type_id)] || "غير محدد";
   }
 
   return "غير محدد";
 }
 
-function translateOpportunityType(
-  value,
-) {
-  const normalized = String(value)
-    .trim()
-    .toLowerCase();
+function translateOpportunityType(value) {
+  const normalized = String(value).trim().toLowerCase();
 
   const translations = {
     job: "وظيفة",
@@ -1075,54 +1073,33 @@ function translateOpportunityType(
     "part-time": "وظيفة",
   };
 
-  return (
-    translations[normalized] ||
-    value
-  );
+  return translations[normalized] || value;
 }
 
-function getOpportunityCategory(
-  opportunity,
-) {
-  const directCategory =
-    opportunity.category_name ||
-    opportunity.categoryName;
+function getOpportunityCategory(opportunity) {
+  const directCategory = opportunity.category_name || opportunity.categoryName;
 
   if (directCategory) {
-    return translateOpportunityCategory(
-      directCategory,
-    );
+    return translateOpportunityCategory(directCategory);
   }
 
-  if (
-    typeof opportunity.category ===
-    "string"
-  ) {
-    return translateOpportunityCategory(
-      opportunity.category,
-    );
+  if (typeof opportunity.category === "string") {
+    return translateOpportunityCategory(opportunity.category);
   }
 
-  if (
-    opportunity.category &&
-    typeof opportunity.category ===
-      "object"
-  ) {
+  if (opportunity.category && typeof opportunity.category === "object") {
     const nestedCategory =
       opportunity.category.name ||
       opportunity.category.category_name ||
       opportunity.category.label;
 
     if (nestedCategory) {
-      return translateOpportunityCategory(
-        nestedCategory,
-      );
+      return translateOpportunityCategory(nestedCategory);
     }
   }
 
   if (
-    opportunity.category_id !==
-      undefined &&
+    opportunity.category_id !== undefined &&
     opportunity.category_id !== null
   ) {
     const categoryTranslations = {
@@ -1138,25 +1115,14 @@ function getOpportunityCategory(
       19: "المالية",
     };
 
-    return (
-      categoryTranslations[
-        Number(
-          opportunity.category_id,
-        )
-      ] || "غير محدد"
-    );
+    return categoryTranslations[Number(opportunity.category_id)] || "غير محدد";
   }
 
   return "غير محدد";
 }
 
-function translateOpportunityCategory(
-  value,
-) {
-  const normalized = String(value)
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
+function translateOpportunityCategory(value) {
+  const normalized = String(value).trim().toLowerCase().replace(/\s+/g, " ");
 
   const translations = {
     technology: "التكنولوجيا",
@@ -1164,8 +1130,7 @@ function translateOpportunityCategory(
     medicine: "الطب",
     business: "الأعمال",
     art: "الفنون والتصميم",
-    "arts and design":
-      "الفنون والتصميم",
+    "arts and design": "الفنون والتصميم",
     science: "العلوم",
     education: "التعليم",
     media: "الإعلام",
@@ -1173,74 +1138,57 @@ function translateOpportunityCategory(
     finance: "المالية",
   };
 
-  return (
-    translations[normalized] ||
-    value
-  );
+  return translations[normalized] || value;
 }
 
-function formatOpportunityDate(
-  value,
-) {
+function formatOpportunityDate(value) {
   if (!value) {
     return "Not specified";
   }
 
-  const stringValue =
-    String(value).trim();
+  const stringValue = String(value).trim();
 
-  const dateOnlyMatch =
-    stringValue.match(
-      /^(\d{4})-(\d{2})-(\d{2})/,
-    );
+  const dateOnlyMatch = stringValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
 
   if (dateOnlyMatch) {
-    const [, year, month, day] =
-      dateOnlyMatch;
+    const [, year, month, day] = dateOnlyMatch;
 
-    const date = new Date(
-      Number(year),
-      Number(month) - 1,
-      Number(day),
-    );
+    const monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
 
-    if (
-      !Number.isNaN(
-        date.getTime(),
-      )
-    ) {
-      return date.toLocaleDateString(
-        "en-US",
-        {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        },
-      );
+    const monthName = monthNames[Number(month) - 1];
+
+    if (monthName) {
+      return `${monthName} ${Number(day)}, ${year}`;
     }
   }
 
   const date = new Date(value);
 
-  if (
-    Number.isNaN(date.getTime())
-  ) {
+  if (Number.isNaN(date.getTime())) {
     return stringValue;
   }
 
-  return date.toLocaleDateString(
-    "en-US",
-    {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    },
-  );
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
-function extractSavedOpportunities(
-  response,
-) {
+function extractSavedOpportunities(response) {
   if (Array.isArray(response)) {
     return response;
   }
@@ -1249,27 +1197,15 @@ function extractSavedOpportunities(
     return response.data;
   }
 
-  if (
-    Array.isArray(
-      response?.opportunities,
-    )
-  ) {
+  if (Array.isArray(response?.opportunities)) {
     return response.opportunities;
   }
 
-  if (
-    Array.isArray(
-      response?.savedOpportunities,
-    )
-  ) {
+  if (Array.isArray(response?.savedOpportunities)) {
     return response.savedOpportunities;
   }
 
-  if (
-    Array.isArray(
-      response?.results,
-    )
-  ) {
+  if (Array.isArray(response?.results)) {
     return response.results;
   }
 

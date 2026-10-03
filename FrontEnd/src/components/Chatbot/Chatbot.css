@@ -14,7 +14,9 @@
   cursor: pointer;
   z-index: 1000;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.22);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .chatbot-floating-button:hover {
@@ -264,6 +266,118 @@
   text-align: center;
   color: #94a3b8;
   font-size: 10px;
+}
+
+/* Dark Mode */
+
+html.dark .chatbot-floating-button,
+body.dark .chatbot-floating-button,
+[data-theme="dark"] .chatbot-floating-button {
+  background: #1e293b;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+}
+
+html.dark .chatbot-floating-button:hover,
+body.dark .chatbot-floating-button:hover,
+[data-theme="dark"] .chatbot-floating-button:hover {
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.45);
+}
+
+html.dark .chatbot-window,
+body.dark .chatbot-window,
+[data-theme="dark"] .chatbot-window {
+  background: #0f172a;
+  border-color: #334155;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+html.dark .chatbot-messages,
+body.dark .chatbot-messages,
+[data-theme="dark"] .chatbot-messages {
+  background: #111827;
+}
+
+html.dark .chatbot-message-bot .chatbot-message,
+body.dark .chatbot-message-bot .chatbot-message,
+[data-theme="dark"] .chatbot-message-bot .chatbot-message {
+  background: #1e293b;
+  color: #e2e8f0;
+  border-color: #334155;
+}
+
+html.dark .chatbot-message-user .chatbot-message,
+body.dark .chatbot-message-user .chatbot-message,
+[data-theme="dark"] .chatbot-message-user .chatbot-message {
+  background: #1e3a5f;
+  color: #e0f2fe;
+}
+
+html.dark .chatbot-small-avatar,
+body.dark .chatbot-small-avatar,
+[data-theme="dark"] .chatbot-small-avatar {
+  background: #334155;
+  color: #cbd5e1;
+}
+
+html.dark .chatbot-user-avatar,
+body.dark .chatbot-user-avatar,
+[data-theme="dark"] .chatbot-user-avatar {
+  background: #1e3a5f;
+  color: #60a5fa;
+}
+
+html.dark .chatbot-suggestions button,
+body.dark .chatbot-suggestions button,
+[data-theme="dark"] .chatbot-suggestions button {
+  border-color: #334155;
+  background: #1e293b;
+  color: #cbd5e1;
+}
+
+html.dark .chatbot-suggestions button:hover,
+body.dark .chatbot-suggestions button:hover,
+[data-theme="dark"] .chatbot-suggestions button:hover {
+  border-color: #60a5fa;
+  background: #172554;
+}
+
+html.dark .chatbot-input-area,
+body.dark .chatbot-input-area,
+[data-theme="dark"] .chatbot-input-area {
+  background: #0f172a;
+  border-top-color: #334155;
+}
+
+html.dark .chatbot-input-wrapper,
+body.dark .chatbot-input-wrapper,
+[data-theme="dark"] .chatbot-input-wrapper {
+  border-color: #334155;
+  background: #1e293b;
+}
+
+html.dark .chatbot-input-wrapper input,
+body.dark .chatbot-input-wrapper input,
+[data-theme="dark"] .chatbot-input-wrapper input {
+  color: #f1f5f9;
+}
+
+html.dark .chatbot-input-wrapper input::placeholder,
+body.dark .chatbot-input-wrapper input::placeholder,
+[data-theme="dark"] .chatbot-input-wrapper input::placeholder {
+  color: #64748b;
+}
+
+html.dark .chatbot-input-wrapper button,
+body.dark .chatbot-input-wrapper button,
+[data-theme="dark"] .chatbot-input-wrapper button {
+  background: #334155;
+  color: #f8fafc;
+}
+
+html.dark .chatbot-input-area p,
+body.dark .chatbot-input-area p,
+[data-theme="dark"] .chatbot-input-area p {
+  color: #64748b;
 }
 
 @media (max-width: 600px) {

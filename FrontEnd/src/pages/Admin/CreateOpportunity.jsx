@@ -3,7 +3,11 @@ import { ArrowLeft, Save } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 import PageContainer from "../../components/layout/PageContainer";
-import { createOpportunity } from "../../services/opportunityService";
+import {
+  createOpportunity,
+  getCategories,
+  getTypes,
+} from "../../services/opportunityService";
 
 import "./CreateOpportunity.css";
 
@@ -13,6 +17,7 @@ const categoryTranslations = {
   medicine: "الطب",
   business: "الأعمال",
   art: "الفنون والتصميم",
+  "arts and design": "الفنون والتصميم",
   science: "العلوم",
   education: "التعليم",
   media: "الإعلام",
@@ -22,8 +27,11 @@ const categoryTranslations = {
 
 const typeTranslations = {
   job: "وظيفة",
-  internship: "منحة",
+  jobs: "وظيفة",
+  internship: "تدريب",
+  internships: "تدريب",
   course: "دورة تدريبية",
+  courses: "دورة تدريبية",
   training: "تدريب",
 };
 
@@ -53,9 +61,8 @@ function CreateOpportunity() {
 
   const [categories, setCategories] = useState([]);
   const [types, setTypes] = useState([]);
-
-  const [loading, setLoading] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -64,39 +71,18 @@ function CreateOpportunity() {
         setLoadingOptions(true);
         setError("");
 
-        const token = localStorage.getItem("token");
-        const API_URL = import.meta.env.VITE_API_URL || "/api";
-
-        const headers = {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        };
-
         const [categoriesResponse, typesResponse] = await Promise.all([
-          fetch(`${API_URL}/categories`, {
-            headers,
-          }),
-          fetch(`${API_URL}/types`, {
-            headers,
-          }),
+          getCategories(),
+          getTypes(),
         ]);
 
-        const categoriesData = await categoriesResponse
-          .json()
-          .catch(() => null);
+        setCategories(
+          Array.isArray(categoriesResponse?.data)
+            ? categoriesResponse.data
+            : [],
+        );
 
-        const typesData = await typesResponse.json().catch(() => null);
-
-        if (!categoriesResponse.ok) {
-          throw new Error(categoriesData?.message || "تعذر تحميل التصنيفات.");
-        }
-
-        if (!typesResponse.ok) {
-          throw new Error(typesData?.message || "تعذر تحميل أنواع الفرص.");
-        }
-
-        setCategories(categoriesData?.data || []);
-        setTypes(typesData?.data || []);
+        setTypes(Array.isArray(typesResponse?.data) ? typesResponse.data : []);
       } catch (requestError) {
         setError(
           requestError?.message || "تعذر تحميل بيانات التصنيفات والأنواع.",
@@ -144,7 +130,8 @@ function CreateOpportunity() {
         requirements: form.requirements
           .split("\n")
           .map((item) => item.trim())
-          .filter(Boolean),
+          .filter(Boolean)
+          .join("\n"),
         category_id: Number(form.category_id),
         type_id: Number(form.type_id),
         location: form.location.trim(),
@@ -221,7 +208,7 @@ function CreateOpportunity() {
                   placeholder="اكتب كل متطلب في سطر مستقل..."
                 />
 
-                <small>كل سطر سيتم إرساله كمتطلب مستقل.</small>
+                <small>كل سطر سيتم حفظه كمتطلب مستقل.</small>
               </div>
 
               <div className="form-group">
@@ -307,6 +294,7 @@ function CreateOpportunity() {
                   onChange={handleChange}
                 >
                   <option value="active">فعالة</option>
+
                   <option value="inactive">غير فعالة</option>
                 </select>
               </div>
